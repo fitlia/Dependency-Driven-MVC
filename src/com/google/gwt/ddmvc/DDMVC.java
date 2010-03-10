@@ -1,12 +1,15 @@
 package com.google.gwt.ddmvc;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.google.gwt.ddmvc.controller.Controller;
 import com.google.gwt.ddmvc.model.Model;
-import com.google.gwt.ddmvc.model.ModelUpdate;
+import com.google.gwt.ddmvc.model.update.CascadeUpdate;
+import com.google.gwt.ddmvc.model.update.ModelUpdate;
+import com.google.gwt.ddmvc.model.update.SetUpdate;
 
 /**
  * The DDMVC object is the top-level object for managing the data and run-loop execution.
@@ -17,7 +20,7 @@ import com.google.gwt.ddmvc.model.ModelUpdate;
 public class DDMVC {
 
 	private static HashMap<String, Model> dataStore;
-	private static HashSet<Observer> pendingNotifies;
+	private static HashMap<Observer,List<ModelUpdate>> pendingNotifies;
 	
 	//Static initialization
 	static { init(); }
@@ -25,9 +28,9 @@ public class DDMVC {
 	/**
 	 * Initialize all the DDMVC components
 	 */
-	public static void init() {
+	private static void init() {
 		dataStore = new HashMap<String, Model>();
-		pendingNotifies = new HashSet<Observer>();
+		pendingNotifies = new HashMap<Observer,List<ModelUpdate>>();
 	}
 	
 	/**
@@ -86,7 +89,7 @@ public class DDMVC {
 	public static Model getModel(String key) {
 		Model model = dataStore.get(key);
 		if(model == null) {
-			model = new Model();
+			model = new Model(key);
 			dataStore.put(key, model);
 		}
 		return model;
@@ -104,14 +107,19 @@ public class DDMVC {
 	}
 	
 	/**
-	 * Put a model into the datastore, and notify all dependencies on next run loop
+	 * Put a model into the data store, and notify all dependencies on next run loop
 	 * Note - this will make an attempt to merge the dependencies if applicable
+	 * 		  also, it will reset the name of model to key
 	 */
 	public static void setModel(String key, Model model) {
 		Model current = getModel(key);
-		addNotify(current.getObservers());
+		model.setKey(key);
+		
+		addNotify(current.getObservers(), new SetUpdate(key, model.get()));
+		
 		for(Observer observer : current.getObservers())
 			model.addObserver(observer);
+		
 		dataStore.put(key, model);
 	}
 	
@@ -124,44 +132,48 @@ public class DDMVC {
 	}
 	
 	/**
+	 * Process an update to a model
+	 * Note - a run-loop will not be enacted.
+	 * @param update the update to apply.
+	 */
+	public static void processUpdate(ModelUpdate update) {
+		Model model = getModel(update.getTarget());
+		model.handleUpdate(update);	
+	}
+	
+	/**
 	 * Process a list of ModelUpdate's
+	 * Note - a run-loop will be enacted upon completion
 	 * @param updateList the list of updates to apply
 	 */
-	@SuppressWarnings("unchecked")
 	public static void processUpdates(List<ModelUpdate> updateList) {
-		for(ModelUpdate update : updateList) {
-			if(update.getUpdate() == ModelUpdate.UpdateType.SET) 
-				setValue(update.getModelKey(), update.getData());
-			else { 
-				List<Object> list = (List<Object>) getValue(update.getModelKey());
-				if(update.getUpdate() == ModelUpdate.UpdateType.LIST_ADD)
-					list.add(update.getData());
-				else if(update.getUpdate() == ModelUpdate.UpdateType.LIST_ADD_ALL)
-					list.addAll((Collection<Object>) update.getData());
-				else if(update.getUpdate() == ModelUpdate.UpdateType.LIST_REMOVE)
-					while(list.contains(update.getData()))
-						list.remove(update.getData());
-				else if(update.getUpdate() == ModelUpdate.UpdateType.LIST_REMOVE_INDEX)
-					list.remove((int) (Integer) update.getData());
-				getModel(update.getModelKey()).update();
-			}
-		}
+		for(ModelUpdate update : updateList)
+			processUpdate(update);
+		runLoop();
 	}
 	
 	/**
 	 * Add an observer to be notified at the next run loop
 	 * @param observer the observer to be notified
+	 * @param update   the update that caused this notification
 	 */
-	public static void addNotify(Observer observer) {
-		pendingNotifies.add(observer);
+	public static void addNotify(Observer observer, ModelUpdate update) {
+		List<ModelUpdate> updateList = pendingNotifies.get(observer);
+		if(updateList == null) {
+			updateList = new ArrayList<ModelUpdate>();
+			pendingNotifies.put(observer, updateList);
+		}
+		updateList.add(update);
 	}
 	
 	/**
 	 * Add a set of observers to be notified at the next run loop
 	 * @param observers the set of observers
+	 * @param update    the update that caused this notification
 	 */
-	public static void addNotify(Set<Observer> observers) {
-		pendingNotifies.addAll(observers);
+	public static void addNotify(Set<Observer> observers, ModelUpdate update) {
+		for(Observer observer : observers)
+			addNotify(observer, update);
 	}
 	
 	/**
@@ -172,16 +184,22 @@ public class DDMVC {
 		Set<Observer> freeNotifies = new HashSet<Observer>();
 		
 		while(pendingNotifies.size() > 0) {
-			Set<Observer> notifies = pendingNotifies;
-			pendingNotifies = new HashSet<Observer>();
-			for(Observer observer : notifies) {
+			Set<Map.Entry<Observer,List<ModelUpdate>>> notifies = pendingNotifies.entrySet();
+			pendingNotifies = new HashMap<Observer,List<ModelUpdate>>();
+			
+			for(Map.Entry<Observer,List<ModelUpdate>> entry : notifies) {
+				Observer observer = entry.getKey();
+				
 				if(!observer.canHaveObservers())
 					freeNotifies.add(observer);
+				
 				else if(((CanHaveObservers) observer).getObservers().size() == 0)
 					freeNotifies.add(observer);
+				
 				else {
-					observer.modelChanged();
-					pendingNotifies.addAll(((CanHaveObservers)observer).getObservers());
+					observer.modelChanged(entry.getValue());
+					Set<Observer> observers = ((CanHaveObservers)observer).getObservers();
+					addNotify(observers, new CascadeUpdate());
 				}
 			}
 		}

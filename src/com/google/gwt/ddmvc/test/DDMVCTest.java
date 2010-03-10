@@ -7,7 +7,7 @@ import org.junit.*;
 import com.google.gwt.ddmvc.*;
 import com.google.gwt.ddmvc.model.ComputedModel;
 import com.google.gwt.ddmvc.model.Model;
-import com.google.gwt.ddmvc.model.ModelUpdate;
+import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.view.View;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -88,15 +88,15 @@ public class DDMVCTest {
 		
 		List<ModelUpdate> updates = new ArrayList<ModelUpdate>();
 		updates.add(new ModelUpdate("something","dog"));
-		updates.add(new ModelUpdate("nothing", ModelUpdate.UpdateType.SET, "cat"));
+		updates.add(new ModelUpdate("nothing", com.google.gwt.ddmvc.model.update.SET, "cat"));
 		
-		updates.add(new ModelUpdate("aList", ModelUpdate.UpdateType.LIST_ADD, "toy"));
+		updates.add(new ModelUpdate("aList", com.google.gwt.ddmvc.model.update.LIST_ADD, "toy"));
 		List<String> strings = new ArrayList<String>();
 		strings.add("sog");
 		strings.add("bog");
-		updates.add(new ModelUpdate("aList", ModelUpdate.UpdateType.LIST_ADD_ALL, strings));
-		updates.add(new ModelUpdate("aList", ModelUpdate.UpdateType.LIST_REMOVE, "french"));
-		updates.add(new ModelUpdate("aList", ModelUpdate.UpdateType.LIST_REMOVE_INDEX, 0));
+		updates.add(new ModelUpdate("aList", com.google.gwt.ddmvc.model.update.LIST_ADD_ALL, strings));
+		updates.add(new ModelUpdate("aList", com.google.gwt.ddmvc.model.update.LIST_REMOVE, "french"));
+		updates.add(new ModelUpdate("aList", com.google.gwt.ddmvc.model.update.LIST_REMOVE_INDEX, 0));
 		
 		DDMVC.processUpdates(updates);
 		

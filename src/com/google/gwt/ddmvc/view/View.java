@@ -1,6 +1,9 @@
 package com.google.gwt.ddmvc.view;
 
+import java.util.List;
+
 import com.google.gwt.ddmvc.Observer;
+import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -17,7 +20,7 @@ public abstract class View implements Observer {
 	 */
 	public View() {
 		initialize();
-		render();
+		render(null);
 	}
 	
 	/**
@@ -26,8 +29,8 @@ public abstract class View implements Observer {
 	public abstract Widget getWidget();
 	
 	@Override
-	public void modelChanged() {
-		render();
+	public void modelChanged(List<ModelUpdate> updates) {
+		render(updates);
 	}
 	
 	@Override
@@ -43,9 +46,11 @@ public abstract class View implements Observer {
 	public abstract void initialize();
 	
 	/**
-	 * Render the already intantiated components.  Should not change the Widget reference.
+	 * Render the already instantiated components.  Should not change the Widget reference.
+	 * Also, may receive a list of updates, which can help for optimization.
+	 * @param updates the list of updates which caused this render to fire, may be null
 	 */
-	public abstract void render();
+	public abstract void render(List<ModelUpdate> updates);
 	
 	
 }

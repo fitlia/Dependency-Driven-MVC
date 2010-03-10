@@ -6,6 +6,9 @@ import java.util.Set;
 import com.google.gwt.ddmvc.CanHaveObservers;
 import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.Observer;
+import com.google.gwt.ddmvc.model.update.ModelUpdate;
+import com.google.gwt.ddmvc.model.update.SetUpdate;
+import com.google.gwt.ddmvc.model.update.UnknownUpdate;
 
 /**
  * Model objects hold an element of a given type, and maintain a set of entities which
@@ -16,22 +19,42 @@ public class Model implements CanHaveObservers {
 
 	private Object data;
 	private HashSet<Observer> observers;
+	private String key;
 	
 	/**
-	 * Instantiate a new blank model
+	 * @return this model's key
 	 */
-	public Model() {
+	public String getKey() {
+		return key;
+	}
+
+	/**
+	 * Set the key associated with this model.
+	 * Generally should not be called outside of DDMVC!
+	 * @param key
+	 */
+	public void setKey(String key) {
+		this.key = key;
+	}
+
+	/**
+	 * Instantiate a new blank model
+	 * @param name the name of this model
+	 */
+	public Model(String name) {
 		this.data = null;
 		this.observers = new HashSet<Observer>();
+		this.key = name;
 	}
 	
 	/**
 	 * Instantiate a new model with associated data
 	 * @param data the data to store
 	 */
-	public Model(Object data) {
+	public Model(String name, Object data) {
 		this.data = data;
-		this.observers = new HashSet<Observer>();	
+		this.observers = new HashSet<Observer>();
+		this.key = name;
 	}
 	
 	/**
@@ -51,12 +74,21 @@ public class Model implements CanHaveObservers {
 	}
 	
 	/**
+	 * Handle a ModelUpdate request, notify dependencies
+	 * @param update the update request being processed
+	 */
+	public void handleUpdate(ModelUpdate update) {
+		Object result = update.performUpdate(data);
+		data = result;
+		DDMVC.addNotify(observers, update);
+	}
+	
+	/**
 	 * Set the associated data, notify dependencies of the change
 	 * @param data the data to set
 	 */
 	public void set(Object data) {
-		this.data = data;
-		update();
+		handleUpdate(new SetUpdate(key, data));
 	}
 	
 	/**
@@ -78,10 +110,13 @@ public class Model implements CanHaveObservers {
 	}
 	
 	/**
-	 * Notify the dependencies of a data change
+	 * Notify the dependencies of a data change,
+	 * where the update type is not known.  This
+	 * causes the ModelUpdate UnknownUpdate to be
+	 * passed along.
 	 */
 	public void update() {
-		DDMVC.addNotify(observers);
+		DDMVC.addNotify(observers, new UnknownUpdate(key));
 	}
 	
 	/**

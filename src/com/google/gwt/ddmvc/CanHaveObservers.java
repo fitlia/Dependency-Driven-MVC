@@ -8,6 +8,9 @@ import java.util.Set;
  */
 public interface CanHaveObservers {
 
+	/**
+	 * @return the set of observers this object has
+	 */
 	public Set<Observer> getObservers();
 	
 }

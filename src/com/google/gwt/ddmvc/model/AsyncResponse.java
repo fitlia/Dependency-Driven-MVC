@@ -3,6 +3,7 @@ package com.google.gwt.ddmvc.model;
 import java.util.List;
 
 import com.google.gwt.ddmvc.controller.Controller;
+import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.view.View;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
