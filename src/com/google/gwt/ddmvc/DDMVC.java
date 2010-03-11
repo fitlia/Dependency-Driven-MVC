@@ -14,7 +14,7 @@ import com.google.gwt.ddmvc.model.update.SetUpdate;
 
 /**
  * The DDMVC object is the top-level object for managing the data and run-loop 
- * execution.
+ * execution. 
  * It is a static singleton.
  * 
  * @author Kevin Dolan

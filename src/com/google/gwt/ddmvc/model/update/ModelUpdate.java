@@ -1,7 +1,7 @@
 package com.google.gwt.ddmvc.model.update;
 
 /**
- * The ModelUpdate class represents an individual update to some model.
+ * The ModelUpdate class represents an individual update to some model. 
  * Several types of updates are defined by default, but the application
  * developer can create any number of his own, which perform any type of
  * reasonable business logic.

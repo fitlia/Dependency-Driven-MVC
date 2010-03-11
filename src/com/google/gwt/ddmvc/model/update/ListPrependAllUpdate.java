@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Update to prepend a collection of elements to a list.  The elements will be
+ * Update to prepend a collection of elements to a list.  The elements will be 
  * prepended in the order they are received, so that model.get(0) will be
  * equal to the first element returned by the iterator of the data collection.
  * Assumes that the target model is a list.

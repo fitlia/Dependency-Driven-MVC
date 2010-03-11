@@ -1,7 +1,7 @@
 package com.google.gwt.ddmvc.model;
 
 /**
- * The ModelUpdate class represents an individual update to some model
+ * The ModelUpdate class represents an individual update to some model 
  * 
  * @author Kevin Dolan
  */

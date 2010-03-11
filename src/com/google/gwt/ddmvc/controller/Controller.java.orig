@@ -3,7 +3,7 @@ package com.google.gwt.ddmvc.controller;
 import com.google.gwt.ddmvc.view.View;
 
 /**
- * Controllers represent business logic.  
+ * Controllers represent business logic. 
  * 
  * @author Kevin Dolan
  */

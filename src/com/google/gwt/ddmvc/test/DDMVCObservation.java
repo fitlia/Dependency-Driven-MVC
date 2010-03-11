@@ -15,7 +15,7 @@ import com.google.gwt.ddmvc.view.View;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Tests of the DDMVC observation patterns
+ * Tests of the DDMVC observation patterns 
  * @author Kevin Dolan
  */
 public class DDMVCObservation {

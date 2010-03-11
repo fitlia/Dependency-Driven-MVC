@@ -10,7 +10,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public class AsyncResponse implements AsyncCallback<List<ModelUpdate>> {
 
 	/**
-	 * Instantiate a new response object waiting on a server response
+	 * Instantiate a new response object waiting on a server response 
 	 * @param controller the controller object to call on completion
 	 * @param source	 the source view if applicable
 	 */

@@ -5,7 +5,7 @@ import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
  * The Observer interface represents the relationship of depending on some model
- * value
+ * value 
  * @author Kevin Dolan
  */
 public interface Observer {

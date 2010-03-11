@@ -1,20 +1,19 @@
 package com.google.gwt.ddmvc.model.update;
 
 /**
- * Update sent as a notification when the type of update 
- * performed is not known.  This should really only be
- * caused by call to Model.update(), and shouldn't be used
- * except to respond to.
+ * Update sent as a notification when a data change is cascaded 
+ * to a computed model.  At this time, there is no way to know
+ * the source of a cascaded data change.
  * If this model update were actually passed to a model, it
  * would have no effect.
  * @author Kevin Dolan
  */
-public class UnknownUpdate extends ModelUpdate {
+public class CascadeUpdate extends ModelUpdate {
 	
 	/**
 	 * @param target
 	 */
-	public UnknownUpdate(String target) {
+	public CascadeUpdate(String target) {
 		super(target, null);
 	}
 

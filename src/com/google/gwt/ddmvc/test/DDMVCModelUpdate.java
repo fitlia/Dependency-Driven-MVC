@@ -8,7 +8,7 @@ import com.google.gwt.ddmvc.*;
 import com.google.gwt.ddmvc.model.update.*;
 
 /**
- * Tests for DDMVC handling of ModelUpdates
+ * Tests for DDMVC handling of ModelUpdates 
  * 
  * @author Kevin Dolan
  */

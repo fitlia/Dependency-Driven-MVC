@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Update to append a collection of elements to a list.
+ * Update to append a collection of elements to a list. 
  * Assumes that the target model is a list.
  * Assumes that the data is a list of objects that can go into the list.
  * 

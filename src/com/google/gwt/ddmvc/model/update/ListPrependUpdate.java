@@ -3,7 +3,7 @@ package com.google.gwt.ddmvc.model.update;
 import java.util.List;
 
 /**
- * Update to prepend a single element to a list.
+ * Update to prepend a single element to a list. 
  * Assumes that the target model is a list.
  * Assumes that the data is an object that can go into the list.
  * 

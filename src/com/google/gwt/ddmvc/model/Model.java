@@ -10,7 +10,7 @@ import com.google.gwt.ddmvc.model.update.UnknownUpdate;
 
 /**
  * Model objects hold an element of a given type, and maintain a set of entities
- * which depend on it
+ * which depend on it 
  * @author Kevin Dolan
  */
 public class Model {

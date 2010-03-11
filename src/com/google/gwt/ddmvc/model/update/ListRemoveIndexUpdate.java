@@ -3,7 +3,7 @@ package com.google.gwt.ddmvc.model.update;
 import java.util.List;
 
 /**
- * Update to delete a single element from a list by its index.
+ * Update to delete a single element from a list by its index. 
  * Note - if the index does not exist or the list has not been initialized, an
  * exception will be thrown.
  * Assumes model value is a list.

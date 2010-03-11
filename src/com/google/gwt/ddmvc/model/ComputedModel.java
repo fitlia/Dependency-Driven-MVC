@@ -5,7 +5,7 @@ import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.Observer;
 
 /**
- * Represents a value which depends on some other model(s).
+ * Represents a value which depends on some other model(s). 
  * @author Kevin Dolan
  *
  * @param <Type> the type of data returned by this model

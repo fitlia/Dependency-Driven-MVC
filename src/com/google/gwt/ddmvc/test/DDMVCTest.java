@@ -12,7 +12,7 @@ import com.google.gwt.ddmvc.view.View;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Unit tests for the DDMVC library
+ * Unit tests for the DDMVC library 
  * 
  * @author Kevin Dolan
  */

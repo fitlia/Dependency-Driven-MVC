@@ -7,7 +7,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * A View is the direct connection with the end-user.  It creates the actual UI
- * widget and dispatches relevant user-generated events
+ * widget and dispatches relevant user-generated events 
  * 
  * @author Kevin Dolan
  */
