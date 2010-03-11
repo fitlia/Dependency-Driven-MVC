@@ -4,9 +4,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 /**
- * 
- * @author kevin
- *
+ * Contains all the relevant tests for the DDMVC library
+ * @author Kevin Dolan
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses( { 
@@ -14,4 +13,4 @@ import org.junit.runners.Suite;
 	DDMVCModelUpdate.class,
 	DDMVCObservation.class
 })
-public class AllTests {}
+public class DDMVCTests {}
