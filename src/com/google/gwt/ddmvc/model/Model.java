@@ -2,8 +2,6 @@ package com.google.gwt.ddmvc.model;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import com.google.gwt.ddmvc.CanHaveObservers;
 import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.Observer;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
@@ -11,15 +9,37 @@ import com.google.gwt.ddmvc.model.update.SetUpdate;
 import com.google.gwt.ddmvc.model.update.UnknownUpdate;
 
 /**
- * Model objects hold an element of a given type, and maintain a set of entities which
- * depend on it
+ * Model objects hold an element of a given type, and maintain a set of entities
+ * which depend on it
  * @author Kevin Dolan
  */
-public class Model implements CanHaveObservers {
+public class Model {
 
 	private Object data;
 	private HashSet<Observer> observers;
 	private String key;
+
+	/**
+	 * Instantiate a new blank model, with no name
+	 * For this to be useful, you should generally use the explicitly
+	 * DDMVC.setModel(...) command with an unnamed model so that
+	 * the name will be assigned...
+	 */
+	public Model() {
+		this.data = null;
+		this.observers = new HashSet<Observer>();
+		this.key = "";
+	}
+	
+	/**
+	 * Instantiate a new blank model
+	 * @param name the name of this model
+	 */
+	public Model(String name) {
+		this.data = null;
+		this.observers = new HashSet<Observer>();
+		this.key = name;
+	}
 	
 	/**
 	 * @return this model's key
@@ -35,16 +55,6 @@ public class Model implements CanHaveObservers {
 	 */
 	public void setKey(String key) {
 		this.key = key;
-	}
-
-	/**
-	 * Instantiate a new blank model
-	 * @param name the name of this model
-	 */
-	public Model(String name) {
-		this.data = null;
-		this.observers = new HashSet<Observer>();
-		this.key = name;
 	}
 	
 	/**

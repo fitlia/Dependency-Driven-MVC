@@ -13,8 +13,8 @@ public class CascadeUpdate extends ModelUpdate {
 	/**
 	 * @param target
 	 */
-	public CascadeUpdate() {
-		super(null, null);
+	public CascadeUpdate(String target) {
+		super(target, null);
 	}
 
 	@Override

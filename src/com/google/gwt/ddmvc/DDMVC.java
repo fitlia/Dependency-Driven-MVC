@@ -1,10 +1,11 @@
 package com.google.gwt.ddmvc;
-import java.util.ArrayList;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.multimap.MultiMap;
 import com.google.gwt.ddmvc.controller.Controller;
 import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.update.CascadeUpdate;
@@ -12,7 +13,8 @@ import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.model.update.SetUpdate;
 
 /**
- * The DDMVC object is the top-level object for managing the data and run-loop execution.
+ * The DDMVC object is the top-level object for managing the data and run-loop 
+ * execution.
  * It is a static singleton.
  * 
  * @author Kevin Dolan
@@ -20,7 +22,7 @@ import com.google.gwt.ddmvc.model.update.SetUpdate;
 public class DDMVC {
 
 	private static HashMap<String, Model> dataStore;
-	private static HashMap<Observer,List<ModelUpdate>> pendingNotifies;
+	private static MultiMap<Observer, ModelUpdate> pendingNotifies;
 	
 	//Static initialization
 	static { init(); }
@@ -30,7 +32,7 @@ public class DDMVC {
 	 */
 	private static void init() {
 		dataStore = new HashMap<String, Model>();
-		pendingNotifies = new HashMap<Observer,List<ModelUpdate>>();
+		pendingNotifies = new MultiMap<Observer, ModelUpdate>();
 	}
 	
 	/**
@@ -82,7 +84,8 @@ public class DDMVC {
 	
 	/**
 	 * Return the Model object associated with a given key
-	 * Note - if there is no model associated with the key, it will be created, but its value will be null
+	 * Note - if there is no model associated with the key, it will be created,
+	 * but its value will be null.
 	 * @param key the key of the Model
 	 * @return	  the Model associated with the Key
 	 */
@@ -107,7 +110,8 @@ public class DDMVC {
 	}
 	
 	/**
-	 * Put a model into the data store, and notify all dependencies on next run loop
+	 * Put a model into the data store, and notify all dependencies on the
+	 * next run loop
 	 * Note - this will make an attempt to merge the dependencies if applicable
 	 * 		  also, it will reset the name of model to key
 	 */
@@ -158,12 +162,7 @@ public class DDMVC {
 	 * @param update   the update that caused this notification
 	 */
 	public static void addNotify(Observer observer, ModelUpdate update) {
-		List<ModelUpdate> updateList = pendingNotifies.get(observer);
-		if(updateList == null) {
-			updateList = new ArrayList<ModelUpdate>();
-			pendingNotifies.put(observer, updateList);
-		}
-		updateList.add(update);
+		pendingNotifies.put(observer, update);
 	}
 	
 	/**
@@ -177,35 +176,37 @@ public class DDMVC {
 	}
 	
 	/**
-	 * Perform the run-loop, should not be called explicitly unless you make changes
-	 * to models outside of a controller, and want the changes to be reflected immediately
+	 * Perform the run-loop, should not be called explicitly unless you make
+	 * changes to models outside of a controller, and want the changes to be
+	 *  reflected immediately
 	 */
 	public static void runLoop() {
-		Set<Observer> freeNotifies = new HashSet<Observer>();
+		Set<Map.Entry<Observer, Set<ModelUpdate>>> freeNotifies = 
+			new HashSet<Map.Entry<Observer, Set<ModelUpdate>>>();
 		
 		while(pendingNotifies.size() > 0) {
-			Set<Map.Entry<Observer,List<ModelUpdate>>> notifies = pendingNotifies.entrySet();
-			pendingNotifies = new HashMap<Observer,List<ModelUpdate>>();
+			Set<Map.Entry<Observer, Set<ModelUpdate>>> notifies = 
+				pendingNotifies.entrySet();
 			
-			for(Map.Entry<Observer,List<ModelUpdate>> entry : notifies) {
+			pendingNotifies = new MultiMap<Observer, ModelUpdate>();
+			
+			for(Map.Entry<Observer, Set<ModelUpdate>> entry : notifies) {
 				Observer observer = entry.getKey();
 				
-				if(!observer.canHaveObservers())
-					freeNotifies.add(observer);
-				
-				else if(((CanHaveObservers) observer).getObservers().size() == 0)
-					freeNotifies.add(observer);
-				
+				if(!observer.isModel() 
+						|| ((Model) observer).getObservers().size() == 0)
+					freeNotifies.add(entry);
 				else {
 					observer.modelChanged(entry.getValue());
-					Set<Observer> observers = ((CanHaveObservers)observer).getObservers();
-					addNotify(observers, new CascadeUpdate());
+					Set<Observer> observers = ((Model)observer).getObservers();
+					addNotify(observers, 
+							new CascadeUpdate(((Model)observer).getKey()));
 				}
 			}
 		}
 		
-		for(Observer observer : freeNotifies)
-			observer.modelChanged();
+		for(Map.Entry<Observer, Set<ModelUpdate>> free : freeNotifies)
+			free.getKey().modelChanged(free.getValue());
 	}
 	
 	/**

@@ -22,7 +22,7 @@ public class ListAppendUpdate extends ModelUpdate {
 	/**
 	 * NOTE - Assumes you want ArrayList if new list creation is necessary
 	 * @param target
-	 * @param data
+	 * @param data   the item to be appended to the list
 	 */
 	public ListAppendUpdate(String target, Object data) {
 		super(target, data);
@@ -31,10 +31,10 @@ public class ListAppendUpdate extends ModelUpdate {
 
 	/**
 	 * Specify what type of list to use
-	 * @param target
-	 * @param data
-	 * @param useLinkedList true if you want to use linked list, if new list creation
-	 * 						is necessary
+	 * @param target 
+	 * @param data   the item to be appended to the list
+	 * @param useLinkedList true if you want to use linked list, if new list
+	 * 						creation is necessary
 	 */
 	public ListAppendUpdate(String target, Object data, boolean useLinkedList) {
 		super(target, data);
@@ -44,8 +44,8 @@ public class ListAppendUpdate extends ModelUpdate {
 	@Override
 	public Object performUpdate(Object value) {
 		List<Object> list = listInitHelper(value, useLinkedList);
-		list.add(data);
 		
+		list.add(data);
 		return list;
 	}
 	
@@ -56,7 +56,9 @@ public class ListAppendUpdate extends ModelUpdate {
 	 * @return				a new list
 	 */
 	@SuppressWarnings("unchecked")
-	public static List<Object> listInitHelper(Object value, boolean useLinkedList) {
+	public static List<Object> listInitHelper(Object value,
+			boolean useLinkedList) {
+		
 		List<Object> list = (List<Object>) value;
 		if(list == null) {
 			if(useLinkedList)

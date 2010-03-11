@@ -1,6 +1,6 @@
 package com.google.gwt.ddmvc.model;
 
-import java.util.List;
+import java.util.Set;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.Observer;
 
@@ -14,6 +14,11 @@ public abstract class ComputedModel extends Model implements Observer {
 	
 	private boolean inSync;
 	private Object cache;
+	
+	public ComputedModel() {
+		inSync = false;
+		cache = null;
+	}
 	
 	public ComputedModel(String key) {
 		super(key);
@@ -40,7 +45,8 @@ public abstract class ComputedModel extends Model implements Observer {
 	}
 	
 	/**
-	 * Set if the value should be computed immediately when its dependencies change,
+	 * Set if the value should be computed immediately when its dependencies
+	 * change.
 	 * This property is ignored if isCacheable() returns false
 	 * @return true by default
 	 */
@@ -63,7 +69,7 @@ public abstract class ComputedModel extends Model implements Observer {
 	}
 	
 	@Override
-	public void modelChanged(List<ModelUpdate> updates) {
+	public void modelChanged(Set<ModelUpdate> updates) {
 		inSync = false;
 		if(isCacheable() && isImmediate()) {
 			cache = computeValue();
@@ -72,7 +78,7 @@ public abstract class ComputedModel extends Model implements Observer {
 	}
 	
 	@Override
-	public boolean canHaveObservers() {
+	public boolean isModel() {
 		return true;
 	}
 }

@@ -50,8 +50,8 @@ public abstract class ModelUpdate {
 	/**
 	 * Perform whatever update this update requests.  
 	 * If the request would cause
-	 * the model's data to be replaced, return the object you would like to replace
-	 * it with.  Otherwise, you should just return the object itself.
+	 * the model's data to be replaced, return the object you would like to
+	 * replace it with.  Otherwise, you should just return the object itself.
 	 * @param value	the model's current data reference
 	 * @return		the model's end data reference
 	 */

@@ -1,14 +1,13 @@
 package com.google.gwt.ddmvc.view;
 
-import java.util.List;
-
+import java.util.Set;
 import com.google.gwt.ddmvc.Observer;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * A View is the direct connection with the end-user.  It creates the actual UI widget and
- * dispatches relevant user-generated events
+ * A View is the direct connection with the end-user.  It creates the actual UI
+ * widget and dispatches relevant user-generated events
  * 
  * @author Kevin Dolan
  */
@@ -29,28 +28,31 @@ public abstract class View implements Observer {
 	public abstract Widget getWidget();
 	
 	@Override
-	public void modelChanged(List<ModelUpdate> updates) {
+	public void modelChanged(Set<ModelUpdate> updates) {
 		render(updates);
 	}
 	
 	@Override
-	public boolean canHaveObservers() {
+	public boolean isModel() {
 		return false;
 	}
 	
 	/**
 	 * Initialize the top-level widget.
-	 * Note: take care to maximize the rendering of everything that will not change,
-	 * but this method should usually make a call to render to render anything that will.
+	 * Note: take care to maximize the rendering of everything that will not
+	 * change, but this method should usually make a call to render to render
+	 * anything that will.
 	 */
 	public abstract void initialize();
 	
 	/**
-	 * Render the already instantiated components.  Should not change the Widget reference.
+	 * Render the already instantiated components.  Should not change the
+	 * Widget reference.
 	 * Also, may receive a list of updates, which can help for optimization.
-	 * @param updates the list of updates which caused this render to fire, may be null
+	 * @param updates the list of updates which caused this render to fire,
+	 * 		 		  may be null
 	 */
-	public abstract void render(List<ModelUpdate> updates);
+	public abstract void render(Set<ModelUpdate> updates);
 	
 	
 }
