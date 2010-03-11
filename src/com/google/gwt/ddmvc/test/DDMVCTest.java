@@ -18,6 +18,8 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class DDMVCTest {
 	
+	//The internet is mostly for porn.
+	
 	@Before
 	public void setUp() {
 		DDMVC.reset();
