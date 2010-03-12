@@ -1,7 +1,6 @@
 package com.google.gwt.ddmvc.model;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collection;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.Observer;
 
@@ -36,11 +35,10 @@ public abstract class ComputedModel extends Model implements Observer {
 	 * in the event of a missing dependency, if you want the best runtime
 	 * feedback of errors.
 	 * @param updates - the list of updates that caused this value to be computed,
-	 * 				an empty list if this was called from get() or 
-	 * 				initialization
+	 * 				null if this was called from .get()
 	 * @return the computed value of this model
 	 */
-	public abstract Object computeValue(Set<ModelUpdate> updates);
+	public abstract Object computeValue(Collection<ModelUpdate> updates);
 	
 	/**
 	 * If necessary, perform any initial dependency-binding or processing
@@ -72,12 +70,12 @@ public abstract class ComputedModel extends Model implements Observer {
 				return cache;
 			
 			if(isCacheable()) {
-				cache = computeValue(new HashSet<ModelUpdate>());
+				cache = computeValue(null);
 				inSync = true;
 				return cache;
 			}
 			
-			return computeValue(new HashSet<ModelUpdate>());
+			return computeValue(null);
 		}
 		catch(ModelDoesNotExistException e) {
 			throw new DependencyNotFoundException(e.getKey());
@@ -85,7 +83,7 @@ public abstract class ComputedModel extends Model implements Observer {
 	}
 	
 	@Override
-	public void modelChanged(Set<ModelUpdate> updates) {
+	public void modelChanged(Collection<ModelUpdate> updates) {
 		try {
 			inSync = false;
 			if(isCacheable() && isImmediate()) {

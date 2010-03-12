@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.multimap.MultiHashListMap;
+import org.multimap.MultiMap;
 import com.google.gwt.ddmvc.controller.Controller;
 import com.google.gwt.ddmvc.model.DependencyNotFoundException;
 import com.google.gwt.ddmvc.model.Model;
@@ -26,7 +27,7 @@ import com.google.gwt.ddmvc.model.update.SetValue;
 public class DDMVC {
 
 	private static HashMap<String, Model> dataStore;
-	private static MultiHashListMap<Observer, ModelUpdate> pendingNotifies;
+	private static MultiMap<Observer, ModelUpdate> pendingNotifies;
 	
 	//Static initialization
 	static { init(); }

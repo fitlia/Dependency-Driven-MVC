@@ -1,6 +1,6 @@
 package com.google.gwt.ddmvc.view;
 
-import java.util.Set;
+import java.util.Collection;
 import com.google.gwt.ddmvc.Observer;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.user.client.ui.Widget;
@@ -28,7 +28,7 @@ public abstract class View implements Observer {
 	public abstract Widget getWidget();
 	
 	@Override
-	public void modelChanged(Set<ModelUpdate> updates) {
+	public void modelChanged(Collection<ModelUpdate> updates) {
 		render(updates);
 	}
 	
@@ -50,9 +50,10 @@ public abstract class View implements Observer {
 	 * Widget reference.
 	 * Also, may receive a list of updates, which can help for optimization.
 	 * @param updates - the list of updates which caused this render to fire,
-	 * 				may be null
+	 * 				in the order they were applied may be null if this is the first
+	 * 				call to rendered
 	 */
-	public abstract void render(Set<ModelUpdate> updates);
+	public abstract void render(Collection<ModelUpdate> updates);
 	
 	
 }

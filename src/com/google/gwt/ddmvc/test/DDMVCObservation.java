@@ -2,8 +2,8 @@ package com.google.gwt.ddmvc.test;
 
 import static org.junit.Assert.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import com.google.gwt.ddmvc.DDMVC;
@@ -50,7 +50,7 @@ public class DDMVCObservation {
 		}
 
 		@Override
-		public void render(Set<ModelUpdate> updates) {
+		public void render(Collection<ModelUpdate> updates) {
 			myInt++;
 		}
 		
@@ -121,7 +121,7 @@ public class DDMVCObservation {
 		}
 		
 		@Override
-		public Object computeValue(Set<ModelUpdate> updates) {
+		public Object computeValue(Collection<ModelUpdate> updates) {
 			return (Integer) DDMVC.getValue(dependent, this) + 1;
 		}
 		
