@@ -19,6 +19,7 @@ public class SetValue extends ModelUpdate {
 	 */
 	public SetValue(String target, Object data) {
 		super(target);
+		this.data = data;
 	}
 
 	@Override
