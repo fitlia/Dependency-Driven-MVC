@@ -1,11 +1,13 @@
 package com.google.gwt.ddmvc.test;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.model.Model;
+import com.google.gwt.ddmvc.model.ModelDoesNotExistException;
 
 /**
  * Unit tests for the basic model methods of DDMVC 
@@ -65,6 +67,15 @@ public class DDMVCModelBasics {
 		DDMVC.setModel("model", new Model("somethingElse", "fresh"));
 		assertTrue(DDMVC.getValue("model").equals("fresh"));
 		assertTrue(DDMVC.getModel("model").get().equals("fresh"));
+	}
+	
+	@Test
+	public void nonExistent() {
+		try {
+			DDMVC.getValue("hahaNotHere");
+			fail();
+		}
+		catch(ModelDoesNotExistException e) {}
 	}
 	
 }

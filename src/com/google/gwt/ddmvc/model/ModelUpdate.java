@@ -41,8 +41,8 @@ public class ModelUpdate {
 
 	/**
 	 * Instantiate a new model update with the specified key and data, implies type is SET
-	 * @param modelKey the key of the model to set
-	 * @param data	   the data to set the model to
+	 * @param modelKey - the key of the model to set
+	 * @param data - the data to set the model to
 	 */
 	public ModelUpdate(String modelKey, Object data) {
 		this.modelKey = modelKey;
@@ -52,9 +52,9 @@ public class ModelUpdate {
 	
 	/**
 	 * Instantiate a new model update with a specified update type
-	 * @param modelKey the key of the model to set
-	 * @param update the update type to enact
-	 * @param data	 the data to update
+	 * @param modelKey - the key of the model to set
+	 * @param update - the update type to enact
+	 * @param data - the data to update
 	 */
 	public ModelUpdate(String modelKey, UpdateType update, Object data) {
 		this.modelKey = modelKey;

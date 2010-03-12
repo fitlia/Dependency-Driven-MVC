@@ -5,7 +5,7 @@ import java.util.Set;
 import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.Observer;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
-import com.google.gwt.ddmvc.model.update.SetUpdate;
+import com.google.gwt.ddmvc.model.update.SetValue;
 import com.google.gwt.ddmvc.model.update.UnknownUpdate;
 
 /**
@@ -33,7 +33,7 @@ public class Model {
 	
 	/**
 	 * Instantiate a new blank model
-	 * @param name the name of this model
+	 * @param name - the name of this model
 	 */
 	public Model(String name) {
 		this.data = null;
@@ -59,7 +59,7 @@ public class Model {
 	
 	/**
 	 * Instantiate a new model with associated data
-	 * @param data the data to store
+	 * @param data - the data to store
 	 */
 	public Model(String name, Object data) {
 		this.data = data;
@@ -68,37 +68,37 @@ public class Model {
 	}
 	
 	/**
-	 * Add an observer to the model's set of dependencies
-	 * @param observer the observer to add
+	 * Add an observer to the model's set of dependents
+	 * @param observer - the observer to add
 	 */
 	public void addObserver(Observer observer) {
 		observers.add(observer);
 	}
 	
 	/**
-	 * Remove an observer from the set of dependencies
-	 * @param observer the observer to remove
+	 * Remove an observer from the set of dependents
+	 * @param observer - the observer to removeMatches
 	 */
 	public void removeObserver(Observer observer) {
 		observers.remove(observer);
 	}
 	
 	/**
-	 * Handle a ModelUpdate request, notify dependencies
-	 * @param update the update request being processed
+	 * Handle a ModelUpdate request, notify dependents
+	 * @param update - the update request being processed
 	 */
 	public void handleUpdate(ModelUpdate update) {
-		Object result = update.performUpdate(data);
+		Object result = update.process(data);
 		data = result;
 		DDMVC.addNotify(observers, update);
 	}
 	
 	/**
-	 * Set the associated data, notify dependencies of the change
-	 * @param data the data to set
+	 * Set the associated data, notify dependents of the change
+	 * @param data - the data to set
 	 */
 	public void set(Object data) {
-		handleUpdate(new SetUpdate(key, data));
+		handleUpdate(new SetValue(key, data));
 	}
 	
 	/**
@@ -110,9 +110,9 @@ public class Model {
 	}
 	
 	/**
-	 * Get the associated data, and add an observer to the list of dependencies
-	 * @param observer the observer to add
-	 * @return		   the data
+	 * Get the associated data, and add an observer to the list of dependents
+	 * @param observer - the observer to add
+	 * @return the data
 	 */
 	public Object get(Observer observer) {
 		addObserver(observer);
@@ -120,7 +120,7 @@ public class Model {
 	}
 	
 	/**
-	 * Notify the dependencies of a data change,
+	 * Notify the dependents of a data change,
 	 * where the update type is not known.  This
 	 * causes the ModelUpdate UnknownUpdate to be
 	 * passed along.
@@ -130,7 +130,7 @@ public class Model {
 	}
 	
 	/**
-	 * @return the set of dependencies
+	 * @return the set of dependents
 	 */
 	public Set<Observer> getObservers() {
 		return observers;

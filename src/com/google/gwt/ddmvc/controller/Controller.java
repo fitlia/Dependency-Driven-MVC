@@ -3,12 +3,7 @@ package com.google.gwt.ddmvc.controller;
 import com.google.gwt.ddmvc.view.View;
 
 /**
-<<<<<<< HEAD:src/com/google/gwt/ddmvc/controller/Controller.java
  * Controllers represent business logic. 
-=======
- * Controllers represent business logic.  
->>>>>>> testBranch3:src/com/google/gwt/ddmvc/controller/Controller.java
- * 
  * @author Kevin Dolan
  */
 public abstract class Controller {

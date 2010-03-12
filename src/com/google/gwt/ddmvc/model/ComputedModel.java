@@ -1,5 +1,6 @@
 package com.google.gwt.ddmvc.model;
 
+import java.util.HashSet;
 import java.util.Set;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.Observer;
@@ -27,9 +28,19 @@ public abstract class ComputedModel extends Model implements Observer {
 	}
 	
 	/**
+	 * Perform the computation.
+	 * Please note that the proper functioning of DependencyNotFoundException
+	 * depends on ModelDoesNotExistException being thrown if a value is not
+	 * found, so take care to use DDMVC.getValue() rather than .getModel().
+	 * If you do use .getModel(), you should throw DependencyNotFoundException
+	 * in the event of a missing dependency, if you want the best runtime
+	 * feedback of errors.
+	 * @param updates - the list of updates that caused this value to be computed,
+	 * 				an empty list if this was called from get() or 
+	 * 				initialization
 	 * @return the computed value of this model
 	 */
-	public abstract Object computeValue();
+	public abstract Object computeValue(Set<ModelUpdate> updates);
 	
 	/**
 	 * If necessary, perform any initial dependency-binding or processing
@@ -56,24 +67,34 @@ public abstract class ComputedModel extends Model implements Observer {
 	
 	@Override
 	public Object get() {
-		if(inSync)
-			return cache;
-		
-		if(isCacheable()) {
-			cache = computeValue();
-			inSync = true;
-			return cache;
+		try {
+			if(inSync)
+				return cache;
+			
+			if(isCacheable()) {
+				cache = computeValue(new HashSet<ModelUpdate>());
+				inSync = true;
+				return cache;
+			}
+			
+			return computeValue(new HashSet<ModelUpdate>());
 		}
-		
-		return computeValue();
+		catch(ModelDoesNotExistException e) {
+			throw new DependencyNotFoundException(e.getKey());
+		}
 	}
 	
 	@Override
 	public void modelChanged(Set<ModelUpdate> updates) {
-		inSync = false;
-		if(isCacheable() && isImmediate()) {
-			cache = computeValue();
-			inSync = true;
+		try {
+			inSync = false;
+			if(isCacheable() && isImmediate()) {
+				cache = computeValue(updates);
+				inSync = true;
+			}
+		}
+		catch(ModelDoesNotExistException e) {
+			throw new DependencyNotFoundException(e.getKey());
 		}
 	}
 	

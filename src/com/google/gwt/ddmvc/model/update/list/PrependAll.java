@@ -1,7 +1,9 @@
-package com.google.gwt.ddmvc.model.update;
+package com.google.gwt.ddmvc.model.update.list;
 
 import java.util.Collection;
 import java.util.List;
+
+import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
  * Update to prepend a collection of elements to a list.  The elements will be 
@@ -16,42 +18,52 @@ import java.util.List;
  * 
  * @author Kevin Dolan
  */
-public class ListPrependAllUpdate extends ModelUpdate {
+public class PrependAll extends ModelUpdate {
 	
 	private boolean useLinkedList;
 	
 	/**
-	 * NOTE - Assumes you want ArrayList if new list creation is necessary
-	 * @param target the collection of objects to prepend
-	 * @param data   must be a list of objects
+	 * The default PrependAll field, used for comparison
 	 */
-	public ListPrependAllUpdate(String target, 
-			Collection<? extends Object> data) {
+	public static final PrependAll DEFAULT =
+		new PrependAll(null, null);
+	
+	private Collection<? extends Object> collection;
+	
+	/**
+	 * NOTE - Assumes you want ArrayList if new list creation is necessary
+	 * @param target
+	 * @param collection - the collection of objects to prepend
+	 */
+	public PrependAll(String target, 
+			Collection<? extends Object> collection) {
 		
-		super(target, data);
+		super(target);
+		this.collection = collection;
 		useLinkedList = false;
 	}
 
 	/**
 	 * Specify what type of list to use
 	 * @param target
-	 * @param data   		the collection of objects to prepend
-	 * @param useLinkedList true if you want to use linked-list, if new list
-	 * 						creation is necessary
+	 * @param collection - the collection of objects to prepend
+	 * @param useLinkedList - true if you want to use linked-list, if new list
+	 * 				creation is necessary
 	 */
-	public ListPrependAllUpdate(String target, Collection<? extends Object> data, 
+	public PrependAll(String target, Collection<? extends Object> collection, 
 			boolean useLinkedList) {
-		super(target, data);
+		
+		super(target);
+		this.collection = collection;
 		this.useLinkedList = useLinkedList;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	public Object performUpdate(Object value) {
+	protected Object performUpdate(Object value) {
 		List<Object> list = 
-			ListAppendUpdate.listInitHelper(value, useLinkedList);
+			Append.listInitHelper(value, useLinkedList);
 		
-		Object[] dataArray = ((Collection<? extends Object>) data).toArray();
+		Object[] dataArray = collection.toArray();
 		
 		for(int i = dataArray.length - 1; i >= 0; i--)
 			list.add(0, dataArray[i]);

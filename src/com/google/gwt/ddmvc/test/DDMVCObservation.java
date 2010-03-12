@@ -1,7 +1,6 @@
 package com.google.gwt.ddmvc.test;
 
-import static org.junit.Assert.assertTrue;
-
+import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -9,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.model.ComputedModel;
+import com.google.gwt.ddmvc.model.DependencyNotFoundException;
 import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.view.View;
@@ -41,11 +41,11 @@ public class DDMVCObservation {
 		@Override
 		public void initialize() {
 			DDMVC.getModel("property1").addObserver(this);
-			DDMVC.getModel("property2").get(this);
-			DDMVC.getValue("property3", this);
+			DDMVC.getModel("property2").addObserver(this);
+			DDMVC.getModel("property3").addObserver(this);
 			DDMVC.getModel("property4").addObserver(this);
-			DDMVC.getModel("property5").get(this);
-			DDMVC.getValue("property6", this);
+			DDMVC.getModel("property5").addObserver(this);
+			DDMVC.getModel("property6").addObserver(this);
 			myInt = 0;
 		}
 
@@ -121,7 +121,7 @@ public class DDMVCObservation {
 		}
 		
 		@Override
-		public Object computeValue() {
+		public Object computeValue(Set<ModelUpdate> updates) {
 			return (Integer) DDMVC.getValue(dependent, this) + 1;
 		}
 		
@@ -218,6 +218,23 @@ public class DDMVCObservation {
 		DDMVC.setValue("A", 1);
 		DDMVC.runLoop();
 		assertTrue(DDMVC.getValue("F").equals(4));
+	}
+	
+	@Test
+	public void dependencyRemoved() {
+		chainSetup(true, true);
+		DDMVC.getValue("F");
+		
+		DDMVC.setValue("A", 1);
+		DDMVC.deleteModel("C");
+		
+		DDMVC.runLoop();
+		
+		try{
+			DDMVC.getValue("F");
+			fail();
+		}
+		catch(DependencyNotFoundException e) {}
 	}
 	
 }

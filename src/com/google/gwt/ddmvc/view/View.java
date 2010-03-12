@@ -49,8 +49,8 @@ public abstract class View implements Observer {
 	 * Render the already instantiated components.  Should not change the
 	 * Widget reference.
 	 * Also, may receive a list of updates, which can help for optimization.
-	 * @param updates the list of updates which caused this render to fire,
-	 * 		 		  may be null
+	 * @param updates - the list of updates which caused this render to fire,
+	 * 				may be null
 	 */
 	public abstract void render(Set<ModelUpdate> updates);
 	
