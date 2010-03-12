@@ -1,11 +1,12 @@
 package com.google.gwt.ddmvc;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.multimap.MultiMap;
+import org.multimap.MultiHashListMap;
 import com.google.gwt.ddmvc.controller.Controller;
 import com.google.gwt.ddmvc.model.DependencyNotFoundException;
 import com.google.gwt.ddmvc.model.Model;
@@ -25,7 +26,7 @@ import com.google.gwt.ddmvc.model.update.SetValue;
 public class DDMVC {
 
 	private static HashMap<String, Model> dataStore;
-	private static MultiMap<Observer, ModelUpdate> pendingNotifies;
+	private static MultiHashListMap<Observer, ModelUpdate> pendingNotifies;
 	
 	//Static initialization
 	static { init(); }
@@ -35,7 +36,7 @@ public class DDMVC {
 	 */
 	private static void init() {
 		dataStore = new HashMap<String, Model>();
-		pendingNotifies = new MultiMap<Observer, ModelUpdate>();
+		pendingNotifies = new MultiHashListMap<Observer, ModelUpdate>();
 	}
 	
 	/**
@@ -190,18 +191,18 @@ public class DDMVC {
 	 *  reflected immediately
 	 */
 	public static void runLoop() {
-		Set<Map.Entry<Observer, Set<ModelUpdate>>> freeNotifies = 
-			new HashSet<Map.Entry<Observer, Set<ModelUpdate>>>();
+		Set<Map.Entry<Observer, Collection<ModelUpdate>>> freeNotifies = 
+			new HashSet<Map.Entry<Observer, Collection<ModelUpdate>>>();
 		
 		//PendingNotifies will build up with notifications as we edit values.
 		while(pendingNotifies.size() > 0) {
 			//Extracts the notifications we will handle now, and reset pending
-			Set<Map.Entry<Observer, Set<ModelUpdate>>> notifies = 
+			Set<Map.Entry<Observer, Collection<ModelUpdate>>> notifies = 
 				pendingNotifies.entrySet();
-			pendingNotifies = new MultiMap<Observer, ModelUpdate>();
+			pendingNotifies = new MultiHashListMap<Observer, ModelUpdate>();
 			
 			//Iterate through all of the current notifications
-			for(Map.Entry<Observer, Set<ModelUpdate>> entry : notifies) {
+			for(Map.Entry<Observer, Collection<ModelUpdate>> entry : notifies) {
 				Observer observer = entry.getKey();
 				
 				//If it's a computed model, we have to be careful
@@ -242,7 +243,7 @@ public class DDMVC {
 		}
 		
 		//Now just tie up the loose ends!
-		for(Map.Entry<Observer, Set<ModelUpdate>> free : freeNotifies)
+		for(Map.Entry<Observer, Collection<ModelUpdate>> free : freeNotifies)
 			try { free.getKey().modelChanged(free.getValue()); }
 			catch(DependencyNotFoundException e) {}
 	

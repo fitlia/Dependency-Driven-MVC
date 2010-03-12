@@ -1,6 +1,6 @@
 package com.google.gwt.ddmvc;
 
-import java.util.Set;
+import java.util.Collection;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
@@ -14,7 +14,7 @@ public interface Observer {
 	 * Notify this observer that the model has changed
 	 * @param updates the set of updates applied, order is not guaranteed
 	 */
-	public void modelChanged(Set<ModelUpdate> updates);
+	public void modelChanged(Collection<ModelUpdate> updates);
 	
 	/**
 	 * @return true if this class extends Model

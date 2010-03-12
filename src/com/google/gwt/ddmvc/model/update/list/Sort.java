@@ -35,9 +35,10 @@ public class Sort extends ModelUpdate {
 	 * @param target
 	 * @param comparator - the comparator object to use to sort the list
 	 */
-	public Sort(String target, Comparator<Object> comparator) {
+	@SuppressWarnings("unchecked")
+	public Sort(String target, Comparator<?> comparator) {
 		super(target);
-		this.comparator = comparator;
+		this.comparator = (Comparator<Object>) comparator;
 	}
 	
 	@SuppressWarnings("unchecked")

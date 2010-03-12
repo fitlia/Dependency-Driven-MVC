@@ -2,6 +2,7 @@ package com.google.gwt.ddmvc.test;
 
 import static org.junit.Assert.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import org.junit.*;
 import com.google.gwt.ddmvc.*;
@@ -15,6 +16,7 @@ import com.google.gwt.ddmvc.model.update.list.Prepend;
 import com.google.gwt.ddmvc.model.update.list.RemoveAllEqualTo;
 import com.google.gwt.ddmvc.model.update.list.RemoveAllThatMatch;
 import com.google.gwt.ddmvc.model.update.list.RemoveIndex;
+import com.google.gwt.ddmvc.model.update.list.Sort;
 
 /**
  * Tests for DDMVC handling of ModelUpdates 
@@ -219,6 +221,55 @@ public class DDMVCModelUpdate {
 		List<Integer> list = (List<Integer>) DDMVC.getValue("nam");
 		assertTrue(list.size() == 4);
 		assertFalse(list.get(1).equals(10));
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void applyListSortUpdate() {
+		List<Integer> list = new ArrayList<Integer>();
+		list.add(100);
+		list.add(90);
+		list.add(95);
+		list.add(3);
+		DDMVC.setValue("nam", list);
+		
+		DDMVC.processUpdate(new Sort("nam"));
+		list = (List<Integer>) DDMVC.getValue("nam");
+				
+		assertTrue(list.size() == 4);
+		assertTrue(list.get(0).equals(3));
+		assertTrue(list.get(1).equals(90));
+		assertTrue(list.get(2).equals(95));
+		assertTrue(list.get(3).equals(100));
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void applyListSortComparatorUpdate() {
+		List<Integer> list = new ArrayList<Integer>();
+		list.add(100);
+		list.add(90);
+		list.add(95);
+		list.add(3);
+		DDMVC.setValue("nam", list);
+		
+		Comparator<Integer> myComp = new Comparator<Integer>() {
+
+			@Override
+			public int compare(Integer a, Integer b) {
+				return b.compareTo(a);
+			}
+			
+		};
+		
+		DDMVC.processUpdate(new Sort("nam", myComp));
+		list = (List<Integer>) DDMVC.getValue("nam");
+				
+		assertTrue(list.size() == 4);
+		assertTrue(list.get(0).equals(100));
+		assertTrue(list.get(1).equals(95));
+		assertTrue(list.get(2).equals(90));
+		assertTrue(list.get(3).equals(3));
 	}
 	
 	@Test
