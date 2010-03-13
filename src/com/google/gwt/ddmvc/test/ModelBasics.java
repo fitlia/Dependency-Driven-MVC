@@ -11,7 +11,7 @@ import com.google.gwt.ddmvc.model.ModelDoesNotExistException;
  * Unit tests for the basic model methods of DDMVC 
  * @author Kevin Dolan
  */
-public class DDMVCModelBasics {
+public class ModelBasics {
 	
 	@Before
 	public void setUp() {

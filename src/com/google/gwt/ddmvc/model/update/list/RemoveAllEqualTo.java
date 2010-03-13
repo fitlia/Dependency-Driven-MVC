@@ -33,7 +33,7 @@ public class RemoveAllEqualTo extends RemoveAllThatMatch {
 		}
 		
 		@Override
-		public boolean accept(Object o) {
+		public boolean accept(int index, Object o) {
 			return data.equals(o);
 		}
 		

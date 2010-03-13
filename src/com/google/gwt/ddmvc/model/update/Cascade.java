@@ -22,6 +22,7 @@ public class Cascade extends ModelUpdate {
 	 */
 	public Cascade(String target) {
 		super(target);
+		this.isComplete = true;
 	}
 
 	@Override

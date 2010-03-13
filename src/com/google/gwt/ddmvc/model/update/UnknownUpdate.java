@@ -17,6 +17,7 @@ public class UnknownUpdate extends ModelUpdate {
 	 */
 	public UnknownUpdate(String target) {
 		super(target);
+		this.isComplete = true;
 	}
 
 	@Override

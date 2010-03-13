@@ -1,18 +1,19 @@
 package com.google.gwt.ddmvc;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.multimap.MultiHashListMap;
+import org.multimap.MultiHashMap;
 import org.multimap.MultiMap;
 import com.google.gwt.ddmvc.controller.Controller;
-import com.google.gwt.ddmvc.model.DependencyNotFoundException;
 import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.ModelDoesNotExistException;
 import com.google.gwt.ddmvc.model.update.Cascade;
+import com.google.gwt.ddmvc.model.update.ExceptionComputed;
 import com.google.gwt.ddmvc.model.update.ModelDeleted;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.model.update.SetValue;
@@ -139,32 +140,37 @@ public class DDMVC {
 	}
 	
 	/**
-	 * Delete a value from the data store.
+	 * Delete a value from the data store, and notify all dependencies on the
+	 * next run loop
 	 * @param key - the key to removeMatches
 	 */
 	public static void deleteModel(String key) {
+		if(hasModel(key)) {
+			Model model = getModel(key);
+			Set<Observer> observers = model.getObservers();
+			addNotify(observers, new ModelDeleted(key));
+		}
 		dataStore.remove(key);
 	}
 	
 	/**
-	 * Process an update to a model
+	 * Apply a single update to a model
 	 * Note - a run-loop will not be enacted.
 	 * @param update - the update to apply.
 	 */
-	public static void processUpdate(ModelUpdate update) {
+	public static void applyUpdate(ModelUpdate update) {
 		Model model = getModel(update.getTarget());
 		model.handleUpdate(update);	
 	}
 	
 	/**
-	 * Process a list of ModelUpdate's
+	 * Apply a list of ModelUpdate's
 	 * Note - a run-loop will be enacted upon completion
 	 * @param updateList - the list of updates to apply
 	 */
-	public static void processUpdates(List<ModelUpdate> updateList) {
+	public static void applyUpdates(List<ModelUpdate> updateList) {
 		for(ModelUpdate update : updateList)
-			processUpdate(update);
-		runLoop();
+			applyUpdate(update);
 	}
 	
 	/**
@@ -187,15 +193,17 @@ public class DDMVC {
 	}
 	
 	/**
-	 * Perform the run-loop, should not be called explicitly unless you make
-	 * changes to models outside of a controller, and want the changes to be
-	 *  reflected immediately
+	 * Perform the run-loop, should generally not be called explicitly
+	 * @return the list of all exceptions encountered during the run-loop
 	 */
-	public static void runLoop() {
-		Set<Map.Entry<Observer, Collection<ModelUpdate>>> freeNotifies = 
-			new HashSet<Map.Entry<Observer, Collection<ModelUpdate>>>();
+	public static List<RunLoopException> runLoop() {
+		MultiHashMap<Observer, ModelUpdate> freeNotifies = 
+			new MultiHashMap<Observer, ModelUpdate>();
+		
+		List<RunLoopException> exceptions = new ArrayList<RunLoopException>();
 		
 		//PendingNotifies will build up with notifications as we edit values.
+		int iteration = 0;
 		while(pendingNotifies.size() > 0) {
 			//Extracts the notifications we will handle now, and reset pending
 			Set<Map.Entry<Observer, Collection<ModelUpdate>>> notifies = 
@@ -212,7 +220,6 @@ public class DDMVC {
 					
 					//If the model no longer exists, clean up the mess
 					if(!hasModel(model.getKey())) {
-						
 						//Tell the model's dependencies not to worry anymore
 						for(ModelUpdate update : entry.getValue()) 
 							getModel(update.getTarget())
@@ -224,30 +231,43 @@ public class DDMVC {
 					}
 					//If nothing depends on this model, don't worry either
 					else if(model.getObservers().size() == 0)
-						freeNotifies.add(entry);
+						freeNotifies.put(entry.getKey(), entry.getValue());
 					else {
 						//Notify the model of a change
-						try { observer.modelChanged(entry.getValue()); }
-						//Don't let a DNFE ruin the run-loop
-						catch(DependencyNotFoundException e) {}
-						
-						//Cascade the update to its dependents (next loop)
-						Set<Observer> observers = model.getObservers();
-						addNotify(observers, 
-							new Cascade(model.getKey()) );
+						try { 
+							observer.modelChanged(entry.getValue());
+							//Cascade the update to its dependents (next loop)
+							Set<Observer> observers = model.getObservers();
+							addNotify(observers, new Cascade(model.getKey()) );
+						}
+						catch(Exception e) {
+							//Cascade the exception update to its dependents (next loop)
+							Set<Observer> observers = model.getObservers();
+							addNotify(observers, new ExceptionComputed(model.getKey(), e) );
+							exceptions.add(new RunLoopException(e, observer, iteration));
+						}
 					}
 				}
 				//If it's not a computed model, don't bother
 				else
-					freeNotifies.add(entry);
+					freeNotifies.put(entry.getKey(), entry.getValue());
 			}
+			iteration++;
 		}
 		
 		//Now just tie up the loose ends!
-		for(Map.Entry<Observer, Collection<ModelUpdate>> free : freeNotifies)
-			try { free.getKey().modelChanged(free.getValue()); }
-			catch(DependencyNotFoundException e) {}
+		for(Map.Entry<Observer, Collection<ModelUpdate>> free 
+				: freeNotifies.entrySet()) {
+			
+			try {
+				free.getKey().modelChanged(free.getValue()); 
+			}
+			catch(Exception e) {
+				exceptions.add(new RunLoopException(e, free.getKey(), iteration));
+			}
+		}
 	
+		return exceptions;
 	}
 	
 	/**

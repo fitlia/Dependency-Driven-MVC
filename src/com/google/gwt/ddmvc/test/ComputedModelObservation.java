@@ -1,103 +1,22 @@
 package com.google.gwt.ddmvc.test;
 
-import static org.junit.Assert.*;
-import java.util.ArrayList;
-import java.util.Collection;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import com.google.gwt.ddmvc.DDMVC;
+import com.google.gwt.ddmvc.RunLoopException;
 import com.google.gwt.ddmvc.model.ComputedModel;
-import com.google.gwt.ddmvc.model.DependencyNotFoundException;
-import com.google.gwt.ddmvc.model.Model;
-import com.google.gwt.ddmvc.model.update.ModelUpdate;
-import com.google.gwt.ddmvc.view.View;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.ddmvc.model.ModelDoesNotExistException;
 
-/**
- * Tests of the DDMVC observation patterns 
- * @author Kevin Dolan
- */
-public class DDMVCObservation {
+public class ComputedModelObservation {
 
 	@Before
 	public void setUp() {
 		DDMVC.reset();
 	}
 	
-	/**
-	 * This class is simply used to count the number of times render() is called
-	 * @author Kevin Dolan
-	 */
-	private class CountView extends View {
-
-		private Integer myInt;
-
-		@Override
-		public Widget getWidget() {
-			return null;
-		}
-
-		@Override
-		public void initialize() {
-			DDMVC.getModel("property1").addObserver(this);
-			DDMVC.getModel("property2").addObserver(this);
-			DDMVC.getModel("property3").addObserver(this);
-			DDMVC.getModel("property4").addObserver(this);
-			DDMVC.getModel("property5").addObserver(this);
-			DDMVC.getModel("property6").addObserver(this);
-			myInt = 0;
-		}
-
-		@Override
-		public void render(Collection<ModelUpdate> updates) {
-			myInt++;
-		}
-		
-		public Integer getMyInt() {
-			return myInt;
-		}
-		
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Test
-	public void simpleViewObserving() {		
-		DDMVC.setValue("property1", "foo");
-		DDMVC.setValue("property2", "bar");
-		DDMVC.setValue("property3", new ArrayList<String>());
-		
-		CountView cv = new CountView();
-		assertTrue(cv.getMyInt() == 1);
-		
-		DDMVC.setValue("property1", "pam");
-		DDMVC.runLoop();
-		assertTrue(cv.getMyInt() == 2);
-		
-		DDMVC.getModel("property2").set("wow");
-		DDMVC.runLoop();
-		assertTrue(cv.getMyInt() == 3);
-		
-		DDMVC.getModel("property3").update();
-		DDMVC.runLoop();
-		assertTrue(cv.getMyInt() == 4);
-		
-		((List<String>) DDMVC.getValue("property3")).add("bie");
-		DDMVC.runLoop();
-		assertTrue(cv.getMyInt() == 4);
-		
-		DDMVC.setValue("property4", "nish");
-		DDMVC.runLoop();
-		assertTrue(cv.getMyInt() == 5);
-		
-		DDMVC.getModel("property5").update();
-		DDMVC.runLoop();
-		assertTrue(cv.getMyInt() == 6);
-		
-		DDMVC.setModel("property6", new Model("naah"));
-		DDMVC.runLoop();
-		assertTrue(cv.getMyInt() == 7);
-	}
 	
 	private class Increment extends ComputedModel {
 
@@ -121,12 +40,12 @@ public class DDMVCObservation {
 		}
 		
 		@Override
-		public Object computeValue(Collection<ModelUpdate> updates) {
+		public Object computeValue() {
 			return (Integer) DDMVC.getValue(dependent, this) + 1;
 		}
 		
 	}
-	
+
 	@Test
 	public void simpleComputedModel() {
 		DDMVC.setValue("A", 0);
@@ -225,7 +144,6 @@ public class DDMVCObservation {
 		chainSetup(true, true);
 		DDMVC.getValue("F");
 		
-		DDMVC.setValue("A", 1);
 		DDMVC.deleteModel("C");
 		
 		DDMVC.runLoop();
@@ -234,7 +152,36 @@ public class DDMVCObservation {
 			DDMVC.getValue("F");
 			fail();
 		}
-		catch(DependencyNotFoundException e) {}
+		catch(ModelDoesNotExistException e) {}
+	}
+	
+	@Test
+	public void dependencyRemovedNoLoop() {
+		chainSetup(false, false);
+		DDMVC.getValue("F");
+		
+		DDMVC.deleteModel("C");
+		
+		try{
+			DDMVC.getValue("F");
+			fail();
+		}
+		catch(ModelDoesNotExistException e) {}
+	}
+	
+	@Test
+	public void exceptionHandling() {		
+		chainSetup(true, true);
+		DDMVC.getValue("F");
+		
+		DDMVC.setValue("A", 1);
+		DDMVC.deleteModel("C");
+		
+		List<RunLoopException> exceptions = DDMVC.runLoop();
+		assertTrue(exceptions.size() == 4);
+		for(RunLoopException e: exceptions)
+			assertTrue(e.getException().getClass()
+					.equals(ModelDoesNotExistException.class));
 	}
 	
 }

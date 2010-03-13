@@ -41,12 +41,15 @@ public class RemoveAllThatMatch extends ModelUpdate {
 		List<Object> list = (List<Object>) value;
 		numRemoved = 0;
 
+		//The original index, before deletes.
+		int oi = 0;
 		for(int i = 0; i < list.size(); i++) {
-			if(removeMatches == filter.accept(list.get(i))) {
+			if(removeMatches == filter.accept(oi, list.get(i))) {
 				list.remove(i);
 				numRemoved++;
 				i--;
 			}
+			oi++;
 		}
 		
 		return list;

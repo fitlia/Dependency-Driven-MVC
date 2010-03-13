@@ -28,17 +28,9 @@ public abstract class ComputedModel extends Model implements Observer {
 	
 	/**
 	 * Perform the computation.
-	 * Please note that the proper functioning of DependencyNotFoundException
-	 * depends on ModelDoesNotExistException being thrown if a value is not
-	 * found, so take care to use DDMVC.getValue() rather than .getModel().
-	 * If you do use .getModel(), you should throw DependencyNotFoundException
-	 * in the event of a missing dependency, if you want the best runtime
-	 * feedback of errors.
-	 * @param updates - the list of updates that caused this value to be computed,
-	 * 				null if this was called from .get()
 	 * @return the computed value of this model
 	 */
-	public abstract Object computeValue(Collection<ModelUpdate> updates);
+	public abstract Object computeValue();
 	
 	/**
 	 * If necessary, perform any initial dependency-binding or processing
@@ -65,34 +57,24 @@ public abstract class ComputedModel extends Model implements Observer {
 	
 	@Override
 	public Object get() {
-		try {
-			if(inSync)
-				return cache;
-			
-			if(isCacheable()) {
-				cache = computeValue(null);
-				inSync = true;
-				return cache;
-			}
-			
-			return computeValue(null);
+		if(inSync)
+			return cache;
+		
+		if(isCacheable()) {
+			cache = computeValue();
+			inSync = true;
+			return cache;
 		}
-		catch(ModelDoesNotExistException e) {
-			throw new DependencyNotFoundException(e.getKey());
-		}
+		
+		return computeValue();
 	}
 	
 	@Override
 	public void modelChanged(Collection<ModelUpdate> updates) {
-		try {
-			inSync = false;
-			if(isCacheable() && isImmediate()) {
-				cache = computeValue(updates);
-				inSync = true;
-			}
-		}
-		catch(ModelDoesNotExistException e) {
-			throw new DependencyNotFoundException(e.getKey());
+		inSync = false;
+		if(isCacheable() && isImmediate()) {
+			cache = computeValue();
+			inSync = true;
 		}
 	}
 	

@@ -1,9 +1,9 @@
 package com.google.gwt.ddmvc.view;
 
 import java.util.Collection;
+import org.multimap.MultiHashMap;
 import com.google.gwt.ddmvc.Observer;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * A View is the direct connection with the end-user.  It creates the actual UI
@@ -13,23 +13,35 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public abstract class View implements Observer {
 	
+	private MultiHashMap<String, Class<? extends ModelUpdate>> subscriptions;
+	
 	/**
 	 * Instantiate a new View with the given executive object
 	 * @param executive the executive DDMVC object to reference
 	 */
 	public View() {
+		subscriptions = new MultiHashMap<String, Class<? extends ModelUpdate>>();
 		initialize();
-		render(null);
+		render();
 	}
 	
-	/**
-	 * @return this View's widget to be displayed
-	 */
-	public abstract Widget getWidget();
-	
 	@Override
-	public void modelChanged(Collection<ModelUpdate> updates) {
-		render(updates);
+	public void modelChanged(Collection<ModelUpdate> updates) {		
+		boolean containsAll = true;
+		
+		for(ModelUpdate update : updates)
+			if(!subscriptions.get(update.getTarget())
+					.contains(update.getClass())) {
+				
+				containsAll = false;
+				break;
+			}
+		
+		if(!containsAll)
+			render();
+		else
+			for(ModelUpdate update : updates)
+				respondToModelUpdate(update);
 	}
 	
 	@Override
@@ -38,22 +50,42 @@ public abstract class View implements Observer {
 	}
 	
 	/**
-	 * Initialize the top-level widget.
-	 * Note: take care to maximize the rendering of everything that will not
-	 * change, but this method should usually make a call to render to render
-	 * anything that will.
+	 * Override this method if you intend to implement any view rendering
+	 * optimizations.  The updates are guaranteed to be passed to this method
+	 * in the order they were applied to the model.
+	 * @param update - the update to respond to.
 	 */
-	public abstract void initialize();
+	protected void respondToModelUpdate(ModelUpdate update) {}
 	
 	/**
-	 * Render the already instantiated components.  Should not change the
-	 * Widget reference.
-	 * Also, may receive a list of updates, which can help for optimization.
-	 * @param updates - the list of updates which caused this render to fire,
-	 * 				in the order they were applied may be null if this is the first
-	 * 				call to rendered
+	 * Set this view to respond to a particular type of model update, instead of
+	 * calling render().  This means that whenever the view receives a collection
+	 * of updates, if all the updates are subscribed updates, it will call the
+	 * view's respondToModelUpdate(...) method for each update instead of render()
+	 * @param modelKey - the key for which a model update is subscribed
+	 * @param cls - the update class to subscribe to.
 	 */
-	public abstract void render(Collection<ModelUpdate> updates);
+	protected void subscribeToModelUpdate(String modelKey, 
+			Class<? extends ModelUpdate> cls) {
+		
+		subscriptions.put(modelKey, cls);
+	}
+	
+	/**
+	 * Initialize the view.
+	 * Note: take care to maximize the initialization of everything that will not
+	 * change with the models.
+	 * This will generally only be called by the constructor, followed by a call
+	 * to render().
+	 */
+	protected abstract void initialize();
+	
+	/**
+	 * Render the view.  Generally, this should involve setting the view to match
+	 * the model, from scratch.  render() is called by the constructor after
+	 * initialize, and also whenever the view receives an unhandled ModelUpdate.
+	 */
+	protected abstract void render();
 	
 	
 }

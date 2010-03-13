@@ -9,8 +9,12 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses( { 
-	DDMVCModelBasics.class,
-	DDMVCModelUpdate.class,
-	DDMVCObservation.class
+	ModelBasics.class,
+	ModelUpdateBasics.class,
+	ModelUpdateListFiltering.class,
+	ModelUpdateListInsertions.class,
+	ModelUpdateListSorting.class,
+	ViewObservation.class,
+	ComputedModelObservation.class
 })
-public class DDMVCTests {}
+public class Tests {}

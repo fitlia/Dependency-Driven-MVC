@@ -17,6 +17,7 @@ public class ModelDeleted extends ModelUpdate {
 	 */
 	public ModelDeleted(String target) {
 		super(target);
+		this.isComplete = true;
 	}
 
 	@Override
