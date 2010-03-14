@@ -2,7 +2,6 @@ package com.google.gwt.ddmvc.model;
 
 import java.util.Collection;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
-import com.google.gwt.ddmvc.Observer;
 
 /**
  * Represents a value which depends on some other model(s). 

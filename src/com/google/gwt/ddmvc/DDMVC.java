@@ -10,9 +10,12 @@ import org.multimap.MultiHashListMap;
 import org.multimap.MultiHashMap;
 import org.multimap.MultiMap;
 import com.google.gwt.ddmvc.controller.Controller;
+import com.google.gwt.ddmvc.controller.ServerRequest;
+import com.google.gwt.ddmvc.event.AppEvent;
 import com.google.gwt.ddmvc.model.ComputedModel;
 import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.ModelDoesNotExistException;
+import com.google.gwt.ddmvc.model.Observer;
 import com.google.gwt.ddmvc.model.update.Cascade;
 import com.google.gwt.ddmvc.model.update.ExceptionComputed;
 import com.google.gwt.ddmvc.model.update.ModelDeleted;
@@ -31,6 +34,8 @@ public class DDMVC {
 
 	private static HashMap<String, Model> dataStore;
 	private static MultiMap<Observer, ModelUpdate> pendingNotifies;
+	private static List<AppEvent> pendingEvents;
+	private static MultiMap<String, Controller> subscriptions;
 	
 	//Static initialization
 	static { init(); }
@@ -47,24 +52,8 @@ public class DDMVC {
 	private static void init() {
 		dataStore = new HashMap<String, Model>();
 		pendingNotifies = new MultiHashListMap<Observer, ModelUpdate>();
-	}
-	
-	/**
-	 * Add a controller bound to a name
-	 * @param name - the name of the controller
-	 * @param controller - the controller itself
-	 */
-	public static void addController(String name, Controller controller) {
-		
-	}
-	
-	/**
-	 * Dispatch a call to a controller, with associated parameters
-	 * @param name - the name of the controller to execute
-	 * @param parameters - the parameters to pass the controller
-	 */
-	public static void dispatchController(String name, Object parameters) {
-		
+		pendingEvents = new ArrayList<AppEvent>();
+		subscriptions = new MultiHashMap<String, Controller>();
 	}
 	
 	/**
@@ -225,10 +214,55 @@ public class DDMVC {
 	}
 	
 	/**
+	 * Notify a particular controller whenever a particular type of event is
+	 * fired.
+	 * @param eventType - the class of the event to listen to
+	 * @param controller - the controller to notify when the event is fired.
+	 */
+	public static void subscribeToEvent(Class<? extends AppEvent> eventType, 
+			Controller controller) {
+		
+		subscriptions.put(eventType.getName(), controller);
+	}
+	
+	/**
+	 * Fire an event to any subscribed controllers, on the next run-loop.
+	 * @param event - the event to fire
+	 */
+	public static void fireEvent(AppEvent event) {
+		pendingEvents.add(event);
+	}
+	
+	/**
+	 * Execute all controllers subscribed to a particular event
+	 * @param event - the event to respond to
+	 * @param request - the list of all requests encountered
+	 */
+	private static List<ServerRequest> handleEvent(AppEvent event) {
+		List<ServerRequest> requests = new ArrayList<ServerRequest>();
+		Collection<Controller> controllers = 
+			subscriptions.get(event.getClass().getName());
+		for(Controller controller : controllers)
+			requests.add(controller.respondToEvent(event));
+		return requests;
+	}
+	
+	/**
 	 * Perform the run-loop, should generally not be called explicitly
 	 * @return the list of all exceptions encountered during the run-loop
 	 */
 	public static List<RunLoopException> runLoop() {
+		List<ServerRequest> requests = new ArrayList<ServerRequest>();
+		while(pendingEvents.size() > 0) {
+			List<AppEvent> events = pendingEvents;
+			pendingEvents = new ArrayList<AppEvent>();
+			
+			for(AppEvent event : events)
+				requests.addAll(handleEvent(event));
+		}
+		
+		//TODO - send out the requests, please
+		
 		MultiHashMap<Observer, ModelUpdate> freeNotifies = 
 			new MultiHashMap<Observer, ModelUpdate>();
 		
@@ -255,8 +289,7 @@ public class DDMVC {
 						//Cascade the update to its dependents (next loop)
 						Set<Observer> observers = observer.getObservers();
 						addNotify(observers, new Cascade( observer.getKey()) );
-					}
-					catch(Exception e) {
+					} catch(Exception e) {
 						//Cascade the exception update to its dependents (next loop)
 						Set<Observer> observers = observer.getObservers();
 						addNotify(observers, new ExceptionComputed( observer.getKey(), e) );
@@ -273,8 +306,7 @@ public class DDMVC {
 			
 			try {
 				free.getKey().modelChanged(free.getValue()); 
-			}
-			catch(Exception e) {
+			} catch(Exception e) {
 				exceptions.add(new RunLoopException(e, free.getKey(), iteration));
 			}
 		}

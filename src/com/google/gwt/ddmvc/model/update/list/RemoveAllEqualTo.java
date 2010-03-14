@@ -20,11 +20,10 @@ public class RemoveAllEqualTo extends RemoveAllThatMatch {
 	 * @param data - the object to compare the other objects to
 	 */
 	public RemoveAllEqualTo(String target, Object data) {		
-		super(target, null);
-		this.filter = new EqualsFilter(data);
+		super(target, new EqualsFilter(data));
 	}
 	
-	protected class EqualsFilter implements ListFilter {
+	private static class EqualsFilter implements ListFilter {
 
 		private Object data;
 		

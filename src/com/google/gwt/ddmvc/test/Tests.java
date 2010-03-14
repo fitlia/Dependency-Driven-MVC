@@ -15,6 +15,7 @@ import org.junit.runners.Suite;
 	ModelUpdateListInsertions.class,
 	ModelUpdateListSorting.class,
 	ViewObservation.class,
-	ComputedModelObservation.class
+	ComputedModelObservation.class,
+	StandardControllerTest.class
 })
 public class Tests {}

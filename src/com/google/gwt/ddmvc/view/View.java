@@ -3,11 +3,10 @@ package com.google.gwt.ddmvc.view;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
-
 import org.multimap.MultiHashMap;
-
 import com.google.gwt.ddmvc.DDMVC;
-import com.google.gwt.ddmvc.Observer;
+import com.google.gwt.ddmvc.event.EventSource;
+import com.google.gwt.ddmvc.model.Observer;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
@@ -16,16 +15,17 @@ import com.google.gwt.ddmvc.model.update.ModelUpdate;
  * 
  * @author Kevin Dolan
  */
-public abstract class View implements Observer {
+public abstract class View extends EventSource implements Observer {
 	
-	private MultiHashMap<String, Class<? extends ModelUpdate>> subscriptions;
+	//Maps Key -> ClassName's
+	private MultiHashMap<String, String> subscriptions;
 	
 	/**
 	 * Instantiate a new View with the given executive object
 	 * @param executive the executive DDMVC object to reference
 	 */
 	public View() {
-		subscriptions = new MultiHashMap<String, Class<? extends ModelUpdate>>();
+		subscriptions = new MultiHashMap<String, String>();
 		initialize();
 		render();
 	}
@@ -35,18 +35,14 @@ public abstract class View implements Observer {
 		boolean containsAll = true;
 		
 		for(ModelUpdate update : updates) {
-			Class<? extends ModelUpdate> updateType = update.getClass();
-			Collection<Class<? extends ModelUpdate>> subscriptionTypes = 
+			Collection<String> subscriptionTypes = 
 				subscriptions.get(update.getTarget());
 			
-			boolean contains = false;
-			for(Class<? extends ModelUpdate> subscriptionType : subscriptionTypes)
-				if(subscriptionType.isAssignableFrom(updateType)) {
-					contains = true;
-					break;
-				}
+			String updateType = update.getClass().getName();
 			
-			if(!contains) {
+			if(!(subscriptionTypes.contains(ModelUpdate.class.getName())
+				|| subscriptionTypes.contains(updateType))) {
+
 				containsAll = false;
 				break;
 			}
@@ -68,7 +64,7 @@ public abstract class View implements Observer {
 	 * Add this view to a model's list of observers
 	 * @param modelKey the key of the observer to observe
 	 */
-	public void observe(String modelKey) {
+	protected void subscribeToModel(String modelKey) {
 		DDMVC.subscribeToModel(modelKey, this);
 	}
 	
@@ -93,16 +89,16 @@ public abstract class View implements Observer {
 	 * calling render().  This means that whenever the view receives a collection
 	 * of updates, if all the updates are subscribed updates, it will call the
 	 * view's respondToModelUpdate(...) method for each update instead of render()
-	 * Subscriptions take into consideration inheritance, so if for instance you
-	 * just want to pay attention to any types of updates to a particular key, you
-	 * could pass in ModelUpdate.class for cls.
+	 * Subscriptions do not take into consideration inheritance, however, if you
+	 * would like to subscribe to any change on a particular key, you can pass
+	 * ModelUpdate.class instead.
 	 * @param modelKey - the key for which a model update is subscribed
 	 * @param cls - the update class to subscribe to.
 	 */
 	protected void subscribeToModelUpdate(String modelKey, 
 			Class<? extends ModelUpdate> cls) {
 		
-		subscriptions.put(modelKey, cls);
+		subscriptions.put(modelKey, cls.getName());
 	}
 	
 	/**

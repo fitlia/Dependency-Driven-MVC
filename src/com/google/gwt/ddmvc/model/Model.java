@@ -3,7 +3,6 @@ package com.google.gwt.ddmvc.model;
 import java.util.HashSet;
 import java.util.Set;
 import com.google.gwt.ddmvc.DDMVC;
-import com.google.gwt.ddmvc.Observer;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.model.update.SetValue;
 import com.google.gwt.ddmvc.model.update.UnknownUpdate;
@@ -12,6 +11,8 @@ import com.google.gwt.ddmvc.model.update.UnknownUpdate;
  * Model objects hold an element of a given type, and maintain a set of entities
  * which depend on it.
  * In general, applications should never specifically reference this class.
+ * It is not recommended that an application extend this class, because it is
+ * intentionally abstracted away from developers for data store integrity.
  * @author Kevin Dolan
  */
 public abstract class Model {

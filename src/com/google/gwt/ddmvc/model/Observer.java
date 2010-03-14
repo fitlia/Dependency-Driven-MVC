@@ -1,4 +1,4 @@
-package com.google.gwt.ddmvc;
+package com.google.gwt.ddmvc.model;
 
 import java.util.Collection;
 import java.util.Set;

@@ -33,12 +33,12 @@ public class ViewObservation {
 
 		@Override
 		public void initialize() {
-			observe("property1");
-			observe("property2");
-			observe("property3");
-			observe("property4");
-			observe("property5");
-			observe("property6");
+			subscribeToModel("property1");
+			subscribeToModel("property2");
+			subscribeToModel("property3");
+			subscribeToModel("property4");
+			subscribeToModel("property5");
+			subscribeToModel("property6");
 			myInt = 0;
 		}
 
@@ -103,10 +103,10 @@ public class ViewObservation {
 		
 		@Override
 		public void initialize() {
-			observe("property1");
-			observe("property2");
-			observe("property3");
-			observe("property4");
+			subscribeToModel("property1");
+			subscribeToModel("property2");
+			subscribeToModel("property3");
+			subscribeToModel("property4");
 			
 			render = 0;
 			setValue2 = 0;

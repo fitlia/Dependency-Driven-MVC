@@ -1,38 +1,30 @@
 package com.google.gwt.ddmvc.controller;
 
-import com.google.gwt.ddmvc.view.View;
+import com.google.gwt.ddmvc.DDMVC;
+import com.google.gwt.ddmvc.event.AppEvent;
+import com.google.gwt.ddmvc.event.EventSource;
 
 /**
  * Controllers represent business logic. 
  * @author Kevin Dolan
  */
-public abstract class Controller {
+public abstract class Controller extends EventSource {
 	
 	/**
-	 * Execute this controller's action
-	 * @param source the view calling the execute
+	 * Respond to an event, however you see fit.  Return a ServerRequest object
+	 * if you would like to make a request to the server
+	 * @param event - the event to respond to
+	 * @return any server request that should occur, null if none
 	 */
-	public abstract void execute(View source);
+	public abstract ServerRequest respondToEvent(AppEvent event);
 	
 	/**
-	 * Determine whether or not the action is valid, optional
-	 * @param source the view calling the execute
-	 * @return		 null if the action is valid, otherwise some message
+	 * Subscribe to a particular type of event.  Generally would be best to call
+	 * in the constructor.  Convenient alternative to DDMVC.subscribeToEvent(...)
+	 * @param event - the event class to subscribe to
 	 */
-	public String validate(View source) {
-		return null;
+	protected void subscribeToEvent(Class<? extends AppEvent> event) {
+		DDMVC.subscribeToEvent(event, this);
 	}
-	
-	/**
-	 * Call-back method for successful completion of remote call, optional
-	 * @param source the view that called the execute
-	 */
-	public void onSuccess(View source) {};
-	
-	/**
-	 * Call-back method for error returned by remote call, optional
-	 * @param source the view that called the execute
-	 */
-	public void onError(View source) {};
 	
 }
