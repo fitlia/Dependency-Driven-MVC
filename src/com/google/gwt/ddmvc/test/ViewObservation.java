@@ -6,7 +6,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import com.google.gwt.ddmvc.DDMVC;
-import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.update.ExceptionEncountered;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.model.update.SetValue;
@@ -34,12 +33,12 @@ public class ViewObservation {
 
 		@Override
 		public void initialize() {
-			DDMVC.getModel("property1").addObserver(this);
-			DDMVC.getModel("property2").addObserver(this);
-			DDMVC.getModel("property3").addObserver(this);
-			DDMVC.getModel("property4").addObserver(this);
-			DDMVC.getModel("property5").addObserver(this);
-			DDMVC.getModel("property6").addObserver(this);
+			observe("property1");
+			observe("property2");
+			observe("property3");
+			observe("property4");
+			observe("property5");
+			observe("property6");
 			myInt = 0;
 		}
 
@@ -68,11 +67,11 @@ public class ViewObservation {
 		DDMVC.runLoop();
 		assertTrue(cv.getMyInt() == 2);
 		
-		DDMVC.getModel("property2").set("wow");
+		DDMVC.setValue("property2", "wow");
 		DDMVC.runLoop();
 		assertTrue(cv.getMyInt() == 3);
 		
-		DDMVC.getModel("property3").update();
+		DDMVC.update("property3");
 		DDMVC.runLoop();
 		assertTrue(cv.getMyInt() == 4);
 		
@@ -84,13 +83,9 @@ public class ViewObservation {
 		DDMVC.runLoop();
 		assertTrue(cv.getMyInt() == 5);
 		
-		DDMVC.getModel("property5").update();
+		DDMVC.update("property5");
 		DDMVC.runLoop();
 		assertTrue(cv.getMyInt() == 6);
-		
-		DDMVC.setModel("property6", new Model("naah"));
-		DDMVC.runLoop();
-		assertTrue(cv.getMyInt() == 7);
 	}	
 	
 	/**
@@ -104,21 +99,26 @@ public class ViewObservation {
 		private int append3;
 		private int prepend3;
 		private int excepted;
+		private int any4;
 		
 		@Override
 		public void initialize() {
-			DDMVC.getModel("property1").addObserver(this);
-			DDMVC.getModel("property2").addObserver(this);
-			DDMVC.getModel("property3").addObserver(this);
+			observe("property1");
+			observe("property2");
+			observe("property3");
+			observe("property4");
+			
 			render = 0;
 			setValue2 = 0;
 			append3 = 0;
 			prepend3 = 0;
 			excepted = 0;
+			any4 = 0;
 			
 			subscribeToModelUpdate("property2", SetValue.class);
 			subscribeToModelUpdate("property3", Prepend.class);
 			subscribeToModelUpdate("property3", Append.class);
+			subscribeToModelUpdate("property4", ModelUpdate.class);
 		}
 	
 		@Override
@@ -139,6 +139,8 @@ public class ViewObservation {
 				else if(update.isSame(Append.DEFAULT))
 					append3++;
 			}
+			else if(update.getTarget().equals("property4"))
+				any4++;
 		}
 		
 		public int getRenderCount() {
@@ -160,6 +162,10 @@ public class ViewObservation {
 		public int getExcepted() {
 			return excepted;
 		}
+		
+		public int getAny4Count() {
+			return any4;
+		}
 	}
 	
 	private CountView2 cv2;
@@ -167,7 +173,8 @@ public class ViewObservation {
 	private void setup2() {
 		DDMVC.setValue("property1", 10);
 		DDMVC.setValue("property2", 10);
-		DDMVC.setValue("property1", new ArrayList<Integer>());
+		DDMVC.setValue("property3", new ArrayList<Integer>());
+		DDMVC.setValue("property4", 15);
 		
 		cv2 = new CountView2();
 	}
@@ -267,6 +274,22 @@ public class ViewObservation {
 		assertTrue(cv2.getSetValue2Count() == 0);
 		assertTrue(cv2.getAppend3Count() == 0);
 		assertTrue(cv2.getPrepend3Count() == 0);
+	}
+	
+	@Test
+	public void testPropertyUpdateObserveration() {
+		setup2();
+		
+		DDMVC.setValue("property4", new ArrayList<Integer>());
+		DDMVC.runLoop();
+		assertTrue(cv2.getRenderCount() == 1);
+		assertTrue(cv2.getAny4Count() == 1);
+		
+		Append app = new Append("property4", 15);
+		DDMVC.applyUpdate(app);
+		DDMVC.runLoop();
+		assertTrue(cv2.getRenderCount() == 1);
+		assertTrue(cv2.getAny4Count() == 2);
 	}
 	
 	@Test

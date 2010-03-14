@@ -10,6 +10,7 @@ import org.multimap.MultiHashListMap;
 import org.multimap.MultiHashMap;
 import org.multimap.MultiMap;
 import com.google.gwt.ddmvc.controller.Controller;
+import com.google.gwt.ddmvc.model.ComputedModel;
 import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.ModelDoesNotExistException;
 import com.google.gwt.ddmvc.model.update.Cascade;
@@ -17,6 +18,7 @@ import com.google.gwt.ddmvc.model.update.ExceptionComputed;
 import com.google.gwt.ddmvc.model.update.ModelDeleted;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.model.update.SetValue;
+import com.google.gwt.ddmvc.model.update.UnknownUpdate;
 
 /**
  * The DDMVC object is the top-level object for managing the data and run-loop 
@@ -32,6 +34,12 @@ public class DDMVC {
 	
 	//Static initialization
 	static { init(); }
+	
+	private static class DefaultModel extends Model {
+		public DefaultModel(String key) {
+			super(key);
+		}
+	}
 	
 	/**
 	 * Initialize all the DDMVC components
@@ -101,13 +109,26 @@ public class DDMVC {
 	 * @param key - the key of the Model
 	 * @return the Model associated with the Key
 	 */
-	public static Model getModel(String key) {
+	private static Model getModel(String key) {
+		//Stop people from being able to use the view key
+		if(key.equals("view"))
+			throw new ReservedWordException("view");
+		
 		Model model = dataStore.get(key);
 		if(model == null) {
-			model = new Model(key);
+			model = new DefaultModel(key);
 			dataStore.put(key, model);
 		}
 		return model;
+	}
+	
+	/**
+	 * Subscribe an observer to a model's changes
+	 * @param key - the model to subscribe to
+	 * @param observer - the observer to notify when changes occur
+	 */
+	public static void subscribeToModel(String key, Observer observer) {
+		getModel(key).addObserver(observer);
 	}
 	
 	/**
@@ -122,12 +143,12 @@ public class DDMVC {
 	}
 	
 	/**
-	 * Put a model into the data store, and notify all dependencies on the
-	 * next run loop
+	 * Put a computed model into the data store, and notify all dependencies
+	 * on the, next run loop, if applicable
 	 * Note - this will make an attempt to merge the dependencies if applicable
 	 * also, it will reset the name of model to key
 	 */
-	public static void setModel(String key, Model model) {
+	public static void setComputedModel(String key, ComputedModel model) {
 		Model current = getModel(key);
 		model.setKey(key);
 		
@@ -137,6 +158,17 @@ public class DDMVC {
 			model.addObserver(observer);
 		
 		dataStore.put(key, model);
+	}
+	
+	/**
+	 * Notify a model's observers of an UnknownUpdate at the next run-loop
+	 * This is useful for making changes not covered by any ModelUpdate and when
+	 * re-rendering would be ideal.
+	 * @param key - the key of the model to update
+	 */
+	public static void update(String key) {
+		Model model = getModel(key);
+		addNotify(model.getObservers(), new UnknownUpdate(key));
 	}
 	
 	/**
@@ -214,43 +246,23 @@ public class DDMVC {
 			for(Map.Entry<Observer, Collection<ModelUpdate>> entry : notifies) {
 				Observer observer = entry.getKey();
 				
-				//If it's a computed model, we have to be careful
-				if(observer.isModel()) {
-					Model model = (Model) observer;
-					
-					//If the model no longer exists, clean up the mess
-					if(!hasModel(model.getKey())) {
-						//Tell the model's dependencies not to worry anymore
-						for(ModelUpdate update : entry.getValue()) 
-							getModel(update.getTarget())
-								.removeObserver(observer);
-						
-						//Notify model's dependency  of the destruction
-						addNotify(model.getObservers(),
-								new ModelDeleted(model.getKey()) );
+				if(observer.getObservers().size() == 0)
+					freeNotifies.put(entry.getKey(), entry.getValue());
+				else {
+					//Notify the model of a change
+					try { 
+						observer.modelChanged(entry.getValue());
+						//Cascade the update to its dependents (next loop)
+						Set<Observer> observers = observer.getObservers();
+						addNotify(observers, new Cascade( observer.getKey()) );
 					}
-					//If nothing depends on this model, don't worry either
-					else if(model.getObservers().size() == 0)
-						freeNotifies.put(entry.getKey(), entry.getValue());
-					else {
-						//Notify the model of a change
-						try { 
-							observer.modelChanged(entry.getValue());
-							//Cascade the update to its dependents (next loop)
-							Set<Observer> observers = model.getObservers();
-							addNotify(observers, new Cascade(model.getKey()) );
-						}
-						catch(Exception e) {
-							//Cascade the exception update to its dependents (next loop)
-							Set<Observer> observers = model.getObservers();
-							addNotify(observers, new ExceptionComputed(model.getKey(), e) );
-							exceptions.add(new RunLoopException(e, observer, iteration));
-						}
+					catch(Exception e) {
+						//Cascade the exception update to its dependents (next loop)
+						Set<Observer> observers = observer.getObservers();
+						addNotify(observers, new ExceptionComputed( observer.getKey(), e) );
+						exceptions.add(new RunLoopException(e, observer, iteration));
 					}
 				}
-				//If it's not a computed model, don't bother
-				else
-					freeNotifies.put(entry.getKey(), entry.getValue());
 			}
 			iteration++;
 		}

@@ -1,6 +1,8 @@
 package com.google.gwt.ddmvc;
 
 import java.util.Collection;
+import java.util.Set;
+
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
@@ -17,7 +19,13 @@ public interface Observer {
 	public void modelChanged(Collection<ModelUpdate> updates);
 	
 	/**
-	 * @return true if this class extends Model
+	 * @return the list of dependents of this observer, if any, or a blank list,
+	 *					if none
 	 */
-	public boolean isModel();
+	public Set<Observer> getObservers();
+	
+	/**
+	 * @return the key associated with this observer
+	 */
+	public String getKey();
 }

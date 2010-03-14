@@ -1,7 +1,12 @@
 package com.google.gwt.ddmvc.view;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
+
 import org.multimap.MultiHashMap;
+
+import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.Observer;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
@@ -29,13 +34,23 @@ public abstract class View implements Observer {
 	public void modelChanged(Collection<ModelUpdate> updates) {		
 		boolean containsAll = true;
 		
-		for(ModelUpdate update : updates)
-			if(!subscriptions.get(update.getTarget())
-					.contains(update.getClass())) {
-				
+		for(ModelUpdate update : updates) {
+			Class<? extends ModelUpdate> updateType = update.getClass();
+			Collection<Class<? extends ModelUpdate>> subscriptionTypes = 
+				subscriptions.get(update.getTarget());
+			
+			boolean contains = false;
+			for(Class<? extends ModelUpdate> subscriptionType : subscriptionTypes)
+				if(subscriptionType.isAssignableFrom(updateType)) {
+					contains = true;
+					break;
+				}
+			
+			if(!contains) {
 				containsAll = false;
 				break;
 			}
+		}
 		
 		if(!containsAll)
 			render();
@@ -45,8 +60,24 @@ public abstract class View implements Observer {
 	}
 	
 	@Override
-	public boolean isModel() {
-		return false;
+	public Set<Observer> getObservers() {
+		return Collections.emptySet();
+	}
+	
+	/**
+	 * Add this view to a model's list of observers
+	 * @param modelKey the key of the observer to observe
+	 */
+	public void observe(String modelKey) {
+		DDMVC.subscribeToModel(modelKey, this);
+	}
+	
+	/**
+	 * Views will all have the same key, view, so that we can ensure nothing will
+	 * ever be able to depend on them
+	 */
+	public String getKey() {
+		return "view";
 	}
 	
 	/**
@@ -62,6 +93,9 @@ public abstract class View implements Observer {
 	 * calling render().  This means that whenever the view receives a collection
 	 * of updates, if all the updates are subscribed updates, it will call the
 	 * view's respondToModelUpdate(...) method for each update instead of render()
+	 * Subscriptions take into consideration inheritance, so if for instance you
+	 * just want to pay attention to any types of updates to a particular key, you
+	 * could pass in ModelUpdate.class for cls.
 	 * @param modelKey - the key for which a model update is subscribed
 	 * @param cls - the update class to subscribe to.
 	 */

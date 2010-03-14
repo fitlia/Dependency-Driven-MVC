@@ -49,14 +49,14 @@ public class ComputedModelObservation {
 	@Test
 	public void simpleComputedModel() {
 		DDMVC.setValue("A", 0);
-		DDMVC.setModel("B", new Increment("A", true, true));
+		DDMVC.setComputedModel("B", new Increment("A", true, true));
 		assertTrue(DDMVC.getValue("B").equals(1));
 	}
 	
 	@Test
 	public void computedModelObserving() {
 		DDMVC.setValue("A", 0);
-		DDMVC.setModel("B", new Increment("A", true, true));
+		DDMVC.setComputedModel("B", new Increment("A", true, true));
 		DDMVC.getValue("B");
 		
 		DDMVC.setValue("A", 1);
@@ -66,11 +66,11 @@ public class ComputedModelObservation {
 	
 	private void chainSetup(boolean cache, boolean imm) {
 		DDMVC.setValue("A", 0);
-		DDMVC.setModel("B", new Increment("A", cache, imm));
-		DDMVC.setModel("C", new Increment("A", cache, imm));
-		DDMVC.setModel("D", new Increment("C", cache, imm));
-		DDMVC.setModel("E", new Increment("C", cache, imm));
-		DDMVC.setModel("F", new Increment("E", cache, imm));
+		DDMVC.setComputedModel("B", new Increment("A", cache, imm));
+		DDMVC.setComputedModel("C", new Increment("A", cache, imm));
+		DDMVC.setComputedModel("D", new Increment("C", cache, imm));
+		DDMVC.setComputedModel("E", new Increment("C", cache, imm));
+		DDMVC.setComputedModel("F", new Increment("E", cache, imm));
 	}
 	
 	@Test

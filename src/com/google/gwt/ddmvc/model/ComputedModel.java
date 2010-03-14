@@ -78,8 +78,4 @@ public abstract class ComputedModel extends Model implements Observer {
 		}
 	}
 	
-	@Override
-	public boolean isModel() {
-		return true;
-	}
 }

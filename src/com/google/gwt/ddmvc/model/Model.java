@@ -10,10 +10,11 @@ import com.google.gwt.ddmvc.model.update.UnknownUpdate;
 
 /**
  * Model objects hold an element of a given type, and maintain a set of entities
- * which depend on it 
+ * which depend on it.
+ * In general, applications should never specifically reference this class.
  * @author Kevin Dolan
  */
-public class Model {
+public abstract class Model {
 
 	private Object data;
 	private HashSet<Observer> observers;
@@ -21,9 +22,8 @@ public class Model {
 
 	/**
 	 * Instantiate a new blank model, with no name
-	 * For this to be useful, you should generally use the explicitly
-	 * DDMVC.setModel(...) command with an unnamed model so that
-	 * the name will be assigned...
+	 * This can be useful for creating templates for models that might not have a
+	 * name until they are committed to the data store.
 	 */
 	public Model() {
 		this.data = null;
