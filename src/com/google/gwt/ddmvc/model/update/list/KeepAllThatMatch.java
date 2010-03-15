@@ -1,5 +1,7 @@
 package com.google.gwt.ddmvc.model.update.list;
 
+import com.google.gwt.ddmvc.model.Path;
+
 /**
  * Update to filter out all elements from a list not matching a certain filter
  * criterion.
@@ -14,13 +16,22 @@ public class KeepAllThatMatch extends RemoveAllThatMatch {
 	 * The default KeepAllThatMatch field, used for comparison
 	 */
 	public static final KeepAllThatMatch DEFAULT = 
-		new KeepAllThatMatch(null, null);
+		new KeepAllThatMatch("", null);
 	
 	/**
 	 * @param target
 	 * @param filter - the filter that will determine which elements are removed
 	 */
 	public KeepAllThatMatch(String target, ListFilter filter) {
+		super(target, filter);
+		this.removeMatches = false;
+	}
+	
+	/**
+	 * @param target
+	 * @param filter - the filter that will determine which elements are removed
+	 */
+	public KeepAllThatMatch(Path target, ListFilter filter) {
 		super(target, filter);
 		this.removeMatches = false;
 	}

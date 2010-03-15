@@ -2,6 +2,7 @@ package com.google.gwt.ddmvc.model.update.list;
 
 import java.util.List;
 
+import com.google.gwt.ddmvc.model.Path;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
@@ -18,7 +19,7 @@ public class RemoveIndex extends ModelUpdate {
 	 * The default RemoveIndex field, used for comparison
 	 */
 	public static final RemoveIndex DEFAULT = 
-		new RemoveIndex(null, 0);
+		new RemoveIndex("", 0);
 	
 	private int index;
 	
@@ -27,6 +28,15 @@ public class RemoveIndex extends ModelUpdate {
 	 * @param index - the index to remove
 	 */
 	public RemoveIndex(String target, int index) {
+		super(target);
+		this.index = index;
+	}
+	
+	/**
+	 * @param target
+	 * @param index - the index to remove
+	 */
+	public RemoveIndex(Path target, int index) {
 		super(target);
 		this.index = index;
 	}

@@ -74,7 +74,7 @@ public class DDMVC {
 	public static Object getValue(String key) {
 		if(!hasModel(key))
 			throw new ModelDoesNotExistException(key);
-		return getModel(key).get();
+		return getModel(key).myValue();
 	}
 	
 	/**
@@ -141,7 +141,7 @@ public class DDMVC {
 		Model current = getModel(key);
 		model.setKey(key);
 		
-		addNotify(current.getObservers(), new SetValue(key, model.get()));
+		addNotify(current.getObservers(), new SetValue(key, model.myValue()));
 		
 		for(Observer observer : current.getObservers())
 			model.addObserver(observer);

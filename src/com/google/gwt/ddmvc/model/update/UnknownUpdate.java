@@ -1,5 +1,7 @@
 package com.google.gwt.ddmvc.model.update;
 
+import com.google.gwt.ddmvc.model.Path;
+
 /**
  * Update sent as a notification when the type of update 
  * performed is not known.
@@ -15,7 +17,7 @@ public class UnknownUpdate extends ModelUpdate {
 	/**
 	 * @param target
 	 */
-	public UnknownUpdate(String target) {
+	public UnknownUpdate(Path target) {
 		super(target);
 		this.isComplete = true;
 	}

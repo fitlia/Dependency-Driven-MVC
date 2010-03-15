@@ -3,6 +3,7 @@ package com.google.gwt.ddmvc.model.update.list;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.gwt.ddmvc.model.Path;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
@@ -24,7 +25,7 @@ public class AppendAll extends ModelUpdate {
 	 * The default AppendAll field, used for comparison
 	 */
 	public static final AppendAll DEFAULT =
-		new AppendAll(null, null);
+		new AppendAll("", null);
 	
 	private Collection<? extends Object> collection;
 	
@@ -40,7 +41,20 @@ public class AppendAll extends ModelUpdate {
 		this.collection = collection;
 		useLinkedList = false;
 	}
-
+	
+	/**
+	 * NOTE - Assumes you want ArrayList if new list creation is necessary
+	 * @param target
+	 * @param collection - the collection of objects to append
+	 */
+	public AppendAll(Path target, 
+			Collection<? extends Object> collection) {
+		
+		super(target);
+		this.collection = collection;
+		useLinkedList = false;
+	}
+	
 	/**
 	 * Specify what type of list to use
 	 * @param target
@@ -49,6 +63,20 @@ public class AppendAll extends ModelUpdate {
 	 * 						creation is necessary
 	 */
 	public AppendAll(String target, Collection<? extends Object> collection, 
+			boolean useLinkedList) {
+		super(target);
+		this.collection = collection;
+		this.useLinkedList = useLinkedList;
+	}
+
+	/**
+	 * Specify what type of list to use
+	 * @param target
+	 * @param collection - the collection of objects to append
+	 * @param useLinkedList - true if you want to use linked-list, if new list
+	 * 						creation is necessary
+	 */
+	public AppendAll(Path target, Collection<? extends Object> collection, 
 			boolean useLinkedList) {
 		super(target);
 		this.collection = collection;

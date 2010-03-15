@@ -55,7 +55,7 @@ public abstract class ComputedModel extends Model implements Observer {
 	}
 	
 	@Override
-	public Object get() {
+	public Object myValue() {
 		if(inSync)
 			return cache;
 		

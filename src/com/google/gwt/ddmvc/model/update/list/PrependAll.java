@@ -3,6 +3,7 @@ package com.google.gwt.ddmvc.model.update.list;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.gwt.ddmvc.model.Path;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
@@ -26,7 +27,7 @@ public class PrependAll extends ModelUpdate {
 	 * The default PrependAll field, used for comparison
 	 */
 	public static final PrependAll DEFAULT =
-		new PrependAll(null, null);
+		new PrependAll("", null);
 	
 	private Collection<? extends Object> collection;
 	
@@ -42,6 +43,19 @@ public class PrependAll extends ModelUpdate {
 		this.collection = collection;
 		useLinkedList = false;
 	}
+	
+	/**
+	 * NOTE - Assumes you want ArrayList if new list creation is necessary
+	 * @param target
+	 * @param collection - the collection of objects to prepend
+	 */
+	public PrependAll(Path target, 
+			Collection<? extends Object> collection) {
+		
+		super(target);
+		this.collection = collection;
+		useLinkedList = false;
+	}
 
 	/**
 	 * Specify what type of list to use
@@ -51,6 +65,21 @@ public class PrependAll extends ModelUpdate {
 	 * 				creation is necessary
 	 */
 	public PrependAll(String target, Collection<? extends Object> collection, 
+			boolean useLinkedList) {
+		
+		super(target);
+		this.collection = collection;
+		this.useLinkedList = useLinkedList;
+	}
+	
+	/**
+	 * Specify what type of list to use
+	 * @param target
+	 * @param collection - the collection of objects to prepend
+	 * @param useLinkedList - true if you want to use linked-list, if new list
+	 * 				creation is necessary
+	 */
+	public PrependAll(Path target, Collection<? extends Object> collection, 
 			boolean useLinkedList) {
 		
 		super(target);

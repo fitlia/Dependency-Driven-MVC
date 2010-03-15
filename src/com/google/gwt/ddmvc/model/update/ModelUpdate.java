@@ -1,5 +1,8 @@
 package com.google.gwt.ddmvc.model.update;
 
+import com.google.gwt.ddmvc.model.Model;
+import com.google.gwt.ddmvc.model.Path;
+
 /**
  * The ModelUpdate class represents an individual update to some model. 
  * Several types of updates are defined by default, but the application
@@ -10,15 +13,44 @@ package com.google.gwt.ddmvc.model.update;
  */
 public abstract class ModelUpdate {
 	
-	protected String target;
+	protected Path target;
 	protected boolean isComplete;
 	protected Exception exception;
 	
 	/**
-	 * Instantiate a new model update with the specified key
+	 * Utility class for handling ModelUpdates that want to set a new model.
+	 * Return an instance of this class, where the model is the model to 
+	 * do the replacing.
+	 * @author Kevin Dolan
+	 */
+	public static class SET_MODEL_TO {
+		
+		private Model model;
+		
+		public SET_MODEL_TO(Model model) {
+			this.model = model;
+		}
+		
+		public Model getModel() {
+			return model;
+		}
+	}
+	
+	/**
+	 * Instantiate a new model update with the specified path, as a string
 	 * @param target - the name of the model being targeted
 	 */
 	public ModelUpdate(String target) {
+		this.target = new Path(target);
+		this.isComplete = false;
+		this.exception = null;
+	}
+	
+	/**
+	 * Instantiate a new model update with the specified path
+	 * @param target - the name of the model being targeted
+	 */
+	public ModelUpdate(Path target) {
 		this.target = target;
 		this.isComplete = false;
 		this.exception = null;
@@ -44,9 +76,9 @@ public abstract class ModelUpdate {
 	}
 	
 	/**
-	 * @return the name of the model this update's target model
+	 * @return the absolute path to the model this update's target model
 	 */
-	public String getTarget() {
+	public Path getTarget() {
 		return target;
 	}
 	
@@ -87,9 +119,17 @@ public abstract class ModelUpdate {
 	
 	/**
 	 * Perform whatever update this update requests.  
-	 * If the request would cause
-	 * the model's data to be replaced, return the object you would like to
-	 * replace it with.  Otherwise, you should just return the object itself.
+	 * If the request would cause the model's data to be replaced, 
+	 * return the object you would like to replace it with.  
+	 * Otherwise, you should just return the object itself.
+	 * 
+	 * If this update should change the reference of the model to a different
+	 * model, you should return an instance of SET_MODEL_TO(newModel).
+	 * 
+	 * Note - if you return a model here, nothing will go wrong, but it is
+	 * not recommended, because that would set the VALUE of the target model to
+	 * the model returned here, so it probably will not behave as you expect.
+	 * 
 	 * @param value - the model's current data reference
 	 * @return the model's end data reference
 	 */

@@ -1,5 +1,7 @@
 package com.google.gwt.ddmvc.model.update;
 
+import com.google.gwt.ddmvc.model.Path;
+
 /**
  * Update sent as a notification when a data change is cascaded
  * from a computed model.  The target key here refers to the computed model
@@ -20,7 +22,7 @@ public class Cascade extends ModelUpdate {
 	/**
 	 * @param target
 	 */
-	public Cascade(String target) {
+	public Cascade(Path target) {
 		super(target);
 		this.isComplete = true;
 	}

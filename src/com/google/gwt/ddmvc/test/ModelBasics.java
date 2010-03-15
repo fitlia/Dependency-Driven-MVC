@@ -6,7 +6,6 @@ import org.junit.Test;
 import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.ReservedWordException;
 import com.google.gwt.ddmvc.model.ModelDoesNotExistException;
-
 /**
  * Unit tests for the basic model methods of DDMVC 
  * @author Kevin Dolan

@@ -8,15 +8,15 @@ public class ModelDoesNotExistException extends RuntimeException {
 
 	private static final long serialVersionUID = 6676614531981476205L;
 
-	private String key;
+	private Path path;
 	
-	public ModelDoesNotExistException(String key) {
-		super("The model key " + key + " does not exist.");
-		this.key = key;
+	public ModelDoesNotExistException(Path path) {
+		super("The model path " + path + " does not exist.");
+		this.path = path;
 	}
 	
-	public String getKey() {
-		return key;
+	public Path getPath() {
+		return path;
 	}
 	
 }

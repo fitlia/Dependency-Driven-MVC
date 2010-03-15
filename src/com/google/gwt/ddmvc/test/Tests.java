@@ -9,6 +9,8 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses( { 
+	PathTest.class,
+	ModelTest.class,
 	ModelBasics.class,
 	ModelUpdateBasics.class,
 	ModelUpdateListFiltering.class,

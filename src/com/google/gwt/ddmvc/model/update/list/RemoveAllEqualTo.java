@@ -1,5 +1,7 @@
 package com.google.gwt.ddmvc.model.update.list;
 
+import com.google.gwt.ddmvc.model.Path;
+
 /**
  * Update to remove all elements from a list that are equal to the provided
  * data object.  Note - this uses the .equals(...) method to determine equality,
@@ -13,13 +15,21 @@ public class RemoveAllEqualTo extends RemoveAllThatMatch {
 	 * The default RemoveAllEqualTo field, used for comparison
 	 */
 	public static final RemoveAllEqualTo DEFAULT = 
-		new RemoveAllEqualTo(null, null);
+		new RemoveAllEqualTo("", null);
 	
 	/**
 	 * @param target
 	 * @param data - the object to compare the other objects to
 	 */
 	public RemoveAllEqualTo(String target, Object data) {		
+		super(target, new EqualsFilter(data));
+	}
+	
+	/**
+	 * @param target
+	 * @param data - the object to compare the other objects to
+	 */
+	public RemoveAllEqualTo(Path target, Object data) {		
 		super(target, new EqualsFilter(data));
 	}
 	
