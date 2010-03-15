@@ -335,8 +335,6 @@ public class ViewObservation {
 	public void testReferentialObserving() {
 		setup3();	
 		
-		assertTrue(root.getModel("dog.cat").getPath().toString().equals("dog.cat"));
-		
 		root.setValue("dog", "roof");
 		DDMVC.runLoop();
 		assertTrue(cv3.render == 1);
@@ -349,10 +347,46 @@ public class ViewObservation {
 		DDMVC.runLoop();
 		assertTrue(cv3.render == 2);
 		
-		System.out.println("----------------------");	
+		root.setModel("dog.cat.tabby", new Model("purr"));
+		DDMVC.runLoop();
+		assertTrue(cv3.render == 2);
 		
 		root.setModel("dog.cat", new Model("purr"));
 		DDMVC.runLoop();
 		assertTrue(cv3.render == 3);
+	}
+	
+	@Test
+	public void testValueObserving() {
+		setup3();
+		
+		root.setValue("person.english", "sup, foo");
+		DDMVC.runLoop();
+		assertTrue(cv3.render == 2);
+		
+		root.setModel("person.english", new Model("sup, foo"));
+		DDMVC.runLoop();
+		assertTrue(cv3.render == 3);
+	}
+	
+	@Test
+	public void testFieldObserving() {
+		setup3();
+		
+		root.setValue("frog", "smash");
+		DDMVC.runLoop();
+		assertTrue(cv3.render == 2);
+		
+		root.setValue("frog.toad", "smash");
+		DDMVC.runLoop();
+		assertTrue(cv3.render == 3);
+		
+		root.setModel("frog.toad", new Model("smash"));
+		DDMVC.runLoop();
+		assertTrue(cv3.render == 4);
+		
+		root.setModel("frog", new Model("smash"));
+		DDMVC.runLoop();
+		assertTrue(cv3.render == 5);
 	}
 }

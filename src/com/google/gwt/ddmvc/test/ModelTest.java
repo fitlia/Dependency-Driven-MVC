@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import com.google.gwt.ddmvc.model.InvalidPathException;
@@ -13,6 +12,7 @@ import com.google.gwt.ddmvc.model.ModelDoesNotExistException;
 import com.google.gwt.ddmvc.model.ModelOverwriteException;
 import com.google.gwt.ddmvc.model.Path;
 import com.google.gwt.ddmvc.model.Observer;
+import com.google.gwt.ddmvc.model.Model.UpdateLevel;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.model.update.list.Append;
 
@@ -20,8 +20,9 @@ public class ModelTest {
 	
 	private class FakeObserver implements Observer {
 		public Path getPath() { return null; }
-		public Set<Observer> getObservers() { return null; }
 		public void modelChanged(Collection<ModelUpdate> updates) {}
+		public boolean hasObservers() { return false; }
+		public void notifyObservers(ModelUpdate update, UpdateLevel level) {}
 	}
 	
 	private Model root;
@@ -371,6 +372,25 @@ public class ModelTest {
 			root.setModel("tool", newModel);
 			fail();
 		} catch(ModelOverwriteException e) {}
+	}
+	
+	@Test
+	public void setModelObserverDuplication() {
+		root.addObserver(obs, "frog.granouille.green");
+		root.setValue("frog.granouille.green", "bark");
+		root.setModel("frog", new Model("ribbit"));
+		assertTrue(root.getValue("frog.granouille.green") == null);
+		assertTrue(root.getModel("frog.granouille.green")
+				.getReferentialObservers().contains(obs));
+	}
+	
+	@Test
+	public void pathSetting() {
+		Model dog = new Model("roof");
+		dog.setValue("cat", "meow");
+		root.setModel("dog", dog);
+		
+		assertTrue(root.getModel("dog.cat").getPath().equals("dog.cat"));
 	}
 	
 	//------------

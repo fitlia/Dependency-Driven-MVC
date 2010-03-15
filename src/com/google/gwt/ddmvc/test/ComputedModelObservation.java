@@ -8,13 +8,17 @@ import org.junit.Test;
 import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.RunLoopException;
 import com.google.gwt.ddmvc.model.ComputedModel;
+import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.ModelDoesNotExistException;
 
 public class ComputedModelObservation {
 
+	private Model root;
+	
 	@Before
 	public void setUp() {
 		DDMVC.reset();
+		root = DDMVC.getDataRoot();
 	}
 	
 	
@@ -41,115 +45,115 @@ public class ComputedModelObservation {
 		
 		@Override
 		public Object computeValue() {
-			return (Integer) DDMVC.getValue(dependent, this) + 1;
+			return (Integer) DDMVC.getDataRoot().getValue(dependent, this) + 1;
 		}
 		
 	}
 
 	@Test
 	public void simpleComputedModel() {
-		DDMVC.setValue("A", 0);
-		DDMVC.setComputedModel("B", new Increment("A", true, true));
-		assertTrue(DDMVC.getValue("B").equals(1));
+		root.setValue("A", 0);
+		root.setModel("B", new Increment("A", true, true));
+		assertTrue(root.getValue("B").equals(1));
 	}
 	
 	@Test
 	public void computedModelObserving() {
-		DDMVC.setValue("A", 0);
-		DDMVC.setComputedModel("B", new Increment("A", true, true));
-		DDMVC.getValue("B");
+		root.setValue("A", 0);
+		root.setModel("B", new Increment("A", true, true));
+		root.getValue("B");
 		
-		DDMVC.setValue("A", 1);
+		root.setValue("A", 1);
 		DDMVC.runLoop();
-		assertTrue(DDMVC.getValue("B").equals(2));
+		assertTrue(root.getValue("B").equals(2));
 	}
 	
 	private void chainSetup(boolean cache, boolean imm) {
-		DDMVC.setValue("A", 0);
-		DDMVC.setComputedModel("B", new Increment("A", cache, imm));
-		DDMVC.setComputedModel("C", new Increment("A", cache, imm));
-		DDMVC.setComputedModel("D", new Increment("C", cache, imm));
-		DDMVC.setComputedModel("E", new Increment("C", cache, imm));
-		DDMVC.setComputedModel("F", new Increment("E", cache, imm));
+		root.setValue("A", 0);
+		root.setModel("B", new Increment("A", cache, imm));
+		root.setModel("C", new Increment("A", cache, imm));
+		root.setModel("D", new Increment("C", cache, imm));
+		root.setModel("E", new Increment("C", cache, imm));
+		root.setModel("F", new Increment("E", cache, imm));
 	}
 	
 	@Test
 	public void computedModelChaining() {
 		chainSetup(true, true);
 		
-		assertTrue(DDMVC.getValue("B").equals(1));
-		assertTrue(DDMVC.getValue("C").equals(1));		
-		assertTrue(DDMVC.getValue("D").equals(2));
-		assertTrue(DDMVC.getValue("E").equals(2));
-		assertTrue(DDMVC.getValue("F").equals(3));
+		assertTrue(root.getValue("B").equals(1));
+		assertTrue(root.getValue("C").equals(1));		
+		assertTrue(root.getValue("D").equals(2));
+		assertTrue(root.getValue("E").equals(2));
+		assertTrue(root.getValue("F").equals(3));
 	}
 	
 	@Test
 	public void computedModelDistalChaining() {
 		chainSetup(true, true);
 		
-		assertTrue(DDMVC.getValue("F").equals(3));
+		assertTrue(root.getValue("F").equals(3));
 	}
 	
 	@Test
 	public void computedModelChainingObserving() {
 		chainSetup(true, true);
 		
-		DDMVC.getValue("F");
+		root.getValue("F");
 		
-		DDMVC.setValue("A", 1);
+		root.setValue("A", 1);
 		DDMVC.runLoop();
-		assertTrue(DDMVC.getValue("B").equals(2));
-		assertTrue(DDMVC.getValue("C").equals(2));		
-		assertTrue(DDMVC.getValue("D").equals(3));
-		assertTrue(DDMVC.getValue("E").equals(3));
-		assertTrue(DDMVC.getValue("F").equals(4));
+		assertTrue(root.getValue("B").equals(2));
+		assertTrue(root.getValue("C").equals(2));		
+		assertTrue(root.getValue("D").equals(3));
+		assertTrue(root.getValue("E").equals(3));
+		assertTrue(root.getValue("F").equals(4));
 	}
 	
 	@Test
 	public void computedModelDistalChainingObserving() {
 		chainSetup(true, true);
 		
-		DDMVC.getValue("F");
+		root.getValue("F");
 		
-		DDMVC.setValue("A", 1);
+		root.setValue("A", 1);
 		DDMVC.runLoop();
-		assertTrue(DDMVC.getValue("F").equals(4));
+		assertTrue(root.getValue("F").equals(4));
 	}
 
 	@Test
 	public void computedModelNoCache() {
 		chainSetup(false, true);
 		
-		DDMVC.getValue("F");
+		root.getValue("F");
 		
-		DDMVC.setValue("A", 1);
+		root.setValue("A", 1);
 		DDMVC.runLoop();
-		assertTrue(DDMVC.getValue("F").equals(4));
+		assertTrue(root.getValue("F").equals(4));
 	}
 	
 	@Test
 	public void computedModelNoImmediate() {
 		chainSetup(true, false);
 		
-		DDMVC.getValue("F");
+		root.getValue("F");
 		
-		DDMVC.setValue("A", 1);
+		root.setValue("A", 1);
 		DDMVC.runLoop();
-		assertTrue(DDMVC.getValue("F").equals(4));
+		assertTrue(root.getValue("F").equals(4));
 	}
 	
 	@Test
 	public void dependencyRemoved() {
 		chainSetup(true, true);
-		DDMVC.getValue("F");
+		root.getValue("F");
 		
-		DDMVC.deleteModel("C");
+		root.deleteModel("C");
 		
 		DDMVC.runLoop();
 		
 		try{
-			DDMVC.getValue("F");
+			root.getValue("F");
 			fail();
 		}
 		catch(ModelDoesNotExistException e) {}
@@ -158,12 +162,12 @@ public class ComputedModelObservation {
 	@Test
 	public void dependencyRemovedNoLoop() {
 		chainSetup(false, false);
-		DDMVC.getValue("F");
+		root.getValue("F");
 		
-		DDMVC.deleteModel("C");
+		root.deleteModel("C");
 		
 		try{
-			DDMVC.getValue("F");
+			root.getValue("F");
 			fail();
 		}
 		catch(ModelDoesNotExistException e) {}
@@ -172,14 +176,14 @@ public class ComputedModelObservation {
 	@Test
 	public void exceptionHandling() {		
 		chainSetup(true, true);
-		DDMVC.getValue("F");
+		root.getValue("F");
 		
-		DDMVC.setValue("A", 1);
-		DDMVC.deleteModel("C");
+		root.setValue("A", 1);
+		root.deleteModel("C");
 		
 		List<RunLoopException> exceptions = DDMVC.runLoop();
-		assertTrue(exceptions.size() == 4);
-		for(RunLoopException e: exceptions)
+		assertTrue(exceptions.size() == 3);
+		for(RunLoopException e : exceptions)
 			assertTrue(e.getException().getClass()
 					.equals(ModelDoesNotExistException.class));
 	}

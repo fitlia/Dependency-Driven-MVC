@@ -1,8 +1,7 @@
 package com.google.gwt.ddmvc.model;
 
 import java.util.Collection;
-import java.util.Set;
-
+import com.google.gwt.ddmvc.model.Model.UpdateLevel;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
@@ -19,13 +18,18 @@ public interface Observer {
 	public void modelChanged(Collection<ModelUpdate> updates);
 	
 	/**
-	 * @return the list of dependents of this observer, if any, or a blank list,
-	 *					if none
+	 * Notify the observers of a given level of a change to this observer
 	 */
-	public Set<Observer> getObservers();
+	public void notifyObservers(ModelUpdate update, UpdateLevel level);
 	
 	/**
 	 * @return the path associated with this observer
 	 */
 	public Path getPath();
+
+	/**
+	 * @return true if this model, or any of its child models has any type of
+	 * observers
+	 */
+	boolean hasObservers();
 }

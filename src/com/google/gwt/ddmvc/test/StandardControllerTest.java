@@ -11,6 +11,7 @@ import com.google.gwt.ddmvc.controller.ServerRequest;
 import com.google.gwt.ddmvc.controller.StandardController;
 import com.google.gwt.ddmvc.controller.ValidationError;
 import com.google.gwt.ddmvc.event.AppEvent;
+import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.view.View;
 
 public class StandardControllerTest {
@@ -33,7 +34,7 @@ public class StandardControllerTest {
 		protected List<ValidationError> validate(AppEvent event) {
 			lastEvent = event;
 			
-			boolean isValid = (Boolean) DDMVC.getValue("isValid");
+			boolean isValid = (Boolean) DDMVC.getDataRoot().getValue("isValid");
 			if(isValid)
 				return null;
 			
@@ -56,7 +57,7 @@ public class StandardControllerTest {
 				event1Count++;
 			else if(event.getClass().equals(Event2.class)) {
 				event2Count++;
-				DDMVC.setValue("someProperty", 5);
+				DDMVC.getDataRoot().setValue("someProperty", 5);
 			}
 			else if(event.getClass().equals(Event3.class))
 				event3Count++;
@@ -82,7 +83,7 @@ public class StandardControllerTest {
 		
 		@Override
 		protected void initialize() {
-			observe("someProperty");
+			observe("someProperty.$");
 		}
 
 		@Override
@@ -109,15 +110,20 @@ public class StandardControllerTest {
 	private MyController controller;
 	private MyView view;
 	
+	private Model root;
+	
 	@Before
 	public void setUp() throws Exception {
+		DDMVC.reset();
+		
 		controller = new MyController();
 		view = new MyView();
+		root = DDMVC.getDataRoot();
 	}
 	
 	@Test
 	public void basicEventFiring() {
-		DDMVC.setValue("isValid", true);
+		root.setValue("isValid", true);
 		view.proxyEvent(new Event1());
 		DDMVC.runLoop();
 		
@@ -138,7 +144,7 @@ public class StandardControllerTest {
 	
 	@Test
 	public void multipleEvents() {
-		DDMVC.setValue("isValid", true);
+		root.setValue("isValid", true);
 		view.proxyEvent(new Event1());
 		view.proxyEvent(new Event2());
 		DDMVC.runLoop();
@@ -153,7 +159,7 @@ public class StandardControllerTest {
 	
 	@Test
 	public void modelObservation() {
-		DDMVC.setValue("isValid", true);
+		root.setValue("isValid", true);
 		view.proxyEvent(new Event2());
 		DDMVC.runLoop();
 		assertTrue(view.renderCount == 2);
@@ -161,7 +167,7 @@ public class StandardControllerTest {
 	
 	@Test
 	public void validationFailure() {
-		DDMVC.setValue("isValid", false);
+		root.setValue("isValid", false);
 		view.proxyEvent(new Event1());
 		DDMVC.runLoop();
 

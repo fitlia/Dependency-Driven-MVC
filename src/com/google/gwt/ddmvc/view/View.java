@@ -1,13 +1,12 @@
 package com.google.gwt.ddmvc.view;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
 import org.multimap.MultiHashMap;
 import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.event.EventSource;
 import com.google.gwt.ddmvc.model.Observer;
 import com.google.gwt.ddmvc.model.Path;
+import com.google.gwt.ddmvc.model.Model.UpdateLevel;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
@@ -54,11 +53,6 @@ public abstract class View extends EventSource implements Observer {
 		else
 			for(ModelUpdate update : updates)
 				respondToModelUpdate(update);
-	}
-	
-	@Override
-	public Set<Observer> getObservers() {
-		return Collections.emptySet();
 	}
 	
 	/**
@@ -147,5 +141,12 @@ public abstract class View extends EventSource implements Observer {
 	 */
 	protected abstract void render();
 	
+	@Override
+	public void notifyObservers(ModelUpdate update, UpdateLevel level) {}
+	
+	@Override
+	public boolean hasObservers() {
+		return false;
+	}
 	
 }

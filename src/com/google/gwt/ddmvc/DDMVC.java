@@ -155,20 +155,20 @@ public class DDMVC {
 			for(Map.Entry<Observer, Collection<ModelUpdate>> entry : notifies) {
 				Observer observer = entry.getKey();
 				
-				if(observer.getObservers().size() == 0)
+				if(!observer.hasObservers())
 					freeNotifies.put(entry.getKey(), entry.getValue());
 				else {
 					//Notify the model of a change
 					try { 
 						observer.modelChanged(entry.getValue());
 						//Cascade the update to its dependents (next loop)
-						Set<Observer> observers = observer.getObservers();
-						addNotify(observers, new Cascade( observer.getPath()) );
+						observer.notifyObservers(new Cascade(observer.getPath()), 
+								Model.UpdateLevel.VALUE);
 					} catch(Exception e) {
 						//Cascade the exception update to its dependents (next loop)
-						Set<Observer> observers = observer.getObservers();
-						addNotify(observers,
-								new ExceptionComputed( observer.getPath(), e) );
+						observer.notifyObservers(
+								new ExceptionComputed( observer.getPath(), e), 
+								Model.UpdateLevel.VALUE);
 						exceptions.add(new RunLoopException(e, observer, iteration));
 					}
 				}

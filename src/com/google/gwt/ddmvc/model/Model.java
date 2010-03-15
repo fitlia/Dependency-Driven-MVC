@@ -4,8 +4,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-
 import com.google.gwt.ddmvc.DDMVC;
+import com.google.gwt.ddmvc.model.update.ModelDeleted;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.model.update.SetModel;
 import com.google.gwt.ddmvc.model.update.SetValue;
@@ -32,6 +32,12 @@ import com.google.gwt.ddmvc.model.update.UnknownUpdate;
  * fieldKey1.fieldKey2.$ to represent the value held by the rightmost field key
  * fieldKey1.fieldKey2.* to reference the subtree of fieldKey2, used only
  * for observation.
+ * 
+ * Models can be overridden so that the familiar model interface can be used
+ * as a stand-in for many different other types of data access.  However, a
+ * lot of the method signatures are only present for convenience and actually
+ * converge to a single method.  Methods marked @proxy methodName merely refer
+ * to some other methodName in their implementation.
  * 
  * @author Kevin Dolan
  */
@@ -133,6 +139,7 @@ public class Model {
 	 */
 	private void setKey(String key) {
 		this.key = key;
+		calculatePath();
 	}
 	
 	/**
@@ -147,10 +154,13 @@ public class Model {
 	 * Calculate and set the upward path.
 	 */
 	private void calculatePath() {
-		if(parent == null)
+		if(parent == null || key == null)
 			this.path = Path.ROOT_PATH;
 		else
 			this.path = parent.getPath().append(key);
+		
+		for(Model subModel : childData.values())
+			subModel.calculatePath();
 	}
 	
 	//------------
@@ -158,6 +168,7 @@ public class Model {
 	//------------
 	
 	/**
+	 * @proxy hasPath(Path)
 	 * Determine whether or not a field path exists, by path-string.
 	 * Note, will throw an exception if the path ends in $ or *
 	 * @param path - the path to check
@@ -230,14 +241,9 @@ public class Model {
 				"if it already has a parent.");
 		
 		Model current = getChild(key);
-		for(Observer observer : current.getReferentialObservers())
-			model.addReferentialObserver(observer);
-		for(Observer observer : current.getValueObservers())
-			model.addValueObserver(observer);
-		for(Observer observer : current.getFieldObservers())
-			model.addFieldObserver(observer);
-		model.setParent(this);
 		model.setKey(key);
+		model.setParent(this);
+		model.copyAllObservers(current);
 		
 		childData.put(key, model);
 	}
@@ -255,12 +261,11 @@ public class Model {
 	
 	/**
 	 * Set the parent reference to point to a new model.
-	 * Note - this could potentially break invariants, so it can only
-	 * be called by the Model class
 	 * @param parent - the new parent to set
 	 */
 	private void setParent(Model model) {
 		parent = model;
+		calculatePath();
 	}
 	
 	/**
@@ -364,6 +369,7 @@ public class Model {
 	}
 	
 	/**
+	 * @proxy addObserver(Observer, Path)
 	 * Add an observer to the model's set of dependents, according to the
 	 * path variable.  If the path ends in a field name, it will
 	 * be a referential observer.  If it ends with a '$' it will be a value
@@ -395,6 +401,31 @@ public class Model {
 		else 
 			getChild(path.getImmediate())
 				.addObserver(observer, path.advance());
+	}
+	
+	/**
+	 * Copy all observers from the other model to this one
+	 * @param model - the model to copy from
+	 */
+	public void copyObservers(Model model) {
+		for(Observer observer : model.getReferentialObservers())
+			addReferentialObserver(observer);
+		for(Observer observer : model.getValueObservers())
+			addValueObserver(observer);
+		for(Observer observer : model.getFieldObservers())
+			addFieldObserver(observer);
+	}
+	
+	/**
+	 * Copy all observers from the other model, and all its sub-models to this one
+	 * @param model - the model to copy from
+	 */
+	public void copyAllObservers(Model model) {
+		copyObservers(model);
+		for(Model subModel : model.childData.values()) {
+			if(subModel.hasObservers())
+				getChild(subModel.getKey()).copyAllObservers(subModel);
+		}
 	}
 	
 	//--------
@@ -447,6 +478,7 @@ public class Model {
 	}
 	
 	/**
+	 * @proxy getValue(Observer)
 	 * Get the associated value.
 	 * @return the value
 	 */
@@ -455,6 +487,7 @@ public class Model {
 	}
 	
 	/**
+	 * @proxy myValue()
 	 * Get the associated value, and add a value observer.
 	 * @param observer - the observer to add, if null will not be added
 	 * @return the value associated with this model
@@ -465,6 +498,7 @@ public class Model {
 	}
 	
 	/**
+	 * @proxy getValue(Path, Observer)
 	 * Get the associated value, by a particular path, as a string
 	 * @param pathString - the string to parse for the path
 	 * @return the associated value of the field represented by this path
@@ -474,6 +508,7 @@ public class Model {
 	}
 	
 	/**
+	 * @proxy getValue(Path, Observer)
 	 * Get the associated value, by a particular path, as a string, and add
 	 * a value observer
 	 * @param pathString - the string to parse for the path
@@ -485,6 +520,7 @@ public class Model {
 	}
 	
 	/**
+	 * @proxy getValue(Path, Observer)
 	 * Get the associated value, by a particular path
 	 * @param pathString - the string to parse for the path
 	 * @return the associated value of the field represented by this path
@@ -494,6 +530,7 @@ public class Model {
 	}
 	
 	/**
+	 * @proxy get(Path, Observer)
 	 * Get the associated value, by a particular path, and add
 	 * a value observer
 	 * @param pathString - the string to parse for the path
@@ -511,6 +548,7 @@ public class Model {
 	//---------------
 	
 	/**
+	 * @proxy getModel(Path, Observer)
 	 * Get a model by a given path string
 	 * Will throw ModelDoesNotExistException if the model does not exist
 	 * @param pathString - the path to the model
@@ -521,6 +559,7 @@ public class Model {
 	}
 	
 	/**
+	 * @proxy getModel(Path, Observer)
 	 * Get a model by a given path string, and add a referential observer
 	 * Will throw ModelDoesNotExistException if the model does not exist
 	 * @param pathString - the path to the model
@@ -532,6 +571,7 @@ public class Model {
 	}
 	
 	/**
+	 * @proxy getModel(Path, Observer)
 	 * Get a model by a given path
 	 * Will throw ModelDoesNotExistException if the model does not exist
 	 * @param path - the path to the model
@@ -542,6 +582,7 @@ public class Model {
 	}
 	
 	/**
+	 * @proxy get(Path, Observer)
 	 * Get a model by a given path, and add a referential observer
 	 * Will throw ModelDoesNotExistException if the model does not exist
 	 * @param path - the path to the model
@@ -559,6 +600,18 @@ public class Model {
 	//-----------------
 	
 	/**
+	 * @proxy get(Path, Observer)
+	 * Get the reference of the path, from a raw path-string.
+	 * Note - this may throw InvalidPathException if the string is not valid.
+	 * @param pathString - the string to parse
+	 * @return the value/model represented by the path-string
+	 */
+	public Object get(String pathString) {
+		return get(new Path(pathString), null);
+	}
+	
+	/**
+	 * @proxy get(Path, Observer)
 	 * Get the reference of the path, relative to this model.
 	 * @param path - the path to access
 	 * @return the value/model represented by the path
@@ -568,16 +621,7 @@ public class Model {
 	}
 	
 	/**
-	 * Get the reference of the path, from a raw path-string.
-	 * Note - this may throw InvalidPathException if the string is not valid.
-	 * @param pathString - the string to parse
-	 * @return the value/model represented by the path-string
-	 */
-	public Object get(String pathString) {
-		return get(pathString, null);
-	}
-	
-	/**
+	 * @proxy get(Path, Observer)
 	 * Get the reference of the path, from a raw path-string, and add an observer
 	 * to the list of observers, according to what type of query this is.
 	 * Note - this may throw InvalidPathException if the string is not valid.
@@ -664,8 +708,7 @@ public class Model {
 	}
 	
 	/**
-	 * Blindly apply this update to this model.  Does not checking, so must
-	 * only be called by this class!
+	 * Blindly apply this update to this model.
 	 * @param update - the update to apply
 	 */
 	private void applyUpdate(ModelUpdate update) {
@@ -689,6 +732,7 @@ public class Model {
 	//---------
 	
 	/**
+	 * @proxy setValue(Path, Object)
 	 * Set the associated value of this model, notify observers of the change
 	 * @param value - the value to set
 	 */
@@ -697,6 +741,7 @@ public class Model {
 	}
 	
 	/**
+	 * @proxy setValue(Path, Object)
 	 * Set the associated of the model referenced by the path-string, relative
 	 * to this model, notify observers of the change
 	 * Note - because this explicitly sets the data of a field, it is not
@@ -709,6 +754,7 @@ public class Model {
 	}
 	
 	/**
+	 * @proxy handleUpdateSafe(SetValue, Path)
 	 * Set the associated of the model referenced by the path, relative
 	 * to this model, notify observers of the change
 	 * Note - because this explicitly sets the data of a field, it is not
@@ -726,6 +772,7 @@ public class Model {
 	//---------
 	
 	/**
+	 * @proxy setModel(Path, Model)
 	 * Set the model reference, notify observers of the change.
 	 * This will recreate the observer lists of all child models of the old
 	 * model.  This will necessarily create some fields if something is
@@ -741,6 +788,7 @@ public class Model {
 	}
 	
 	/**
+	 * @proxy setModel(Path, Model)
 	 * Set the model reference by the path-string, relative
 	 * to this model, notify observers of the change
 	 * This will recreate the observer lists of all child models of the old
@@ -758,6 +806,7 @@ public class Model {
 	}
 	
 	/**
+	 * @proxy handleUpdateSafe(SetModel, Path)
 	 * Set the model reference by the path, relative
 	 * to this model, notify observers of the change
 	 * This will recreate the observer lists of all child models of the old
@@ -780,6 +829,7 @@ public class Model {
 	//------------
 	
 	/**
+	 * @proxy deleteModel(Path)
 	 * Delete the reference to a model
 	 * @param pathString - the path to the model to be deleted
 	 */
@@ -805,6 +855,9 @@ public class Model {
 			if(!hasPath(path.getImmediate()))
 				throw new ModelDoesNotExistException(getPath().append(path));
 			
+			Model model = getChild(path.getImmediate());
+			model.notifyObservers(new ModelDeleted(model.getPath()),
+					UpdateLevel.VALUE);
 			childData.remove(path.getImmediate());
 		}
 		else {
@@ -819,6 +872,7 @@ public class Model {
 	//----------------
 	
 	/**
+	 * @proxy update(Path)
 	 * Notify the observers of a value change to this model, where the 
 	 * update type is not known.  This causes the ModelUpdate UnknownUpdate 
 	 * to be passed along.
@@ -828,6 +882,7 @@ public class Model {
 	}	
 	
 	/**
+	 * @proxy update(Path)
 	 * Notify the observers of a value change to a model relative to this one,
 	 * by the supplied path-string,  where the update type is not known.  This 
 	 * causes the ModelUpdate UnknownUpdate to be passed along.
@@ -838,6 +893,7 @@ public class Model {
 	}
 	
 	/**
+	 * @proxy handleUpdateSafe(UnknownUpdate, Path)
 	 * Notify the observers of a value change to a model relative to this one,
 	 * by the supplied path,  where the update type is not known.  This 
 	 * causes the ModelUpdate UnknownUpdate to be passed along.
@@ -853,29 +909,23 @@ public class Model {
 	//--------------------
 	
 	/**
-	 * Send notification of a model update to all appropriate observers
+	 * Send notification of a model update to all appropriate observers.
+	 * Note - this just puts the notifications in the DDMVC's pending
+	 * notifications set.  They will not be applied until the next run-loop.
 	 * @param update - the update to notify observers of
 	 * @param level - the update level
 	 */
-	private void notifyObservers(ModelUpdate update, UpdateLevel level) {
-		System.out.println("***");
-		System.out.println(getPath());
-		System.out.println(update.getTarget());
-		System.out.println(level);
-		
+	public void notifyObservers(ModelUpdate update, UpdateLevel level) {
 		if(level == UpdateLevel.REFERENTIAL) {
-			System.out.println(referentialObservers.size() + valueObservers.size() + fieldObservers.size());
 			DDMVC.addNotify(referentialObservers, update);
 			DDMVC.addNotify(valueObservers, update);
 			DDMVC.addNotify(fieldObservers, update);
 		}
 		else if(level == UpdateLevel.VALUE) {
-			System.out.println(valueObservers.size() + fieldObservers.size());
 			DDMVC.addNotify(valueObservers, update);
 			DDMVC.addNotify(fieldObservers, update);
 		}
 		else {
-			System.out.println(fieldObservers.size());
 			DDMVC.addNotify(fieldObservers, update);
 		}
 		
