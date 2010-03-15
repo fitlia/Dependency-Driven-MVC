@@ -1,24 +1,27 @@
 package com.google.gwt.ddmvc.test;
 
 import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import com.google.gwt.ddmvc.DDMVC;
+import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.update.list.Sort;
 
 public class ModelUpdateListSorting {
 
 	private List<Integer> testList;
+	private Model root;
 	
 	@Before
 	public void setUp() {
 		DDMVC.reset();
-		DDMVC.setValue("frillo", "Hodgepodge");
-		DDMVC.setValue("something", "text");
+		root = DDMVC.getDataRoot();
+		
+		root.setValue("frillo", "Hodgepodge");
+		root.setValue("something", "text");
 		
 		testList = new ArrayList<Integer>();
 		testList.add(5);
@@ -29,16 +32,16 @@ public class ModelUpdateListSorting {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void applyListSortUpdate() {
+	public void handleListSortUpdate() {
 		List<Integer> list = new ArrayList<Integer>();
 		list.add(100);
 		list.add(90);
 		list.add(95);
 		list.add(3);
-		DDMVC.setValue("nam", list);
+		root.setValue("nam", list);
 		
-		DDMVC.applyUpdate(new Sort("nam"));
-		list = (List<Integer>) DDMVC.getValue("nam");
+		root.handleUpdate(new Sort("nam"));
+		list = (List<Integer>) root.getValue("nam");
 				
 		assertTrue(list.size() == 4);
 		assertTrue(list.get(0).equals(3));
@@ -49,13 +52,13 @@ public class ModelUpdateListSorting {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void applyListSortComparatorUpdate() {
+	public void handleListSortComparatorUpdate() {
 		List<Integer> list = new ArrayList<Integer>();
 		list.add(100);
 		list.add(90);
 		list.add(95);
 		list.add(3);
-		DDMVC.setValue("nam", list);
+		root.setValue("nam", list);
 		
 		Comparator<Integer> myComp = new Comparator<Integer>() {
 
@@ -66,8 +69,8 @@ public class ModelUpdateListSorting {
 			
 		};
 		
-		DDMVC.applyUpdate(new Sort("nam", myComp));
-		list = (List<Integer>) DDMVC.getValue("nam");
+		root.handleUpdate(new Sort("nam", myComp));
+		list = (List<Integer>) root.getValue("nam");
 				
 		assertTrue(list.size() == 4);
 		assertTrue(list.get(0).equals(100));

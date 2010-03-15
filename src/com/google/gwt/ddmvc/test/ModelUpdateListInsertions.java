@@ -1,14 +1,12 @@
 package com.google.gwt.ddmvc.test;
 
 import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import com.google.gwt.ddmvc.DDMVC;
+import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.update.list.Append;
 import com.google.gwt.ddmvc.model.update.list.AppendAll;
 import com.google.gwt.ddmvc.model.update.list.Prepend;
@@ -17,12 +15,15 @@ import com.google.gwt.ddmvc.model.update.list.PrependAll;
 public class ModelUpdateListInsertions {
 
 	private List<Integer> testList;
+	private Model root;
 	
 	@Before
 	public void setUp() {
 		DDMVC.reset();
-		DDMVC.setValue("frillo", "Hodgepodge");
-		DDMVC.setValue("something", "text");
+		root = DDMVC.getDataRoot();
+		
+		root.setValue("frillo", "Hodgepodge");
+		root.setValue("something", "text");
 		
 		testList = new ArrayList<Integer>();
 		testList.add(5);
@@ -34,15 +35,15 @@ public class ModelUpdateListInsertions {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void applyListAppendUpdate() {
-		Append update = new Append("nam", 33);
-		DDMVC.applyUpdate(update);
-		List<Integer> list = (List<Integer>) DDMVC.getValue("nam");
+		Append update = new Append("lists.listA", 33);
+		root.handleUpdate(update);
+		List<Integer> list = (List<Integer>) root.getValue("lists.listA");
 		assertTrue(list.size() == 1);
 		assertTrue(list.get(0).equals(33));
 		
-		Append update2 = new Append("nam", 505);
-		DDMVC.applyUpdate(update2);
-		list = (List<Integer>) DDMVC.getValue("nam");
+		Append update2 = new Append("lists.listA", 505);
+		root.handleUpdate(update2);
+		list = (List<Integer>) root.getValue("lists.listA");
 		assertTrue(list.size() == 2);
 		assertTrue(list.get(0).equals(33));
 		assertTrue(list.get(1).equals(505));
@@ -52,16 +53,16 @@ public class ModelUpdateListInsertions {
 	@Test
 	public void applyListAppendAllUpdate() {
 		
-		AppendAll update = new AppendAll("nam", testList);
-		DDMVC.applyUpdate(update);
-		List<Integer> list = (List<Integer>) DDMVC.getValue("nam");
+		AppendAll update = new AppendAll("lists.listA", testList);
+		root.handleUpdate(update);
+		List<Integer> list = (List<Integer>) root.getValue("lists.listA");
 		assertTrue(list.size() == 4);
 		assertTrue(list.get(0).equals(5));
 		assertTrue(list.get(1).equals(10));
 		
-		AppendAll update2 = new AppendAll("nam", testList);
-		DDMVC.applyUpdate(update2);
-		list = (List<Integer>) DDMVC.getValue("nam");
+		AppendAll update2 = new AppendAll("lists.listA", testList);
+		root.handleUpdate(update2);
+		list = (List<Integer>) root.getValue("lists.listA");
 		assertTrue(list.size() == 8);
 		assertTrue(list.get(0).equals(5));
 		assertTrue(list.get(1).equals(10));
@@ -72,15 +73,15 @@ public class ModelUpdateListInsertions {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void applyListPrependUpdate() {
-		Prepend update = new Prepend("nam", 33);
-		DDMVC.applyUpdate(update);
-		List<Integer> list = (List<Integer>) DDMVC.getValue("nam");
+		Prepend update = new Prepend("lists.listA", 33);
+		root.handleUpdate(update);
+		List<Integer> list = (List<Integer>) root.getValue("lists.listA");
 		assertTrue(list.size() == 1);
 		assertTrue(list.get(0).equals(33));
 		
-		Prepend update2 = new Prepend("nam", 505);
-		DDMVC.applyUpdate(update2);
-		list = (List<Integer>) DDMVC.getValue("nam");
+		Prepend update2 = new Prepend("lists.listA", 505);
+		root.handleUpdate(update2);
+		list = (List<Integer>) root.getValue("lists.listA");
 		assertTrue(list.size() == 2);
 		assertTrue(list.get(0).equals(505));
 		assertTrue(list.get(1).equals(33));
@@ -90,9 +91,9 @@ public class ModelUpdateListInsertions {
 	@Test
 	public void applyListPrependAllUpdate() {
 		
-		PrependAll update = new PrependAll("nam", testList);
-		DDMVC.applyUpdate(update);
-		List<Integer> list = (List<Integer>) DDMVC.getValue("nam");
+		PrependAll update = new PrependAll("lists.listA", testList);
+		root.handleUpdate(update);
+		List<Integer> list = (List<Integer>) root.getValue("lists.listA");
 		assertTrue(list.size() == 4);
 		assertTrue(list.get(0).equals(5));
 		assertTrue(list.get(1).equals(10));
@@ -102,9 +103,9 @@ public class ModelUpdateListInsertions {
 		testList2.add(60);
 		
 		PrependAll update2 = 
-			new PrependAll("nam", testList2);
-		DDMVC.applyUpdate(update2);
-		list = (List<Integer>) DDMVC.getValue("nam");
+			new PrependAll("lists.listA", testList2);
+		root.handleUpdate(update2);
+		list = (List<Integer>) root.getValue("lists.listA");
 		assertTrue(list.size() == 6);
 		assertTrue(list.get(0).equals(20));
 		assertTrue(list.get(1).equals(60));

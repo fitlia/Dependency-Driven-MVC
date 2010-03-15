@@ -608,7 +608,7 @@ public class Model {
 	 * to this model, notify observers of the change
 	 * Note - because this explicitly sets the data of a field, it is not
 	 * necessary, and will throw an exception if the path ends with '$'
-	 * @param path - the path relative to this model
+	 * @param pathString - the path relative to this model
 	 * @param value - the value to set
 	 */
 	public void setValue(String pathString, Object value) {
@@ -643,7 +643,7 @@ public class Model {
 	 * Note - because this explicitly sets the data of a field, it is not
 	 * necessary, and will throw an exception if the path ends with '$'
 	 * @param model - the model to set
-	 * @param path - the path relative to this model
+	 * @param pathString - the path relative to this model
 	 */
 	public void setModel(String pathString, Model model) {
 		setModel(new Path(pathString), model);
@@ -660,6 +660,42 @@ public class Model {
 	public void setModel(Path path, Model model) {
 		ModelUpdate update = new SetModel(getPath().append(path), model);
 		handleUpdateSafe(update, path);
+	}
+	
+	//Delete Model
+	/**
+	 * Delete the reference to a model
+	 * @param pathString - the path to the model to be deleted
+	 */
+	public void deleteModel(String pathString) {
+		deleteModel(new Path(pathString));
+	}
+	
+	/**
+	 * Delete the reference to a model
+	 * Note - this will cause a loss of all observer lists for this and all
+	 * models in this model's subtree.  This means that delete should not
+	 * be called unless you're sure you won't want the values again.
+	 * @param path - the path to the model to be deleted
+	 */
+	public void deleteModel(Path path) {
+		if(path.size() == 0)
+			throw new InvalidPathException("Cannot delete a blank path, dummy!");
+		else if(path.size() == 1) {
+			if(path.getImmediate().equals("$"))
+				throw new InvalidPathException("Delete path cannot end with '$'.");
+			if(path.getImmediate().equals("*"))
+				throw new InvalidPathException("Delete path cannot end with '*'.");
+			if(!hasPath(path.getImmediate()))
+				throw new ModelDoesNotExistException(getPath().append(path));
+			
+			childData.remove(path.getImmediate());
+		}
+		else {
+			if(!hasPath(path.getImmediate())) 
+				throw new ModelDoesNotExistException(getPath().append(path));
+			getChild(path.getImmediate()).deleteModel(path.advance());
+		}	
 	}
 	
 	//Explicit updates
@@ -690,7 +726,7 @@ public class Model {
 	 */
 	public void update(Path path) {
 		ModelUpdate update = new UnknownUpdate(getPath().append(path));
-		handleUpdateSafe(update, path);
+		getModel(path).notifyObservers(update, UpdateLevel.VALUE);
 	}
 	
 	//Notification sending
@@ -699,7 +735,7 @@ public class Model {
 	 * @param update - the update to notify observers of
 	 * @param level - the update level
 	 */
-	private void notifyObservers(ModelUpdate update, UpdateLevel level) {
+	private void notifyObservers(ModelUpdate update, UpdateLevel level) {		
 		if(level == UpdateLevel.REFERENTIAL) {
 			DDMVC.addNotify(referentialObservers, update);
 			DDMVC.addNotify(valueObservers, update);

@@ -278,4 +278,12 @@ public class Path {
 			sb.replace(sb.length() - 1, sb.length(), "");
 		return sb.toString();
 	}
+	
+	public boolean equals(Path other) {
+		return toString().equals(other.toString());
+	}
+	
+	public boolean equals(String other) {
+		return toString().equals(other);
+	}
 }

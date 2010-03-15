@@ -25,7 +25,7 @@ public interface Observer {
 	public Set<Observer> getObservers();
 	
 	/**
-	 * @return the key associated with this observer
+	 * @return the path associated with this observer
 	 */
-	public String getKey();
+	public Path getPath();
 }

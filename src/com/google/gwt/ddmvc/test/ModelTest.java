@@ -18,7 +18,7 @@ import com.google.gwt.ddmvc.model.update.list.Append;
 public class ModelTest {
 	
 	private class FakeObserver implements Observer {
-		public String getKey() { return null; }
+		public Path getPath() { return null; }
 		public Set<Observer> getObservers() { return null; }
 		public void modelChanged(Collection<ModelUpdate> updates) {}
 	}
@@ -201,6 +201,21 @@ public class ModelTest {
 		assertTrue(counting.size() == 2);
 		assertTrue(counting.get(0).equals(1));
 		assertTrue(counting.get(1).equals(2));
+		
+		Model model = root.getModel("lists.counting");
+		update = new Append("lists.counting", 3);
+		model.handleUpdate(update);
+		assertTrue(counting.size() == 3);
+		assertTrue(counting.get(0).equals(1));
+		assertTrue(counting.get(1).equals(2));
+		assertTrue(counting.get(2).equals(3));
+		
+		Model model2 = root.getModel("cat");
+		update = new Append("lists.counting", 4);
+		try{
+			model2.handleUpdate(update);
+			fail();
+		} catch(InvalidPathException e) {}
 	}
 
 	@Test
@@ -260,5 +275,16 @@ public class ModelTest {
 			fail();
 		} catch(ModelDoesNotExistException e) {}
 	}
-
+	
+	@Test
+	public void deleteModelByString() {
+		root.deleteModel("person");
+		assertFalse(root.hasPath("person"));
+	}
+	
+	@Test
+	public void deleteModelByPath() {
+		root.deleteModel(new Path("person"));
+		assertFalse(root.hasPath("person"));
+	}
 }

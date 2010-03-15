@@ -7,6 +7,7 @@ import org.multimap.MultiHashMap;
 import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.event.EventSource;
 import com.google.gwt.ddmvc.model.Observer;
+import com.google.gwt.ddmvc.model.Path;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
@@ -17,12 +18,11 @@ import com.google.gwt.ddmvc.model.update.ModelUpdate;
  */
 public abstract class View extends EventSource implements Observer {
 	
-	//Maps Key -> ClassName's
+	//Maps Path.toString() -> ModelUpdate.getClass().getName()
 	private MultiHashMap<String, String> subscriptions;
 	
 	/**
-	 * Instantiate a new View with the given executive object
-	 * @param executive the executive DDMVC object to reference
+	 * Instantiate a new View
 	 */
 	public View() {
 		subscriptions = new MultiHashMap<String, String>();
@@ -35,8 +35,9 @@ public abstract class View extends EventSource implements Observer {
 		boolean containsAll = true;
 		
 		for(ModelUpdate update : updates) {
+			
 			Collection<String> subscriptionTypes = 
-				subscriptions.get(update.getTarget());
+				subscriptions.get(update.getTarget().toString());
 			
 			String updateType = update.getClass().getName();
 			
@@ -62,18 +63,30 @@ public abstract class View extends EventSource implements Observer {
 	
 	/**
 	 * Add this view to a model's list of observers
-	 * @param modelKey the key of the observer to observe
+	 * Note - if the path ends with a field name, it will be added as
+	 * a referential observer.  If the path ends with a $, it will be added
+	 * as a value observer.  If the path ends with a * it will be added as
+	 * a field observer.
+	 * @param pathString
 	 */
-	protected void subscribeToModel(String modelKey) {
-		DDMVC.subscribeToModel(modelKey, this);
+	protected void observe(String pathString) {
+		observe(new Path(pathString));
 	}
 	
 	/**
-	 * Views will all have the same key, view, so that we can ensure nothing will
-	 * ever be able to depend on them
+	 * Add this view to a model's list of observers
+	 * Note - if the path ends with a field name, it will be added as
+	 * a referential observer.  If the path ends with a $, it will be added
+	 * as a value observer.  If the path ends with a * it will be added as
+	 * a field observer.
+	 * @param modelKey the key of the observer to observe
 	 */
-	public String getKey() {
-		return "view";
+	protected void observe(Path path) {
+		DDMVC.getDataRoot().addObserver(this, path);
+	}
+	
+	public Path getPath() {
+		return null;
 	}
 	
 	/**
@@ -92,13 +105,30 @@ public abstract class View extends EventSource implements Observer {
 	 * Subscriptions do not take into consideration inheritance, however, if you
 	 * would like to subscribe to any change on a particular key, you can pass
 	 * ModelUpdate.class instead.
-	 * @param modelKey - the key for which a model update is subscribed
+	 * @param pathString - the path to observe
 	 * @param cls - the update class to subscribe to.
 	 */
-	protected void subscribeToModelUpdate(String modelKey, 
+	protected void subscribeToModelUpdate(String pathString, 
 			Class<? extends ModelUpdate> cls) {
 		
-		subscriptions.put(modelKey, cls.getName());
+		subscribeToModelUpdate(new Path(pathString), cls);
+	}
+	
+	/**
+	 * Set this view to respond to a particular type of model update, instead of
+	 * calling render().  This means that whenever the view receives a collection
+	 * of updates, if all the updates are subscribed updates, it will call the
+	 * view's respondToModelUpdate(...) method for each update instead of render()
+	 * Subscriptions do not take into consideration inheritance, however, if you
+	 * would like to subscribe to any change on a particular key, you can pass
+	 * ModelUpdate.class instead.
+	 * @param path - the path to observe
+	 * @param cls - the update class to subscribe to.
+	 */
+	protected void subscribeToModelUpdate(Path path, 
+			Class<? extends ModelUpdate> cls) {
+		
+		subscriptions.put(path.toString(), cls.getName());
 	}
 	
 	/**

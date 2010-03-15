@@ -11,7 +11,6 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses( { 
 	PathTest.class,
 	ModelTest.class,
-	ModelBasics.class,
 	ModelUpdateBasics.class,
 	ModelUpdateListFiltering.class,
 	ModelUpdateListInsertions.class,

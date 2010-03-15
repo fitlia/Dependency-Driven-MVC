@@ -82,7 +82,7 @@ public class StandardControllerTest {
 		
 		@Override
 		protected void initialize() {
-			subscribeToModel("someProperty");
+			observe("someProperty");
 		}
 
 		@Override
