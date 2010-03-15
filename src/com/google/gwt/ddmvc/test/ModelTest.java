@@ -10,6 +10,7 @@ import org.junit.Test;
 import com.google.gwt.ddmvc.model.InvalidPathException;
 import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.ModelDoesNotExistException;
+import com.google.gwt.ddmvc.model.ModelOverwriteException;
 import com.google.gwt.ddmvc.model.Path;
 import com.google.gwt.ddmvc.model.Observer;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
@@ -35,45 +36,22 @@ public class ModelTest {
 		root.setValue("person.french", "bonjour");
 		root.setValue("person.english", "hello");
 		root.setValue("lists.counting", new ArrayList<Integer>());
+		
+		root.setValue("frog", "ribbit");
+		root.setValue("frog.toad", "croak");
+		root.setValue("frog.jumping", "jump");
 	}
+
+	//--------------------------------------------------------
+	//                                                       |
+	//            PARENT-CHILD RELATIONSHIPS                 |
+	//                                                       |
+	//--------------------------------------------------------
 	
-	@Test
-	public void testHasPath() {
-		assertTrue(root.hasPath("cat"));
-		assertTrue(root.hasPath("person"));
-		assertTrue(root.hasPath("person.english"));
-		
-		assertFalse(root.hasPath("raccoon"));
-		assertFalse(root.hasPath("person.spanish"));
-		assertFalse(root.hasPath("raccoon.rabies"));
-		
-		assertTrue(root.hasPath("cat.$"));
-		assertFalse(root.hasPath("$"));
-		assertTrue(root.hasPath("person.*"));
-		assertFalse(root.hasPath("cat.*"));
-	}
-
-	@Test
-	public void testSetChild() {
-		root.setChild("monkey", new Model(null, "oo oo", "anything"));
-		assertTrue(root.get("monkey.$").equals("oo oo"));
-		
-		root.setChild("dog", new Model(null, "roof", null));
-		assertTrue(root.get("dog.$").equals("roof"));
-		
-		try {
-			root.setChild("dog.cow", root);
-			fail();
-		} catch(InvalidPathException e) {}
-	}
-
-	@Test
-	public void testGetParent() {
-		assertTrue(root.getParent() == null);
-		Model cat = root.getModel("cat");
-		assertTrue(cat.getParent() == root);
-	}
-
+	//----------
+	//This Model
+	//----------
+	
 	@Test
 	public void testGetKey() {
 		Model english = (Model) root.get("person.english");
@@ -87,7 +65,83 @@ public class ModelTest {
 		Model english = (Model) root.get("person.english");
 		assertTrue(english.getPath().toString().equals("person.english"));
 	}
+	
+	//------------
+	//Child Models
+	//------------
+	
+	@Test
+	public void testHasPath() {
+		assertTrue(root.hasPath("cat"));
+		assertTrue(root.hasPath("person"));
+		assertTrue(root.hasPath("person.english"));
+		assertTrue(root.hasPath("frog"));
+		assertTrue(root.hasPath("frog.toad"));
+		
+		assertFalse(root.hasPath("raccoon"));
+		assertFalse(root.hasPath("person.spanish"));
+		assertFalse(root.hasPath("raccoon.rabies"));
+		
+		assertTrue(root.hasPath("cat.$"));
+		assertFalse(root.hasPath("$"));
+		assertTrue(root.hasPath("person.*"));
+		assertFalse(root.hasPath("cat.*"));
+	}
+	
+	//-------------
+	//Parent Models
+	//-------------
 
+	@Test
+	public void testGetParent() {
+		assertTrue(root.getParent() == null);
+		Model cat = root.getModel("cat");
+		assertTrue(cat.getParent() == root);
+		
+		Model toad = root.getModel("frog.toad");
+		assertTrue(toad.getParent().getKey().equals("frog"));
+	}
+
+	@Test
+	public void testGetRoot() {
+		Model english = root.getModel("person.english");
+		assertTrue(english.getRoot() == root);
+	}
+	
+	//--------------------------------------------------------
+	//                                                       |
+	//                     OBSERVERS                         |
+	//                                                       |
+	//--------------------------------------------------------
+	
+	//---------
+	//Existence
+	//---------
+
+	@Test
+	public void testHasObservers() {
+		root.addObserver(obs, "dog.cat.rain.main");
+		assertTrue(root.getModel("dog").hasObservers());
+		assertTrue(root.getModel("dog.cat").hasObservers());
+		assertTrue(root.getModel("dog.cat.rain.main").hasObservers());
+		
+		root.setValue("fish.raid", "maui");
+		root.addObserver(obs, "fish.gills.$");
+		assertTrue(root.getModel("fish").hasObservers());
+		assertTrue(root.getModel("fish.gills").hasObservers());
+		assertFalse(root.getModel("fish.raid").hasObservers());
+	}
+		
+	//--------------------------------------------------------
+	//                                                       |
+	//                     ACCESSORS                         |
+	//                                                       |
+	//--------------------------------------------------------
+	
+	//---------------
+	//Value Accessors
+	//---------------
+	
 	@Test
 	public void testGetValue() {
 		Model cat = root.getModel("cat");
@@ -132,6 +186,10 @@ public class ModelTest {
 		assertTrue(cat.getValueObservers().contains(obs));
 	}
 	
+	//---------------
+	//Model Accessors
+	//---------------
+	
 	@Test
 	public void testGetModelByString() {
 		assertTrue(root.getModel("cat").getValue().equals("meow"));
@@ -162,6 +220,10 @@ public class ModelTest {
 		Model cat = root.getModel("cat");
 		assertTrue(cat.getReferentialObservers().contains(obs));
 	}
+	
+	//-----------------
+	//Generic Accessors
+	//-----------------
 
 	@Test
 	public void testGetByPathStringObserver() {
@@ -185,7 +247,17 @@ public class ModelTest {
 		assertTrue(root.getModel("cat")
 				.getFieldObservers().contains(obs));
 	}
-
+	
+	//--------------------------------------------------------
+	//                                                       |
+	//                  UPDATE HANDLING                      |
+	//                                                       |
+	//--------------------------------------------------------
+	
+	//-----------------------
+	//Generic update handling
+	//-----------------------
+	
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testHandleUpdate() {
@@ -217,6 +289,10 @@ public class ModelTest {
 			fail();
 		} catch(InvalidPathException e) {}
 	}
+	
+	//---------
+	//Set Value
+	//---------
 
 	@Test
 	public void testSetValueByObject() {
@@ -235,6 +311,10 @@ public class ModelTest {
 		root.setValue(new Path("cat.tabby"),"moo");
 		assertTrue(root.getValue("cat.tabby").equals("moo"));
 	}
+	
+	//---------
+	//Set Model
+	//---------
 
 	@Test
 	public void testSetModelByModel() {
@@ -277,6 +357,27 @@ public class ModelTest {
 	}
 	
 	@Test
+	public void setIllegalModel() {
+		Model newPerson = new Model(root, "maw", "anything");
+		
+		try {
+			root.setModel("person", newPerson);
+			fail();
+		} catch(ModelOverwriteException e) {}
+		
+		Model newModel = new Model("tool");
+		newModel.addObserver(obs, "drill");
+		try {
+			root.setModel("tool", newModel);
+			fail();
+		} catch(ModelOverwriteException e) {}
+	}
+	
+	//------------
+	//Delete Model
+	//------------
+	
+	@Test
 	public void deleteModelByString() {
 		root.deleteModel("person");
 		assertFalse(root.hasPath("person"));
@@ -287,4 +388,5 @@ public class ModelTest {
 		root.deleteModel(new Path("person"));
 		assertFalse(root.hasPath("person"));
 	}
+	
 }

@@ -92,7 +92,7 @@ public class Model {
 			Path.validateKey(key);
 		
 		if(parent != null && key == null)
-			throw new InvalidPathException("You cannot instantiate a model with" +
+			throw new InvalidPathException("You cannot instantiate a model with " +
 					"a parent, but no key.");
 		
 		this.value = value;
@@ -108,8 +108,54 @@ public class Model {
 		calculatePath();
 	}
 	
+	//--------------------------------------------------------
+	//                                                       |
+	//            PARENT-CHILD RELATIONSHIPS                 |
+	//                                                       |
+	//--------------------------------------------------------
 	
-	//PARENT-CHILD RELATIONSHIPS
+	//----------
+	//This Model
+	//----------
+	
+	/**
+	 * @return this model's key
+	 */
+	public String getKey() {
+		return key;
+	}
+
+	/**
+	 * Set the key associated with this model.
+	 * Note - this could potentially break invariants, so it can only
+	 * be called by the Model class
+	 * @param key - the key to set this model to
+	 */
+	private void setKey(String key) {
+		this.key = key;
+	}
+	
+	/**
+	 * Get the path upward from this model to the top model
+	 * @return the path from the root to this model
+	 */
+	public Path getPath() {
+		return path;
+	}
+	
+	/**
+	 * Calculate and set the upward path.
+	 */
+	private void calculatePath() {
+		if(parent == null)
+			this.path = Path.ROOT_PATH;
+		else
+			this.path = parent.getPath().append(key);
+	}
+	
+	//------------
+	//Child Models
+	//------------
 	
 	/**
 	 * Determine whether or not a field path exists, by path-string.
@@ -172,12 +218,10 @@ public class Model {
 	 * @param key - the key of the model to replace
 	 * @param model - the model to do the replacing
 	 */
-	public void setChild(String key, Model model) {
+	private void setChild(String key, Model model) {
 		Path.validateKey(key);
 		
-		if(model.getReferentialObservers().size() > 0
-				|| model.getValueObservers().size() > 0
-				|| model.getFieldObservers().size() > 0)
+		if(model.hasObservers())
 			throw new ModelOverwriteException("A model cannot be set as a child" +
 					"if it already has observers.");
 		
@@ -198,6 +242,10 @@ public class Model {
 		childData.put(key, model);
 	}
 	
+	//-------------
+	//Parent Models
+	//-------------
+	
 	/**
 	 * @return the parent of this model
 	 */
@@ -216,44 +264,45 @@ public class Model {
 	}
 	
 	/**
-	 * @return this model's key
+	 * @return the root model of this model
 	 */
-	public String getKey() {
-		return key;
-	}
-
-	/**
-	 * Set the key associated with this model.
-	 * Note - this could potentially break invariants, so it can only
-	 * be called by the Model class
-	 * @param key - the key to set this model to
-	 */
-	private void setKey(String key) {
-		this.key = key;
+	public Model getRoot() {
+		if(getParent() == null)
+			return this;
+		return getParent().getRoot();
 	}
 	
-	/**
-	 * Get the path upward from this model to the top model
-	 * @return the path from the root to this model
-	 */
-	public Path getPath() {
-		return path;
-	}
+	//--------------------------------------------------------
+	//                                                       |
+	//                     OBSERVERS                         |
+	//                                                       |
+	//--------------------------------------------------------
+	
+	//---------
+	//Existence
+	//---------
 	
 	/**
-	 * Calculate and set the upward path.
+	 * @return true if this model, or any of its child models has any type of
+	 * observers
 	 */
-	private void calculatePath() {
-		if(parent == null)
-			this.path = Path.ROOT_PATH;
-		else
-			this.path = parent.getPath().append(key);
+	public boolean hasObservers() {
+		if(referentialObservers.size() > 0 
+				|| valueObservers.size() > 0
+				|| fieldObservers.size() > 0)
+			return true;
+		
+		for(Model subModel : childData.values())
+			if(subModel.hasObservers())
+				return true;
+		
+		return false;
 	}
 	
-	
-	//OBSERVER GET/ADD/REMOVE's
-	
+	//-------
 	//Getters
+	//-------
+	
 	/**
 	 * @return the set of referential observers, unmodifiable
 	 */
@@ -275,7 +324,10 @@ public class Model {
 		return Collections.unmodifiableSet(fieldObservers);
 	}
 	
+	//------
 	//Adders
+	//------
+	
 	/**
 	 * Add a referential observer to this model.
 	 * A referential observer only pays attention to changes in the model
@@ -318,6 +370,19 @@ public class Model {
 	 * observer, and if it ends with a '*' it will be a field observer.
 	 * Note - if the model does not exist yet, it will be created.
 	 * @param observer - the observer to add, if null will not be added
+	 * @param pathString - the path (relative to this model) to observe
+	 */
+	public void addObserver(Observer observer, String pathString) {
+		addObserver(observer, new Path(pathString));
+	}
+	
+	/**
+	 * Add an observer to the model's set of dependents, according to the
+	 * path variable.  If the path ends in a field name, it will
+	 * be a referential observer.  If it ends with a '$' it will be a value
+	 * observer, and if it ends with a '*' it will be a field observer.
+	 * Note - if the model does not exist yet, it will be created.
+	 * @param observer - the observer to add, if null will not be added
 	 * @param path - the path (relative to this model) to observe
 	 */
 	public void addObserver(Observer observer, Path path) {
@@ -332,7 +397,10 @@ public class Model {
 				.addObserver(observer, path.advance());
 	}
 	
+	//--------
 	//Removals
+	//--------
+	
 	/**
 	 * Remove an observer from the set of referential observers
 	 * @param observer - the observer to remove
@@ -358,7 +426,16 @@ public class Model {
 	}
 	
 
-	//DATA ACCESSORS
+	//--------------------------------------------------------
+	//                                                       |
+	//                     ACCESSORS                         |
+	//                                                       |
+	//--------------------------------------------------------
+	
+	//---------------
+	//Value Accessors
+	//---------------
+	
 	/**
 	 * Get the value associated with this model, for internal use
 	 * By default, this returns the value field, but it can be overridden to
@@ -429,6 +506,10 @@ public class Model {
 		return get(path.append("$"), observer);
 	}
 	
+	//---------------
+	//Model Accessors
+	//---------------
+	
 	/**
 	 * Get a model by a given path string
 	 * Will throw ModelDoesNotExistException if the model does not exist
@@ -472,7 +553,11 @@ public class Model {
 			throw new InvalidPathException("Model query paths must be non-terminal.");
 		return (Model) get(path, observer);
 	}
-	 
+	
+	//-----------------
+	//Generic Accessors
+	//-----------------
+	
 	/**
 	 * Get the reference of the path, relative to this model.
 	 * @param path - the path to access
@@ -536,10 +621,16 @@ public class Model {
 		return getChild(key).get(path.advance(), observer);
 	}
 	
+	//--------------------------------------------------------
+	//                                                       |
+	//                  UPDATE HANDLING                      |
+	//                                                       |
+	//--------------------------------------------------------
 	
-	//UPDATE HANDLING
-	
+	//-----------------------
 	//Generic update handling
+	//-----------------------
+	
 	/**
 	 * Handle a ModelUpdate request, notify relevant observers.
 	 * Note - this will attempt to resolve the absolute path in ModelUpdate
@@ -593,8 +684,10 @@ public class Model {
 		}
 	}
 	
-	//Convenience Handlers
+	//---------
 	//Set Value
+	//---------
+	
 	/**
 	 * Set the associated value of this model, notify observers of the change
 	 * @param value - the value to set
@@ -628,9 +721,19 @@ public class Model {
 		handleUpdateSafe(update, path);
 	}
 	
+	//---------
 	//Set Model
+	//---------
+	
 	/**
-	 * Set the model reference, notify observers of the change
+	 * Set the model reference, notify observers of the change.
+	 * This will recreate the observer lists of all child models of the old
+	 * model.  This will necessarily create some fields if something is
+	 * currently observing those fields, and if the model implementation
+	 * being set does not allow that to occur, ModelOverwriteException will
+	 * be thrown.
+	 * Note - may throw ModelOverwriteException if the new model has a parent or
+	 * observers set already.
 	 * @param model - the model to set
 	 */
 	public void setModel(Model model) {
@@ -640,8 +743,13 @@ public class Model {
 	/**
 	 * Set the model reference by the path-string, relative
 	 * to this model, notify observers of the change
-	 * Note - because this explicitly sets the data of a field, it is not
-	 * necessary, and will throw an exception if the path ends with '$'
+	 * This will recreate the observer lists of all child models of the old
+	 * model.  This will necessarily create some fields if something is
+	 * currently observing those fields, and if the model implementation
+	 * being set does not allow that to occur, ModelOverwriteException will
+	 * be thrown.
+	 * Note - may throw ModelOverwriteException if the new model has a parent or
+	 * observers set already.
 	 * @param model - the model to set
 	 * @param pathString - the path relative to this model
 	 */
@@ -652,8 +760,13 @@ public class Model {
 	/**
 	 * Set the model reference by the path, relative
 	 * to this model, notify observers of the change
-	 * Note - because this explicitly sets the data of a field, it is not
-	 * necessary, and will throw an exception if the path ends with '$'
+	 * This will recreate the observer lists of all child models of the old
+	 * model.  This will necessarily create some fields if something is
+	 * currently observing those fields, and if the model implementation
+	 * being set does not allow that to occur, ModelOverwriteException will
+	 * be thrown.
+	 * Note - may throw ModelOverwriteException if the new model has a parent or
+	 * observers set already.
 	 * @param value - the model to set
 	 * @param path - the path relative to this model
 	 */
@@ -662,7 +775,10 @@ public class Model {
 		handleUpdateSafe(update, path);
 	}
 	
+	//------------
 	//Delete Model
+	//------------
+	
 	/**
 	 * Delete the reference to a model
 	 * @param pathString - the path to the model to be deleted
@@ -698,7 +814,10 @@ public class Model {
 		}	
 	}
 	
+	//----------------
 	//Explicit updates
+	//----------------
+	
 	/**
 	 * Notify the observers of a value change to this model, where the 
 	 * update type is not known.  This causes the ModelUpdate UnknownUpdate 
@@ -729,23 +848,34 @@ public class Model {
 		getModel(path).notifyObservers(update, UpdateLevel.VALUE);
 	}
 	
-	//Notification sending
+	//--------------------
+	//Notification Sending
+	//--------------------
+	
 	/**
 	 * Send notification of a model update to all appropriate observers
 	 * @param update - the update to notify observers of
 	 * @param level - the update level
 	 */
-	private void notifyObservers(ModelUpdate update, UpdateLevel level) {		
+	private void notifyObservers(ModelUpdate update, UpdateLevel level) {
+		System.out.println("***");
+		System.out.println(getPath());
+		System.out.println(update.getTarget());
+		System.out.println(level);
+		
 		if(level == UpdateLevel.REFERENTIAL) {
+			System.out.println(referentialObservers.size() + valueObservers.size() + fieldObservers.size());
 			DDMVC.addNotify(referentialObservers, update);
 			DDMVC.addNotify(valueObservers, update);
 			DDMVC.addNotify(fieldObservers, update);
 		}
 		else if(level == UpdateLevel.VALUE) {
+			System.out.println(valueObservers.size() + fieldObservers.size());
 			DDMVC.addNotify(valueObservers, update);
 			DDMVC.addNotify(fieldObservers, update);
 		}
 		else {
+			System.out.println(fieldObservers.size());
 			DDMVC.addNotify(fieldObservers, update);
 		}
 		

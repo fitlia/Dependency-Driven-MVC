@@ -271,6 +271,9 @@ public class Path {
 	
 	@Override
 	public String toString() {
+		if(path.size() == 0)
+			return "ROOT_PATH";
+		
 		StringBuilder sb = new StringBuilder();
 		for(String field : path)
 			sb.append(field + ".");
