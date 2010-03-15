@@ -3,7 +3,7 @@ package com.google.gwt.ddmvc.model.update;
 import com.google.gwt.ddmvc.model.Path;
 
 /**
- * Update sent as a notification when a model is deleted.
+ * Update sent as a notification when a model is deleted. 
  * 
  * If this model update were actually passed to a model, it
  * would have no effect.
