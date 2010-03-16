@@ -137,7 +137,7 @@ public class Model {
 	 * be called by the Model class
 	 * @param key - the key to set this model to
 	 */
-	private void setKey(String key) {
+	protected void setKey(String key) {
 		this.key = key;
 		calculatePath();
 	}
@@ -153,7 +153,7 @@ public class Model {
 	/**
 	 * Calculate and set the upward path.
 	 */
-	private void calculatePath() {
+	protected void calculatePath() {
 		if(parent == null || key == null)
 			this.path = Path.ROOT_PATH;
 		else
@@ -166,6 +166,15 @@ public class Model {
 	//------------
 	//Child Models
 	//------------
+	
+	/**
+	 * Determine whether or not a model-child exists
+	 * @param key - the key of the child to check for
+	 * @return true if the child exists
+	 */
+	public boolean hasChild(String key) {
+		return childData.containsKey(key); 
+	}
 	
 	/**
 	 * @proxy hasPath(Path)
@@ -194,7 +203,7 @@ public class Model {
 		if(path.getImmediate().equals("$"))
 			return myValue() != null;
 		
-		if(!childData.containsKey(path.getImmediate()))
+		if(!hasChild(path.getImmediate()))
 			return false;
 		
 		return getChild(path.getImmediate()).hasPath(path.advance());
@@ -206,7 +215,7 @@ public class Model {
 	 * @param key - the key to check
 	 * @return a model referenced by the key
 	 */
-	private Model getChild(String key) {
+	protected Model getChild(String key) {
 		Model model = childData.get(key);
 		if(model == null) {
 			//This will throw InvalidPathException if key is invalid, so we're safe
@@ -229,7 +238,7 @@ public class Model {
 	 * @param key - the key of the model to replace
 	 * @param model - the model to do the replacing
 	 */
-	private void setChild(String key, Model model) {
+	protected void setChild(String key, Model model) {
 		Path.validateKey(key);
 		
 		if(model.hasObservers())
@@ -263,7 +272,7 @@ public class Model {
 	 * Set the parent reference to point to a new model.
 	 * @param parent - the new parent to set
 	 */
-	private void setParent(Model model) {
+	protected void setParent(Model model) {
 		parent = model;
 		calculatePath();
 	}
@@ -692,10 +701,12 @@ public class Model {
 	 * checking if the addresses are consistent, so can only be called by
 	 * this class.
 	 * If need be, this method will create new child models.
+	 * Override this method if you want to affect the way this model processes
+	 * updates.
 	 * @param update - the update to apply
 	 * @param relative - the relative path to pursue
 	 */
-	private void handleUpdateSafe(ModelUpdate update, Path relative) {
+	protected void handleUpdateSafe(ModelUpdate update, Path relative) {
 		if(relative.getImmediate() == null)
 			applyUpdate(update);
 		else if(relative.getImmediate().equals("$"))
@@ -709,9 +720,11 @@ public class Model {
 	
 	/**
 	 * Blindly apply this update to this model.
+	 * Override this method if you want to affect the way this model processes
+	 * updates.
 	 * @param update - the update to apply
 	 */
-	private void applyUpdate(ModelUpdate update) {
+	protected void applyUpdate(ModelUpdate update) {
 		Object result = update.process(value);
 		
 		if(result.getClass().getName()
@@ -917,20 +930,20 @@ public class Model {
 	 */
 	public void notifyObservers(ModelUpdate update, UpdateLevel level) {
 		if(level == UpdateLevel.REFERENTIAL) {
-			DDMVC.addNotify(referentialObservers, update);
-			DDMVC.addNotify(valueObservers, update);
-			DDMVC.addNotify(fieldObservers, update);
+			DDMVC.addNotify(getReferentialObservers(), update);
+			DDMVC.addNotify(getValueObservers(), update);
+			DDMVC.addNotify(getFieldObservers(), update);
 		}
 		else if(level == UpdateLevel.VALUE) {
-			DDMVC.addNotify(valueObservers, update);
-			DDMVC.addNotify(fieldObservers, update);
+			DDMVC.addNotify(getValueObservers(), update);
+			DDMVC.addNotify(getFieldObservers(), update);
 		}
 		else {
-			DDMVC.addNotify(fieldObservers, update);
+			DDMVC.addNotify(getFieldObservers(), update);
 		}
 		
-		if(parent != null)
-			parent.notifyObservers(update, UpdateLevel.FIELD);
+		if(getParent() != null)
+			getParent().notifyObservers(update, UpdateLevel.FIELD);
 	}
 	
 }

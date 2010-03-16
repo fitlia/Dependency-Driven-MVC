@@ -359,12 +359,14 @@ public class ModelTest {
 	
 	@Test
 	public void setIllegalModel() {
+		root.setValue("person", "hello");
 		Model newPerson = new Model(root, "maw", "anything");
-		
 		try {
 			root.setModel("person", newPerson);
 			fail();
 		} catch(ModelOverwriteException e) {}
+		assertTrue(root.getValue("person").equals("hello"));
+		
 		
 		Model newModel = new Model("tool");
 		newModel.addObserver(obs, "drill");
