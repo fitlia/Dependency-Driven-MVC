@@ -8,12 +8,12 @@ import java.util.List;
 
 import org.junit.*;
 import com.google.gwt.ddmvc.DDMVC;
-import com.google.gwt.ddmvc.model.InvalidPathException;
+import com.google.gwt.ddmvc.event.Observer;
 import com.google.gwt.ddmvc.model.Model;
-import com.google.gwt.ddmvc.model.Observer;
 import com.google.gwt.ddmvc.model.Path;
 import com.google.gwt.ddmvc.model.ValueModel;
 import com.google.gwt.ddmvc.model.Model.UpdateLevel;
+import com.google.gwt.ddmvc.model.exception.InvalidPathException;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.model.update.list.Append;
 

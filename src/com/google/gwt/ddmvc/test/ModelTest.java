@@ -6,13 +6,14 @@ import java.util.Collection;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
-import com.google.gwt.ddmvc.model.InvalidPathException;
+
+import com.google.gwt.ddmvc.event.Observer;
 import com.google.gwt.ddmvc.model.Model;
-import com.google.gwt.ddmvc.model.ModelDoesNotExistException;
-import com.google.gwt.ddmvc.model.ModelOverwriteException;
 import com.google.gwt.ddmvc.model.Path;
-import com.google.gwt.ddmvc.model.Observer;
 import com.google.gwt.ddmvc.model.Model.UpdateLevel;
+import com.google.gwt.ddmvc.model.exception.InvalidPathException;
+import com.google.gwt.ddmvc.model.exception.ModelDoesNotExistException;
+import com.google.gwt.ddmvc.model.exception.ModelOverwriteException;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.model.update.list.Append;
 

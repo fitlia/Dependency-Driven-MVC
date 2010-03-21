@@ -1,6 +1,8 @@
 package com.google.gwt.ddmvc.model;
 
 import java.util.Collection;
+
+import com.google.gwt.ddmvc.event.Observer;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**

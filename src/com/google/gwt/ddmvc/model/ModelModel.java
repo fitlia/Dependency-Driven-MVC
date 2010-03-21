@@ -1,7 +1,8 @@
 package com.google.gwt.ddmvc.model;
 
 import java.util.Set;
-
+import com.google.gwt.ddmvc.event.Observer;
+import com.google.gwt.ddmvc.model.exception.InvalidPathException;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
@@ -10,6 +11,10 @@ import com.google.gwt.ddmvc.model.update.ModelUpdate;
  * you to specify a model-type useful for compile-time type checking.
  * Like ValueModel, this just adds an extra layer of optional type-safety
  * which you can use to help you debug earlier.
+ * 
+ * In general, this is most useful as a utility class for ObjectModel, and not
+ * necessarily created directly.
+ * 
  * @author Kevin Dolan
  *
  * @param <ModelType> the type of model held by this model
@@ -19,14 +24,22 @@ public class ModelModel<ModelType extends Model> extends Model {
 	private ModelType model;
 	
 	/**
-	 * Instantiate a new blank ValueModelTest
+	 * Instantiate a new blank ModelModel
+	 * Note - that if the default ModelModel, that a default Model is put in its
+	 * place temporarily to keep track of observers and make sure no errors are
+	 * encountered.  In general, you should take care to set the model before
+	 * it's too late, though.
 	 */
+	@SuppressWarnings("unchecked")
 	public ModelModel() {
 		super();
+		this.model = (ModelType) new Model();
+		model.setKey(getKey());
+		model.setParent(getParent());
 	}
 	
 	/**
-	 * Instantiate a new ValueModelTest with the given model
+	 * Instantiate a new ModelModel with the given model
 	 * @param model - the value of the model
 	 */
 	public ModelModel(ModelType model) {

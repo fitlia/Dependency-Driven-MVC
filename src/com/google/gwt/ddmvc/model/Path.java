@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.gwt.ddmvc.model.exception.InvalidPathException;
+
 /**
  * A Path represents a traversible path through a model data
  * @author Kevin Dolan

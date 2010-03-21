@@ -1,6 +1,6 @@
 package com.google.gwt.ddmvc;
 
-import com.google.gwt.ddmvc.model.Observer;
+import com.google.gwt.ddmvc.event.Observer;
 
 /**
  * Container class for information regarding exceptions encountered during a

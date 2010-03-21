@@ -1,5 +1,7 @@
 package com.google.gwt.ddmvc.model;
 
+import com.google.gwt.ddmvc.event.Observer;
+import com.google.gwt.ddmvc.model.exception.InvalidPathException;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
@@ -12,6 +14,9 @@ import com.google.gwt.ddmvc.model.update.ModelUpdate;
  * nothing to stop you from sending some other type of value to be set
  * through the usual means.  However, you can use the set(...) method
  * instead to enforce type-safety on yourself.
+ * 
+ * In general, this is most useful as a utility class for ObjectModel, and not
+ * necessarily created directly.
  * 
  * @author Kevin Dolan
  *

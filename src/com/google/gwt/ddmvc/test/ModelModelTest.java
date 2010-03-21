@@ -7,9 +7,9 @@ import java.util.Collection;
 import org.junit.Before;
 import org.junit.Test;
 import com.google.gwt.ddmvc.DDMVC;
+import com.google.gwt.ddmvc.event.Observer;
 import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.ModelModel;
-import com.google.gwt.ddmvc.model.Observer;
 import com.google.gwt.ddmvc.model.Path;
 import com.google.gwt.ddmvc.model.ValueModel;
 import com.google.gwt.ddmvc.model.Model.UpdateLevel;
@@ -20,7 +20,7 @@ public class ModelModelTest {
 	private Model root;
 	private FakeObserver obs;
 
-	private class FakeObserver implements Observer {
+	private class FakeObserver implements Observer { 
 		public int change = 0;
 		public Path getPath() { return null; }
 		public void modelChanged(Collection<ModelUpdate> updates) {
@@ -159,4 +159,24 @@ public class ModelModelTest {
 		assertTrue(root.getModel("cat.tabby")
 				.getReferentialObservers().contains(obs));
 	}
+	
+	@Test
+	public void testDefaultConstructor() {
+		ModelModel<Model> myModel = new ModelModel<Model>();
+		root.setValue("cat", "purr");
+		root.setModel("cat.tabby", myModel);
+		System.out.println(root.getValue("cat.tabby"));
+	}
+	
+	@Test
+	public void testResetModel() {
+		ModelModel<Model> myModel = new ModelModel<Model>(new Model("meow"));
+		root.setValue("cat", "purr");
+		root.setModel("cat.tabby", myModel);
+		assertTrue(root.getModel("cat.tabby").getClass().equals(ModelModel.class));
+		root.getModel("cat.tabby").setModel(new Model("phes"));
+		assertTrue(root.getModel("cat.tabby").getClass().equals(Model.class));
+		System.out.println("testing reset model...");
+	}
+	
 }

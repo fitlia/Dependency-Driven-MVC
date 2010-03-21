@@ -9,7 +9,7 @@ import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.RunLoopException;
 import com.google.gwt.ddmvc.model.ComputedModel;
 import com.google.gwt.ddmvc.model.Model;
-import com.google.gwt.ddmvc.model.ModelDoesNotExistException;
+import com.google.gwt.ddmvc.model.exception.ModelDoesNotExistException;
 
 public class ComputedModelObservation {
 

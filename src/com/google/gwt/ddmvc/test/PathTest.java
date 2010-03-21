@@ -2,8 +2,8 @@ package com.google.gwt.ddmvc.test;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
-import com.google.gwt.ddmvc.model.InvalidPathException;
 import com.google.gwt.ddmvc.model.Path;
+import com.google.gwt.ddmvc.model.exception.InvalidPathException;
 
 public class PathTest {
 

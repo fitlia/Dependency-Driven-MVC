@@ -17,6 +17,7 @@ import org.junit.runners.Suite;
 	ModelUpdateListSorting.class,
 	ValueModelTest.class,
 	ModelModelTest.class,
+	ObjectModelTest.class,
 	ViewObservation.class,
 	ComputedModelObservation.class,
 	StandardControllerTest.class
