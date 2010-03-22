@@ -24,8 +24,6 @@ import com.google.gwt.ddmvc.model.update.ModelUpdate;
  */
 public class ValueModel<Type> extends Model {
 
-	private Type value;
-	
 	/**
 	 * Instantiate a new blank ValueModel
 	 */
@@ -39,11 +37,6 @@ public class ValueModel<Type> extends Model {
 	 */
 	public ValueModel(Type value) {
 		this.value = value;
-	}
-	
-	@Override
-	protected Type myValue() {
-		return value;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -78,23 +71,6 @@ public class ValueModel<Type> extends Model {
 		else
 			throw new InvalidPathException(getPath() + " is a value model.  It " +
 					"cannot have any children.");
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	protected void applyUpdate(ModelUpdate update) {
-		Object result = update.process(value);
-		
-		//If we are going to be replacing the model, delegate that to Model.
-		if(result.getClass().getName()
-				.equals(ModelUpdate.SET_MODEL_TO.class.getName())) {
-			
-			super.applyUpdate(update);
-		}
-		else {
-			notifyObservers(update, UpdateLevel.VALUE);
-			value = (Type) result;
-		}
 	}
 	
 }

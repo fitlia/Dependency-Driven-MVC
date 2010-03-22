@@ -35,6 +35,10 @@ import com.google.gwt.ddmvc.model.update.UnknownUpdate;
  * fieldKey1.fieldKey2.* to reference the subtree of fieldKey2, used only
  * for observation.
  * 
+ * Models do not maintain their sets of observers; these are held in DDMVC.
+ * The methods within Model related to observers are actually proxy methods
+ * to DDMVC methods by the path.
+ * 
  * Models can be overridden so that the familiar model interface can be used
  * as a stand-in for many different other types of data access.  However, a
  * lot of the method signatures are only present for convenience and actually
@@ -59,7 +63,7 @@ public class Model {
 	private Model parent;
 	private Path path;
 	private HashMap<String, Model> childData;
-	private Object value;
+	protected Object value;
 	
 	/**
 	 * Instantiate a new blank model
@@ -275,7 +279,6 @@ public class Model {
 		if(model.getParent() != null)
 			throw new ModelOverwriteException("A model cannot be set as a child" +
 				"if it already has a parent.");
-		
 		
 		model.setKey(key);
 		model.setParent(this);

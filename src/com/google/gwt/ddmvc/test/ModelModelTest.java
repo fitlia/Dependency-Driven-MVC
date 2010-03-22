@@ -75,7 +75,7 @@ public class ModelModelTest {
 		ModelModel<ValueModel<String>> myModel = 
 			new ModelModel<ValueModel<String>>(new ValueModel<String>("meow"));
 		root.setValue("cat", "purr");
-		root.setModel("cat.tabby", myModel);
+		root.setModel("cat.tabby", myModel);	
 		root.setValue("cat.tabby", "hiss");
 		assertTrue(root.getValue("cat.tabby").equals("hiss"));
 		assertTrue(myModel.getModel().getValue().equals("hiss"));
@@ -151,6 +151,7 @@ public class ModelModelTest {
 		root.addObserver(obs, "cat.tabby");
 		assertTrue(root.getModel("cat.tabby")
 				.getReferentialObservers().contains(obs));
+		
 		root.setModel("cat.tabby", new Model("roar"));
 		DDMVC.runLoop();
 		assertTrue(obs.change == 1);
@@ -164,17 +165,10 @@ public class ModelModelTest {
 		ModelModel<Model> myModel = new ModelModel<Model>();
 		root.setValue("cat", "purr");
 		root.setModel("cat.tabby", myModel);
-		fail();
-	}
-	
-	@Test
-	public void testResetModel() {
-		ModelModel<Model> myModel = new ModelModel<Model>(new Model("meow"));
-		root.setValue("cat", "purr");
-		root.setModel("cat.tabby", myModel);
-		assertTrue(root.getModel("cat.tabby").getClass().equals(ModelModel.class));
-		root.getModel("cat.tabby").setModel(new Model("phes"));
-		assertTrue(root.getModel("cat.tabby").getClass().equals(Model.class));
+		try {
+			root.setValue("cat.tabby", "meow");
+			fail();
+		} catch(NullPointerException e) {}
 	}
 	
 }

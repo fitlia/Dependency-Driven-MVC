@@ -26,14 +26,10 @@ public class ModelModel<ModelType extends Model> extends Model {
 	 * Note - if the default constructor is used, it is effectively the equivalent
 	 * of declaring a field as null in Java.  Attempts to modify this model
 	 * without first setting the model to something else will fail.
-	 * However, observers can still be added to this and sub-models.
 	 */
-	@SuppressWarnings("unchecked")
 	public ModelModel() {
 		super();
-		this.model = (ModelType) new Model();
-		model.setKey(getKey());
-		model.setParent(getParent());
+		this.model = null;
 	}
 	
 	/**
@@ -57,13 +53,15 @@ public class ModelModel<ModelType extends Model> extends Model {
 	@Override
 	protected void setKey(String key) {
 		super.setKey(key);
-		this.model.setKey(key);
+		if(model != null)
+			this.model.setKey(key);
 	}
 	
 	@Override
 	protected void setParent(Model model) {
 		super.setParent(model);
-		this.model.setParent(model);
+		if(this.model != null)
+			this.model.setParent(model);
 	}
 	
 	@Override
@@ -89,7 +87,7 @@ public class ModelModel<ModelType extends Model> extends Model {
 	@Override
 	protected void handleUpdateSafe(ModelUpdate update, Path relative) {
 		if(relative.getImmediate() == null)
-			model.applyUpdate(update);
+			applyUpdate(update);
 		else if(relative.getImmediate().equals("$"))
 			throw new InvalidPathException("Update path cannot end with '$'.");
 		else if(relative.getImmediate().equals("*"))
@@ -98,9 +96,23 @@ public class ModelModel<ModelType extends Model> extends Model {
 			model.handleUpdateSafe(update, relative);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	protected void applyUpdate(ModelUpdate update) {
-		model.applyUpdate(update);
+	protected void applyUpdate(ModelUpdate update) {		
+		Object result = update.process(model.myValue());
+		
+		if(result.getClass().getName()
+				.equals(ModelUpdate.SET_MODEL_TO.class.getName())) {
+			
+			notifyObservers(update, UpdateLevel.REFERENTIAL);
+			model = (ModelType) ((ModelUpdate.SET_MODEL_TO) result).getModel();
+			model.setKey(getKey());
+			model.setParent(getParent());
+		}
+		else {
+			notifyObservers(update, UpdateLevel.VALUE);
+			model.value = result;
+		}
 	}
 	
 }
