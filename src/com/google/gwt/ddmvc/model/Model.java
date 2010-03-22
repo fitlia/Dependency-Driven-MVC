@@ -113,15 +113,15 @@ public class Model {
 		calculatePath();
 	}
 	
-	//--------------------------------------------------------
-	//                                                       |
-	//            PARENT-CHILD RELATIONSHIPS                 |
-	//                                                       |
-	//--------------------------------------------------------
+	//
+	//
+	// Parent-child Relationships
+	//
+	//
 	
-	//----------
-	//This Model
-	//----------
+	//
+	// This Model
+	//
 	
 	/**
 	 * @return this model's key
@@ -162,9 +162,9 @@ public class Model {
 			subModel.calculatePath();
 	}
 	
-	//------------
-	//Child Models
-	//------------
+	//
+	// Child Models
+	//
 	
 	/**
 	 * Determine whether or not this model has any child models at all
@@ -286,9 +286,9 @@ public class Model {
 		childData.put(key, model);
 	}
 	
-	//-------------
-	//Parent Models
-	//-------------
+	//
+	// Parent Models
+	//
 	
 	/**
 	 * @return the parent of this model
@@ -315,15 +315,15 @@ public class Model {
 		return getParent().getRoot();
 	}
 	
-	//--------------------------------------------------------
-	//                                                       |
-	//                     OBSERVERS                         |
-	//                                                       |
-	//--------------------------------------------------------
+	//
+	//
+	// Observer methods
+	//
+	//
 	
-	//---------
-	//Existence
-	//---------
+	//
+	// Existence
+	//
 	
 	/**
 	 * @return true if a change to this model would result in any observers
@@ -333,9 +333,9 @@ public class Model {
 		return DDMVC.hasObservers(path);
 	}
 	
-	//-------
-	//Getters
-	//-------
+	//
+	// Getters
+	//
 	
 	/**
 	 * @return the set of referential observers, unmodifiable
@@ -358,9 +358,9 @@ public class Model {
 		return DDMVC.getObservers(path.append("*"));
 	}
 	
-	//------
-	//Adders
-	//------
+	//
+	// Adders
+	//
 	
 	/**
 	 * Add a referential observer to this model.
@@ -424,9 +424,9 @@ public class Model {
 		DDMVC.addObserver(observer, this.path.append(path));
 	}
 	
-	//--------
-	//Removals
-	//--------
+	//
+	// Removals
+	//
 	
 	/**
 	 * Remove an observer from the set of referential observers
@@ -453,15 +453,15 @@ public class Model {
 	}
 	
 
-	//--------------------------------------------------------
-	//                                                       |
-	//                     ACCESSORS                         |
-	//                                                       |
-	//--------------------------------------------------------
+	//
+	//
+	// Accessors
+	//
+	//
 	
-	//---------------
-	//Value Accessors
-	//---------------
+	//
+	// Value Accessors
+	//
 	
 	/**
 	 * Get the value associated with this model, for internal use
@@ -539,9 +539,9 @@ public class Model {
 		return get(path.append("$"), observer);
 	}
 	
-	//---------------
-	//Model Accessors
-	//---------------
+	//
+	// Model Accessors
+	//
 	
 	/**
 	 * @proxy getModel(Path, Observer)
@@ -591,9 +591,9 @@ public class Model {
 		return (Model) get(path, observer);
 	}
 	
-	//-----------------
-	//Generic Accessors
-	//-----------------
+	//
+	// Generic Accessors
+	//
 	
 	/**
 	 * @proxy get(Path, Observer)
@@ -661,15 +661,15 @@ public class Model {
 		return getChild(key).get(path.advance(), observer);
 	}
 	
-	//--------------------------------------------------------
-	//                                                       |
-	//                  UPDATE HANDLING                      |
-	//                                                       |
-	//--------------------------------------------------------
+	//
+	//
+	// Update Handling
+	//
+	//
 	
-	//-----------------------
-	//Generic update handling
-	//-----------------------
+	//
+	// Generic update handling
+	//
 	
 	/**
 	 * Handle a ModelUpdate request, notify relevant observers.
@@ -727,9 +727,9 @@ public class Model {
 		}
 	}
 	
-	//---------
-	//Set Value
-	//---------
+	//
+	// Set Value
+	//
 	
 	/**
 	 * @proxy setValue(Path, Object)
@@ -767,9 +767,9 @@ public class Model {
 		handleUpdateSafe(update, path);
 	}
 	
-	//---------
-	//Set Model
-	//---------
+	//
+	// Set Model
+	//
 	
 	/**
 	 * @proxy setModel(Path, Model)
@@ -824,9 +824,9 @@ public class Model {
 		handleUpdateSafe(update, path);
 	}
 	
-	//------------
-	//Delete Model
-	//------------
+	//
+	// Delete Model
+	//
 	
 	/**
 	 * @proxy deleteModel(Path)
@@ -867,9 +867,9 @@ public class Model {
 		}	
 	}
 	
-	//----------------
-	//Explicit updates
-	//----------------
+	//
+	// Explicit updates
+	//
 	
 	/**
 	 * @proxy update(Path)
@@ -904,9 +904,9 @@ public class Model {
 		DDMVC.notifyObservers(update, UpdateLevel.VALUE, path);
 	}
 	
-	//--------------------
-	//Notification Sending
-	//--------------------
+	//
+	// Notification Sending
+	//
 	
 	/**
 	 * Send notification of a model update to all appropriate observers.

@@ -26,11 +26,14 @@ public class ViewObservation {
 	public void setUp() {
 		DDMVC.reset();
 		root = DDMVC.getDataRoot();
-	}
+	}	
 	
-	/**
-	 * This class is simply used to count the number of times render() is called
-	 */
+	//
+	//
+	// SIMPLE OBSERVATION TESTS
+	//
+	//
+	
 	private class CountView extends View {
 
 		public int myInt;
@@ -88,10 +91,12 @@ public class ViewObservation {
 		assertTrue(cv.myInt == 6);
 	}	
 	
-	/**
-	 * This class is simply used to count the number of times render() is called
-	 * and also the number of times otherUpdate().
-	 */
+	//
+	//
+	// RENDERING OPTIMIZATIONS
+	//
+	//
+	
 	private class CountView2 extends View {
 
 		public int render;
@@ -169,7 +174,7 @@ public class ViewObservation {
 	}
 	
 	@Test
-	public void testSetValueOnly() {
+	public void setValueOnly() {
 		setup2();
 		
 		root.setValue("property2", 45);
@@ -181,7 +186,7 @@ public class ViewObservation {
 	}
 	
 	@Test
-	public void testAppendOnly() {
+	public void appendOnly() {
 		setup2();
 		
 		root.handleUpdate(new Append("property3", 33));
@@ -193,7 +198,7 @@ public class ViewObservation {
 	}
 	
 	@Test
-	public void testPrependOnly() {
+	public void prependOnly() {
 		setup2();
 		
 		root.handleUpdate(new Prepend("property3", 33));
@@ -205,7 +210,7 @@ public class ViewObservation {
 	}
 	
 	@Test
-	public void testAppendUnobservedOnly() {
+	public void appendUnobservedOnly() {
 		setup2();
 		root.setValue("property2", new ArrayList<Integer>());
 		DDMVC.runLoop();
@@ -223,7 +228,7 @@ public class ViewObservation {
 	}
 	
 	@Test
-	public void testAllAtOnce() {
+	public void allAtOnce() {
 		setup2();
 		
 		root.setValue("property2", new ArrayList<Integer>());
@@ -238,7 +243,7 @@ public class ViewObservation {
 	}
 	
 	@Test
-	public void testSeveralWithOneUnobserver() {
+	public void severalWithOneUnobserver() {
 		setup2();
 		
 		root.setValue("property1", 1);
@@ -254,7 +259,7 @@ public class ViewObservation {
 	}
 	
 	@Test
-	public void testPropertyUpdateObserveration() {
+	public void propertyUpdateObserveration() {
 		setup2();
 		
 		root.setValue("property4", new ArrayList<Integer>());
@@ -270,7 +275,7 @@ public class ViewObservation {
 	}
 	
 	@Test
-	public void testWithError() {
+	public void withError() {
 		setup2();
 		
 		root.setValue("property3", 1);
@@ -293,10 +298,12 @@ public class ViewObservation {
 				.equals(ExceptionEncountered.class));
 	}
 	
-	/**
-	 * This class is simply used to count the number of times render() is called,
-	 * but pays attention to more hierarchical observation techniques
-	 */
+	//
+	//                          
+	// HIERARCHY-SPECIFIC TESTS 
+	//                          
+	//
+
 	private class CountView3 extends View {
 
 		public int render;
@@ -332,7 +339,7 @@ public class ViewObservation {
 	}
 	
 	@Test
-	public void testReferentialObserving() {
+	public void referentialObserving() {
 		setup3();	
 		
 		root.setValue("dog", "roof");
@@ -357,7 +364,7 @@ public class ViewObservation {
 	}
 	
 	@Test
-	public void testValueObserving() {
+	public void valueObserving() {
 		setup3();
 		
 		root.setValue("person.english", "sup, foo");
@@ -370,7 +377,7 @@ public class ViewObservation {
 	}
 	
 	@Test
-	public void testFieldObserving() {
+	public void fieldObserving() {
 		setup3();
 		
 		root.setValue("frog", "smash");
@@ -388,5 +395,20 @@ public class ViewObservation {
 		root.setModel("frog", new Model("smash"));
 		DDMVC.runLoop();
 		assertTrue(cv3.render == 5);
+	}
+	
+	@Test
+	public void observerRemoval() {
+		setup3();
+		CountView3 cv3_2 = new CountView3();
+		
+		DDMVC.addObserver(cv3, "bog.$");
+		DDMVC.addObserver(cv3_2, "bog.fish.car.$");
+		
+		root.setValue("bog", 1);
+		root.setValue("bog.fish.car", 2);
+		
+		DDMVC.runLoop();
+		assertTrue(cv3.render == 2);
 	}
 }

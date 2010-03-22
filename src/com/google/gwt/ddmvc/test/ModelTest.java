@@ -45,15 +45,15 @@ public class ModelTest {
 		root.setValue("frog.jumping", "jump");
 	}
 
-	//--------------------------------------------------------
-	//                                                       |
-	//            PARENT-CHILD RELATIONSHIPS                 |
-	//                                                       |
-	//--------------------------------------------------------
+	//
+	//
+	// Parent-child relationships
+	//
+	//
 	
-	//----------
-	//This Model
-	//----------
+	//
+	// This Model
+	//
 	
 	@Test
 	public void testGetKey() {
@@ -69,9 +69,9 @@ public class ModelTest {
 		assertTrue(english.getPath().toString().equals("person.english"));
 	}
 	
-	//------------
-	//Child Models
-	//------------
+	//
+	// Child Models
+	//
 	
 	@Test
 	public void testHasPath() {
@@ -101,9 +101,9 @@ public class ModelTest {
 		assertTrue(root.resolvePath("noontime").equals("ROOT_PATH"));
 	}
 	
-	//-------------
-	//Parent Models
-	//-------------
+	//
+	// Parent Models
+	//
 
 	@Test
 	public void testGetParent() {
@@ -121,15 +121,15 @@ public class ModelTest {
 		assertTrue(english.getRoot() == root);
 	}
 	
-	//--------------------------------------------------------
-	//                                                       |
-	//                     OBSERVERS                         |
-	//                                                       |
-	//--------------------------------------------------------
+	//
+	//
+	// Observer Methods
+	//
+	//
 	
-	//---------
-	//Existence
-	//---------
+	//
+	// Existence
+	//
 
 	@Test
 	public void testHasObservers() {
@@ -145,15 +145,15 @@ public class ModelTest {
 		assertTrue(DDMVC.hasObservers("pal.fish.cat"));
 	}
 		
-	//--------------------------------------------------------
-	//                                                       |
-	//                     ACCESSORS                         |
-	//                                                       |
-	//--------------------------------------------------------
+	//
+	//
+	// Accessors
+	//
+	//
 	
-	//---------------
-	//Value Accessors
-	//---------------
+	//
+	// Value Accessors
+	//
 	
 	@Test
 	public void testGetValue() {
@@ -199,9 +199,9 @@ public class ModelTest {
 		assertTrue(cat.getValueObservers().contains(obs));
 	}
 	
-	//---------------
-	//Model Accessors
-	//---------------
+	//
+	// Model Accessors
+	//
 	
 	@Test
 	public void testGetModelByString() {
@@ -234,9 +234,9 @@ public class ModelTest {
 		assertTrue(cat.getReferentialObservers().contains(obs));
 	}
 	
-	//-----------------
-	//Generic Accessors
-	//-----------------
+	//
+	// Generic Accessors
+	//
 
 	@Test
 	public void testGetByPathStringObserver() {
@@ -261,15 +261,15 @@ public class ModelTest {
 				.getFieldObservers().contains(obs));
 	}
 	
-	//--------------------------------------------------------
-	//                                                       |
-	//                  UPDATE HANDLING                      |
-	//                                                       |
-	//--------------------------------------------------------
+	//
+	//
+	// Update Handling
+	//
+	//
 	
-	//-----------------------
-	//Generic update handling
-	//-----------------------
+	//
+	// Generic update handling
+	//-
 	
 	@SuppressWarnings("unchecked")
 	@Test
@@ -303,9 +303,9 @@ public class ModelTest {
 		} catch(InvalidPathException e) {}
 	}
 	
-	//---------
-	//Set Value
-	//---------
+	//
+	// Set Value
+	//
 
 	@Test
 	public void testSetValueByObject() {
@@ -325,9 +325,9 @@ public class ModelTest {
 		assertTrue(root.getValue("cat.tabby").equals("moo"));
 	}
 	
-	//---------
-	//Set Model
-	//---------
+	//
+	// Set Model
+	//
 
 	@Test
 	public void testSetModelByModel() {
@@ -401,9 +401,9 @@ public class ModelTest {
 		assertTrue(root.getModel("dog.cat").getPath().equals("dog.cat"));
 	}
 	
-	//------------
-	//Delete Model
-	//------------
+	//
+	// Delete Model
+	//
 	
 	@Test
 	public void deleteModelByString() {

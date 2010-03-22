@@ -71,6 +71,16 @@ public class DDMVC {
 		return dataRoot;
 	}
 	
+	//
+	//                     
+	//  Observer Methods
+	//                     
+	//
+	
+	//
+	// Observer Existence
+	//
+	
 	/**
 	 * Return true if the model at the given path has any observers of any type, 
 	 * or any of its parents have any field observers.
@@ -130,6 +140,10 @@ public class DDMVC {
 		
 		return false;
 	}
+	
+	//
+	// Observer Accessors
+	//
 	
 	/**
 	 * Return all observers for a given path.  All terminal fields will be
@@ -214,6 +228,10 @@ public class DDMVC {
 		return Collections.unmodifiableSet(observers);
 	}
 	
+	//
+	// Observer Addition
+	//
+	
 	/**
 	 * Add an observer to the set of observers, according to the path variable.
 	 * Note - this makes no attempt to ensure a model is present here
@@ -238,6 +256,9 @@ public class DDMVC {
 		Set<Observer> observers = getObserversSafe(path, true);
 		observers.add(observer);
 	}
+	
+	//
+	// Observer Removal
 	
 	/**
 	 * Remove an observer from the set of observers, according to the path 
@@ -266,6 +287,271 @@ public class DDMVC {
 			cleanUp(observerRoot.getModel(path.ignoreTerminal()));
 		}
 	}
+	
+	/**
+	 * If this model is a leaf, and if it has no observers in its value, delete it
+	 * and recursively work its way up
+	 * @param model - the observer model to check
+	 */
+	private static void cleanUp(Model model) {
+		if(model.hasChilds())
+			return;
+		
+		if(!hasObservers(model, false, false)) {
+			Model parent = model.getParent();
+			parent.deleteModel(model.getKey());
+			cleanUp(parent);
+		}
+	}
+	
+	//
+	//
+	// Model Accessor Methods
+	//
+	//
+	
+	//
+	// Path Methods
+	//
+	
+	/**
+	 * Determine whether or not the data-store has a model at the given path
+	 * @param pathString - the path to check
+	 * @return true if a model exists
+	 */
+	public static boolean hasPath(String pathString) {
+		return hasPath(new Path(pathString));
+	}
+	
+	/**
+	 * Determine whether or not the data-store has a model at the given path
+	 * @param path - the path to check
+	 * @return true if a model exists
+	 */
+	public static boolean hasPath(Path path) {
+		return dataRoot.hasPath(path);
+	}
+	
+	//
+	// Value Accessors
+	//
+	
+	/**
+	 * Get the value at a given path
+	 * @param pathString - the path to the data model to access
+	 * @return the value at the path
+	 */
+	public static Object getValue(String pathString) {
+		return getValue(new Path(pathString), null);
+	}
+	
+	/**
+	 * Get the value at a given path and add the observer to the list of observers
+	 * @param pathString - the path to the data model to access
+	 * @param observer - the observer to add
+	 * @return the value at the path
+	 */
+	public static Object getValue(String pathString, Observer observer) {
+		return getValue(new Path(pathString), observer);
+	}
+	
+	/**
+	 * Get the value at a given paths
+	 * @param path - the path to the data model to access
+	 * @return the value at the path
+	 */
+	public static Object getValue(Path path) {
+		return getValue(path, null);
+	}
+	
+	/**
+	 * Get the value at a given path and add the observer to the list of observers
+	 * @param path - the path to the data model to access
+	 * @param observer - the observer to add
+	 * @return the value at the path
+	 */
+	public static Object getValue(Path path, Observer observer) {
+		return dataRoot.getValue(path, observer);
+	}
+
+	//
+	// Model Accessors
+	//
+	
+	/**
+	 * Get the Model at a given path
+	 * @param pathString - the path to the data model to access
+	 * @return the Model at the path
+	 */
+	public static Model getModel(String pathString) {
+		return getModel(new Path(pathString), null);
+	}
+	
+	/**
+	 * Get the Model at a given path and add the observer to the list of observers
+	 * @param pathString - the path to the data model to access
+	 * @param observer - the observer to add
+	 * @return the Model at the path
+	 */
+	public static Model getModel(String pathString, Observer observer) {
+		return getModel(new Path(pathString), observer);
+	}
+	
+	/**
+	 * Get the Model at a given paths
+	 * @param path - the path to the data model to access
+	 * @return the Model at the path
+	 */
+	public static Model getModel(Path path) {
+		return getModel(path, null);
+	}
+	
+	/**
+	 * Get the Model at a given path and add the observer to the list of observers
+	 * @param path - the path to the data model to access
+	 * @param observer - the observer to add
+	 * @return the Model at the path
+	 */
+	public static Model getModel(Path path, Observer observer) {
+		return dataRoot.getModel(path, observer);
+	}
+	
+	//
+	// Generic Accessors
+	//
+	
+	/**
+	 * Get the value referenced by this path, either a value or a model
+	 * @param pathString - the path to the data model to access
+	 * @return the value at the path
+	 */
+	public static Object get(String pathString) {
+		return get(new Path(pathString), null);
+	}
+	
+	/**
+	 * Get the value referenced by this path, either a value or a model
+	 * @param pathString - the path to the data model to access
+	 * @param observer - the observer to add
+	 * @return the value at the path
+	 */
+	public static Object get(String pathString, Observer observer) {
+		return get(new Path(pathString), observer);
+	}
+	
+	/**
+	 * Get the value referenced by this path, either a value or a model
+	 * @param path - the path to the data model to access
+	 * @return the value at the path
+	 */
+	public static Object get(Path path) {
+		return get(path, null);
+	}
+	
+	/**
+	 * Get the value referenced by this path, either a value or a model
+	 * @param path - the path to the data model to access
+	 * @param observer - the observer to add
+	 * @return the value at the path
+	 */
+	public static Object get(Path path, Observer observer) {
+		return dataRoot.get(path, observer);
+	}
+	
+	//
+	//                     
+	// Model Update Methods
+	//                     
+	//
+	
+	//
+	// Set Value
+	//
+	
+	/**
+	 * Set the value of a data-model
+	 * @param pathString - the path to the data
+	 * @param value - the value to set
+	 */
+	public static void setValue(String pathString, Object value) {
+		setValue(new Path(pathString), value);
+	}
+	
+	/**
+	 * Set the value of a data-model
+	 * @param path - the path to the data
+	 * @param value - the value to set
+	 */
+	public static void setValue(Path path, Object value) {
+		dataRoot.setValue(path, value);
+	}
+	
+	//
+	// Set Model
+	//
+	
+	/**
+	 * Set the model at a given path
+	 * @param pathString - the path to the model
+	 * @param model - the model to set
+	 */
+	public static void setModel(String pathString, Model model) {
+		setModel(new Path(pathString), model);
+	}
+	
+	/**
+	 * Set the model at a given path
+	 * @param path - the path to the model
+	 * @param model - the model to set
+	 */
+	public static void setModel(Path path, Model model) {
+		dataRoot.setModel(path, model);
+	}
+	
+	//
+	// Delete Model
+	//
+	
+	/**
+	 * Delete the model at a given path
+	 * @param pathString - the path to delete
+	 */
+	public static void deleteModel(String pathString) {
+		deleteModel(new Path(pathString));
+	}
+	
+	/**
+	 * Delete the model at a given path
+	 * @param path - the path to delete
+	 */
+	public static void deleteModel(Path path) {
+		dataRoot.deleteModel(path);
+	}
+	
+	//
+	// Generic Update Handling
+	//
+	
+	/**
+	 * Handle a single model update
+	 * @param update - the update to apply
+	 */
+	public static void handleUpdate(ModelUpdate update) {
+		dataRoot.handleUpdate(update);
+	}
+	
+	/**
+	 * Process a list of ModelUpdate objects
+	 * @param updates - the updates to be applied
+	 */
+	public static void handleUpdates(List<ModelUpdate> updates) {
+		for(ModelUpdate update : updates)
+			handleUpdate(update);
+	}
+	
+	//
+	// Notification Dissemination
+	//
 	
 	/**
 	 * Notify any observers of a particular model of a particular change
@@ -314,32 +600,6 @@ public class DDMVC {
 	}
 	
 	/**
-	 * If this model is a leaf, and if it has no observers in its value, delete it
-	 * and recursively work its way up
-	 * @param model - the observer model to check
-	 */
-	private static void cleanUp(Model model) {
-		//TODO - tests to try and break this
-		if(model.hasChilds())
-			return;
-		
-		if(!hasObservers(model, false, false)) {
-			Model parent = model.getParent();
-			parent.deleteModel(model.getKey());
-			cleanUp(parent);
-		}
-	}
-	
-	/**
-	 * Process a list of ModelUpdate objects
-	 * @param updates - the updates to be applied
-	 */
-	public static void handleUpdates(List<ModelUpdate> updates) {
-		for(ModelUpdate update : updates)
-			dataRoot.handleUpdate(update);
-	}
-	
-	/**
 	 * Add an observer to be notified at the next run loop
 	 * @param observer - the observer to be notified
 	 * @param update - the update that caused this notification
@@ -357,6 +617,12 @@ public class DDMVC {
 		for(Observer observer : observers)
 			addNotify(observer, update);
 	}
+	
+	//
+	//                     
+	//  Event Methods
+	//                     
+	//
 	
 	/**
 	 * Notify a particular controller whenever a particular type of event is
