@@ -2,6 +2,8 @@ package com.google.gwt.ddmvc;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,6 +15,9 @@ import com.google.gwt.ddmvc.controller.ServerRequest;
 import com.google.gwt.ddmvc.event.AppEvent;
 import com.google.gwt.ddmvc.event.Observer;
 import com.google.gwt.ddmvc.model.Model;
+import com.google.gwt.ddmvc.model.Path;
+import com.google.gwt.ddmvc.model.Model.UpdateLevel;
+import com.google.gwt.ddmvc.model.exception.InvalidPathException;
 import com.google.gwt.ddmvc.model.update.Cascade;
 import com.google.gwt.ddmvc.model.update.ExceptionComputed;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
@@ -30,6 +35,11 @@ public class DDMVC {
 	private static List<AppEvent> pendingEvents;
 	private static MultiMap<String, Controller> subscriptions;
 	private static Model dataRoot;
+	private static Model observerRoot;
+	
+	private static final int REFERENTIAL_OBSERVER_INDEX = 0;
+	private static final int VALUE_OBSERVER_INDEX = 1;
+	private static final int FIELD_OBSERVER_INDEX = 2;
 	
 	//Static initialization
 	static { init(); }
@@ -39,6 +49,7 @@ public class DDMVC {
 	 */
 	private static void init() {
 		dataRoot = new Model();
+		observerRoot = new Model();
 		pendingNotifies = new MultiHashListMap<Observer, ModelUpdate>();
 		pendingEvents = new ArrayList<AppEvent>();
 		subscriptions = new MultiHashMap<String, Controller>();
@@ -58,6 +69,265 @@ public class DDMVC {
 	 */
 	public static Model getDataRoot() {
 		return dataRoot;
+	}
+	
+	/**
+	 * Return true if the model at the given path has any observers of any type, 
+	 * or any of its parents have any field observers.
+	 * Note - with throw an InvalidPathException if path is terminal
+	 * @param pathString - the path to check for observers
+	 * @return true if the path has any observers
+	 */
+	public static boolean hasObservers(String pathString) {
+		return hasObservers(new Path(pathString));
+	}
+	
+	/**
+	 * Return true if the model at the given path has any observers of any type, 
+	 * or any of its parents have any field observers.
+	 * Note - with throw an InvalidPathException if path is terminal
+	 * @param path - the path to check for observers
+	 * @return true if the path has any observers
+	 */
+	public static boolean hasObservers(Path path) {
+		if(path.isTerminal())
+			throw new InvalidPathException("Cannot call hasObservers on a " +
+					"terminal path.");
+		
+		if(!observerRoot.hasPath(path))
+			return hasObservers(
+					observerRoot.getModel(observerRoot.resolvePath(path)), true, true);
+		else
+			return hasObservers(observerRoot.getModel(path), true, false);
+		
+	}
+	
+	/**
+	 * Determines if any observers should be notified if a given
+	 * model changes.
+	 * @param observerModel - the observer model to check
+	 * @param recursive - if true, will also check field observers upstream
+	 * @param fieldOnly - if true, will only check field observers
+	 * @param true if there are any observers
+	 */
+	@SuppressWarnings("unchecked")
+	private static boolean hasObservers(Model observerModel, boolean recursive, 
+			boolean fieldOnly) {
+		
+		Set<Observer>[] observers = (Set<Observer>[]) observerModel.getValue();
+		
+		if(observers != null) {
+			if(observers[FIELD_OBSERVER_INDEX].size() > 0)
+				return true;
+			if(!fieldOnly && (
+					observers[REFERENTIAL_OBSERVER_INDEX].size() > 0
+					|| observers[VALUE_OBSERVER_INDEX].size() > 0 ))
+				return true;
+		}
+		
+		if(recursive && observerModel.getParent() != null)
+			return hasObservers(observerModel.getParent(), true, true);
+		
+		return false;
+	}
+	
+	/**
+	 * Return all observers for a given path.  All terminal fields will be
+	 * ignored.
+	 * Modifying any set will be reflected in the observation tree.
+	 * @param path - the path to access
+	 * @param create - if true, this will create anything necessary, otherwise
+	 * 				it will just return null if it runs into anything uncreated
+	 * @return the sets of observers, packed in an array
+	 */
+	@SuppressWarnings("unchecked")
+	private static Set<Observer>[] getAllObservers(Path path, boolean create) {
+		Model observerModel;
+		Path modelPath = path.ignoreTerminal();
+		if(observerRoot.hasPath(modelPath))
+			observerModel = observerRoot.getModel(modelPath);
+		else if(create) {
+			Set<Observer>[] observers = new Set[3];
+			for(int i = 0; i < 3; i++)
+				observers[i] = new HashSet<Observer>();
+			observerModel = new Model(observers);
+			observerRoot.setModel(modelPath, observerModel);
+		}
+		else {
+			return null;
+		}
+		
+		Set<Observer>[] observers = (Set<Observer>[]) observerModel.getValue();
+		return observers;
+	}
+	
+	/**
+	 * Return the observers for a given path.  The type of observers returned
+	 * depends on the path, where a path ending in $ will return value observers,
+	 * a path ending in * will return field observers, and anything else will
+	 * return referential observers.
+	 * Modifying the set will be reflected in the observation tree.
+	 * @param path - the path to access
+	 * @param create - if true, The set of observers will be created if it 
+	 * 				does not exist.
+	 * @return the sets of observers
+	 */
+	private static Set<Observer> getObserversSafe(Path path, boolean create) {
+		Set<Observer>[] observers = getAllObservers(path, create);
+		if(observers == null)
+			return null;
+		
+		if(path.endsWith("$"))
+			return observers[VALUE_OBSERVER_INDEX];
+		else if(path.endsWith("*"))
+			return observers[FIELD_OBSERVER_INDEX];
+		else
+			return observers[REFERENTIAL_OBSERVER_INDEX];
+	}
+	
+	/**
+	 * Return the observers for a given path.  The type of observers returned
+	 * depends on the path, where a path ending in $ will return value observers,
+	 * a path ending in * will return field observers, and anything else will
+	 * return referential observers.
+	 * Modifying the set will be reflected in the observation tree.
+	 * @param pathString - the path to access
+	 * @return the sets of observers, unmodifiable
+	 */
+	public static Set<Observer> getObservers(String pathString) {
+		return getObservers(new Path(pathString));
+	}
+	
+	/**
+	 * Return the observers for a given path.  The type of observers returned
+	 * depends on the path, where a path ending in $ will return value observers,
+	 * a path ending in * will return field observers, and anything else will
+	 * return referential observers.
+	 * Modifying the set will be reflected in the observation tree.
+	 * @param path - the path to access
+	 * @return the sets of observers, unmodifiable
+	 */
+	public static Set<Observer> getObservers(Path path) {
+		Set<Observer> observers = getObserversSafe(path, false);
+		if(observers == null)
+			return Collections.emptySet();
+		return Collections.unmodifiableSet(observers);
+	}
+	
+	/**
+	 * Add an observer to the set of observers, according to the path variable.
+	 * Note - this makes no attempt to ensure a model is present here
+	 * @param observer - the observer to add
+	 * @param pathString - the path to add the observer to (defines what type of 
+	 * observer it is according to the right-most path field)
+	 */
+	
+	public static void addObserver(Observer observer, String pathString) {
+		addObserver(observer, new Path(pathString));
+	}
+	
+	/**
+	 * Add an observer to the set of observers, according to the path variable.
+	 * Note - this makes no attempt to ensure a model is present here
+	 * @param observer - the observer to add
+	 * @param path - the path to add the observer to (defines what type of 
+	 * observer it is according to the right-most path field)
+	 */
+	
+	public static void addObserver(Observer observer, Path path) {
+		Set<Observer> observers = getObserversSafe(path, true);
+		observers.add(observer);
+	}
+	
+	/**
+	 * Remove an observer from the set of observers, according to the path 
+	 * variable.
+	 * @param observer - the observer to add
+	 * @param pathString - the path to add the observer to (defines what type of 
+	 * observer it is according to the right-most path field)
+	 */
+	
+	public static void removeObserver(Observer observer, String pathString) {			
+		removeObserver(observer, new Path(pathString));
+	}
+	
+	/**
+	 * Remove an observer from the set of observers, according to the path 
+	 * variable.
+	 * @param observer - the observer to add
+	 * @param path - the path to add the observer to (defines what type of 
+	 * observer it is according to the right-most path field)
+	 */
+	
+	public static void removeObserver(Observer observer, Path path) {			
+		Set<Observer> observers = getObserversSafe(path, false);
+		if(observers != null)	{
+			observers.remove(observer);
+			cleanUp(observerRoot.getModel(path.ignoreTerminal()));
+		}
+	}
+	
+	/**
+	 * Notify any observers of a particular model of a particular change
+	 * @param update - the update to notify about
+	 * @param level - the level of the update to apply
+	 * @param path - the path to the model to update
+	 */
+	public static void notifyObservers(ModelUpdate update, UpdateLevel level,
+			Path path) {
+		if(path.isTerminal())
+			throw new InvalidPathException("Cannot call notifyObservers on a " +
+				"terminal path.");
+		
+		if(!observerRoot.hasPath(path)) {
+			level = UpdateLevel.FIELD;
+			path = observerRoot.resolvePath(path);
+		}
+		notifyObservers(update, level, observerRoot.getModel(path));
+	}
+	
+	/**
+	 * Recursively notify any observers of a particular model of a particular 
+	 * change
+	 * @param update - the update to notify about
+	 * @param level - the level of the update to apply
+	 * @param observerModel - the observer model to access
+	 */
+	@SuppressWarnings("unchecked")
+	private static void notifyObservers(ModelUpdate update, UpdateLevel level,
+			Model observerModel) {
+		
+		Set<Observer>[] observers = (Set<Observer>[]) observerModel.getValue();
+		
+		if(observers != null) {
+			addNotify(observers[FIELD_OBSERVER_INDEX], update);
+			if(level == UpdateLevel.REFERENTIAL) {
+				addNotify(observers[REFERENTIAL_OBSERVER_INDEX], update);
+				addNotify(observers[VALUE_OBSERVER_INDEX], update);
+			}
+			else if(level == UpdateLevel.VALUE) 
+				addNotify(observers[VALUE_OBSERVER_INDEX], update);
+		}
+		
+		if(observerModel.getParent() != null)
+			notifyObservers(update, UpdateLevel.FIELD, observerModel.getParent());
+	}
+	
+	/**
+	 * If this model is a leaf, and if it has no observers in its value, delete it
+	 * and recursively work its way up
+	 * @param model - the observer model to check
+	 */
+	private static void cleanUp(Model model) {
+		//TODO - tests to try and break this
+		if(model.hasChilds())
+			return;
+		
+		if(!hasObservers(model, false, false)) {
+			Model parent = model.getParent();
+			parent.deleteModel(model.getKey());
+			cleanUp(parent);
+		}
 	}
 	
 	/**

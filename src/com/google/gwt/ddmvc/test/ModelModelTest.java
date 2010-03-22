@@ -124,8 +124,7 @@ public class ModelModelTest {
 		root.setValue("cat", "purr");
 		root.setModel("cat.tabby", myModel);
 		root.addObserver(obs, "cat.tabby.male.$");
-		assertTrue(root.getModel("cat.tabby.male")
-				.getValueObservers().contains(obs));
+		assertTrue(DDMVC.getObservers("cat.tabby.male.$").contains(obs));
 		root.setValue("cat.tabby.male", "reeo");
 		DDMVC.runLoop();
 		assertTrue(obs.change == 1);
@@ -165,7 +164,7 @@ public class ModelModelTest {
 		ModelModel<Model> myModel = new ModelModel<Model>();
 		root.setValue("cat", "purr");
 		root.setModel("cat.tabby", myModel);
-		System.out.println(root.getValue("cat.tabby"));
+		fail();
 	}
 	
 	@Test

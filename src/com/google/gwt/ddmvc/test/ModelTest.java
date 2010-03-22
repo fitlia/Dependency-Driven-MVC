@@ -7,6 +7,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.event.Observer;
 import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.Path;
@@ -90,6 +91,16 @@ public class ModelTest {
 		assertFalse(root.hasPath("cat.*"));
 	}
 	
+	@Test
+	public void testResolvePath() {
+		assertTrue(root.resolvePath("cat").equals("cat"));
+		assertTrue(root.resolvePath("person.english").equals("person.english"));
+		assertTrue(root.resolvePath("person.english.abe").equals("person.english"));
+		assertTrue(root.resolvePath("cat.fred").equals("cat"));
+		assertTrue(root.resolvePath("person.german").equals("person"));
+		assertTrue(root.resolvePath("noontime").equals("ROOT_PATH"));
+	}
+	
 	//-------------
 	//Parent Models
 	//-------------
@@ -123,15 +134,15 @@ public class ModelTest {
 	@Test
 	public void testHasObservers() {
 		root.addObserver(obs, "dog.cat.rain.main");
-		assertTrue(root.getModel("dog").hasObservers());
-		assertTrue(root.getModel("dog.cat").hasObservers());
-		assertTrue(root.getModel("dog.cat.rain.main").hasObservers());
+		assertTrue(DDMVC.hasObservers("dog.cat.rain.main"));
 		
 		root.setValue("fish.raid", "maui");
 		root.addObserver(obs, "fish.gills.$");
-		assertTrue(root.getModel("fish").hasObservers());
-		assertTrue(root.getModel("fish.gills").hasObservers());
-		assertFalse(root.getModel("fish.raid").hasObservers());
+		assertTrue(DDMVC.hasObservers("fish.gills"));
+		assertFalse(DDMVC.hasObservers("fish.raid"));
+		
+		root.addObserver(obs, "pal.*");
+		assertTrue(DDMVC.hasObservers("pal.fish.cat"));
 	}
 		
 	//--------------------------------------------------------
@@ -367,14 +378,6 @@ public class ModelTest {
 			fail();
 		} catch(ModelOverwriteException e) {}
 		assertTrue(root.getValue("person").equals("hello"));
-		
-		
-		Model newModel = new Model("tool");
-		newModel.addObserver(obs, "drill");
-		try {
-			root.setModel("tool", newModel);
-			fail();
-		} catch(ModelOverwriteException e) {}
 	}
 	
 	@Test
@@ -382,9 +385,11 @@ public class ModelTest {
 		root.addObserver(obs, "frog.granouille.green");
 		root.setValue("frog.granouille.green", "bark");
 		root.setModel("frog", new Model("ribbit"));
-		assertTrue(root.getValue("frog.granouille.green") == null);
-		assertTrue(root.getModel("frog.granouille.green")
-				.getReferentialObservers().contains(obs));
+		try{
+			root.getValue("frog.granouille.green");
+			fail();
+		} catch(ModelDoesNotExistException e) {}
+		assertTrue(DDMVC.getObservers("frog.granouille.green").contains(obs));
 	}
 	
 	@Test

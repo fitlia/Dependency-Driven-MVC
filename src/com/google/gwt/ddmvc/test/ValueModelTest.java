@@ -14,6 +14,7 @@ import com.google.gwt.ddmvc.model.Path;
 import com.google.gwt.ddmvc.model.ValueModel;
 import com.google.gwt.ddmvc.model.Model.UpdateLevel;
 import com.google.gwt.ddmvc.model.exception.InvalidPathException;
+import com.google.gwt.ddmvc.model.exception.ModelDoesNotExistException;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.model.update.list.Append;
 
@@ -127,7 +128,10 @@ public class ValueModelTest {
 		root.setValue("frog.toad.green", "fibbit");
 		root.addObserver(obs, "frog.toad.green");
 		root.setModel("frog.toad", new ValueModel<String>("ribbit"));
-		assertTrue(root.getModel("frog.toad.green")
-				.getReferentialObservers().size() == 1);
+		assertTrue(DDMVC.getObservers("frog.toad.green").size() == 1);
+		try {
+			root.getValue("frog.toad.green");
+			fail();
+		} catch(ModelDoesNotExistException e) {}
 	}
 }

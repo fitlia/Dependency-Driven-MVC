@@ -1,7 +1,5 @@
 package com.google.gwt.ddmvc.model;
 
-
-
 /**
  * A SubModel is a Field that stores some type of Model (by means of a 
  * ModelModel)

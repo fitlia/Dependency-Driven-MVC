@@ -1,8 +1,6 @@
 package com.google.gwt.ddmvc.model;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Set;
 import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.event.Observer;
@@ -60,9 +58,6 @@ public class Model {
 	private String key;
 	private Model parent;
 	private Path path;
-	private HashSet<Observer> referentialObservers;
-	private HashSet<Observer> valueObservers;
-	private HashSet<Observer> fieldObservers;
 	private HashMap<String, Model> childData;
 	private Object value;
 	
@@ -107,10 +102,6 @@ public class Model {
 		
 		this.value = value;
 		this.childData = new HashMap<String, Model>();
-		
-		this.referentialObservers = new HashSet<Observer>();
-		this.valueObservers = new HashSet<Observer>();
-		this.fieldObservers = new HashSet<Observer>();
 		
 		this.key = key;
 		this.parent = parent;
@@ -172,6 +163,14 @@ public class Model {
 	//------------
 	
 	/**
+	 * Determine whether or not this model has any child models at all
+	 * @return true if there are any child models
+	 */
+	public boolean hasChilds() {
+		return childData.size() > 0;
+	}
+	
+	/**
 	 * Determine whether or not a model-child exists
 	 * @param key - the key of the child to check for
 	 * @return true if the child exists
@@ -214,6 +213,34 @@ public class Model {
 	}
 	
 	/**
+	 * Return the deepest path through this model consistent with the provided
+	 * path.
+	 * Note - If this model has no children, resolvePath(new Path("dog")) will
+	 * return a blank path.
+	 * @param pathString - the path to resolve
+	 * @return the resolved path.
+	 */
+	public Path resolvePath(String pathString) {
+		return resolvePath(new Path(pathString));
+	}
+	
+	/**
+	 * Return the deepest path through this model consistent with the provided
+	 * path.
+	 * Note - If this model has no children, resolvePath(new Path("dog")) will
+	 * return a blank path.
+	 * @param path - the path to resolve
+	 * @return the resolved path.
+	 */
+	public Path resolvePath(Path path) {
+		if(hasChild(path.getImmediate()))
+			return (new Path(path.getImmediate()))
+				.append(getChild(path.getImmediate()).resolvePath(path.advance()));
+		
+		return new Path("");
+	}
+	
+	/**
 	 * Return the child model referenced by a given key.  If no model exists
 	 * with that key, it will be created and returned.
 	 * @param key - the key to check
@@ -230,14 +257,14 @@ public class Model {
 	}
 	
 	/**
-	 * Set the child at the given key to a new model.  The old model's 
-	 * observers will be transferred to the new model, and the parent-child
-	 * relationship will be resolved appropriately.
+	 * Set the child at the given key to a new model.  Observers will be preserved
+	 * from the old model, because those are stored by DDMVC and unrelated to
+	 * model.
 	 * 
-	 * If the new model has any observers or a parent set, 
+	 * If the new model has a parent set, 
 	 * ModelOverwriteException will be thrown.
 	 * 
-	 * Note - this will not send any notifications.
+	 * Note - this will not send any notifications
 	 * 
 	 * @param key - the key of the model to replace
 	 * @param model - the model to do the replacing
@@ -245,18 +272,13 @@ public class Model {
 	protected void setChild(String key, Model model) {
 		Path.validateKey(key);
 		
-		if(model.hasObservers())
-			throw new ModelOverwriteException("A model cannot be set as a child" +
-					"if it already has observers.");
-		
 		if(model.getParent() != null)
 			throw new ModelOverwriteException("A model cannot be set as a child" +
 				"if it already has a parent.");
 		
-		Model current = getChild(key);
+		
 		model.setKey(key);
 		model.setParent(this);
-		model.copyAllObservers(current);
 		
 		childData.put(key, model);
 	}
@@ -301,20 +323,11 @@ public class Model {
 	//---------
 	
 	/**
-	 * @return true if this model, or any of its child models has any type of
-	 * observers
+	 * @return true if a change to this model would result in any observers
+	 * being notified
 	 */
 	public boolean hasObservers() {
-		if(referentialObservers.size() > 0 
-				|| valueObservers.size() > 0
-				|| fieldObservers.size() > 0)
-			return true;
-		
-		for(Model subModel : childData.values())
-			if(subModel.hasObservers())
-				return true;
-		
-		return false;
+		return DDMVC.hasObservers(path);
 	}
 	
 	//-------
@@ -325,21 +338,21 @@ public class Model {
 	 * @return the set of referential observers, unmodifiable
 	 */
 	public Set<Observer> getReferentialObservers() {
-		return Collections.unmodifiableSet(referentialObservers);
+		return DDMVC.getObservers(path);
 	}
 	
 	/**
 	 * @return the set of value observers, unmodifiable
 	 */
 	public Set<Observer> getValueObservers() {
-		return Collections.unmodifiableSet(valueObservers);
+		return DDMVC.getObservers(path.append("$"));
 	}
 	
 	/**
 	 * @return the set of field observers, unmodifiable
 	 */
 	public Set<Observer> getFieldObservers() {
-		return Collections.unmodifiableSet(fieldObservers);
+		return DDMVC.getObservers(path.append("*"));
 	}
 	
 	//------
@@ -354,7 +367,7 @@ public class Model {
 	 */
 	public void addReferentialObserver(Observer observer) {
 		if(observer != null)
-			referentialObservers.add(observer);
+			DDMVC.addObserver(observer, path);
 	}
 	
 	/**
@@ -366,7 +379,7 @@ public class Model {
 	 */
 	public void addValueObserver(Observer observer) {
 		if(observer != null)
-			valueObservers.add(observer);
+			DDMVC.addObserver(observer, path.append("$"));
 	}
 	
 	/**
@@ -378,7 +391,7 @@ public class Model {
 	 */
 	public void addFieldObserver(Observer observer) {
 		if(observer != null)
-			fieldObservers.add(observer);
+			DDMVC.addObserver(observer, path.append("*"));
 	}
 	
 	/**
@@ -396,7 +409,7 @@ public class Model {
 	}
 	
 	/**
-	 * Add an observer to the model's set of dependents, according to the
+	 * Add an observer to relative to this model, according to the
 	 * path variable.  If the path ends in a field name, it will
 	 * be a referential observer.  If it ends with a '$' it will be a value
 	 * observer, and if it ends with a '*' it will be a field observer.
@@ -405,40 +418,7 @@ public class Model {
 	 * @param path - the path (relative to this model) to observe
 	 */
 	public void addObserver(Observer observer, Path path) {
-		if(path.getImmediate() == null)
-			addReferentialObserver(observer);
-		else if(path.getImmediate().equals("$"))
-			addValueObserver(observer);
-		else if(path.getImmediate().equals("*"))
-			addFieldObserver(observer);
-		else 
-			getChild(path.getImmediate())
-				.addObserver(observer, path.advance());
-	}
-	
-	/**
-	 * Copy all observers from the other model to this one
-	 * @param model - the model to copy from
-	 */
-	public void copyObservers(Model model) {
-		for(Observer observer : model.getReferentialObservers())
-			addReferentialObserver(observer);
-		for(Observer observer : model.getValueObservers())
-			addValueObserver(observer);
-		for(Observer observer : model.getFieldObservers())
-			addFieldObserver(observer);
-	}
-	
-	/**
-	 * Copy all observers from the other model, and all its sub-models to this one
-	 * @param model - the model to copy from
-	 */
-	public void copyAllObservers(Model model) {
-		copyObservers(model);
-		for(Model subModel : model.childData.values()) {
-			if(subModel.hasObservers())
-				getChild(subModel.getKey()).copyAllObservers(subModel);
-		}
+		DDMVC.addObserver(observer, this.path.append(path));
 	}
 	
 	//--------
@@ -450,7 +430,7 @@ public class Model {
 	 * @param observer - the observer to remove
 	 */
 	public void removeReferentialObserver(Observer observer) {
-		referentialObservers.remove(observer);
+		DDMVC.removeObserver(observer, path);
 	}
 	
 	/**
@@ -458,7 +438,7 @@ public class Model {
 	 * @param observer - the observer to remove
 	 */
 	public void removeValueObserver(Observer observer) {
-		valueObservers.remove(observer);
+		DDMVC.removeObserver(observer, path.append("$"));
 	}
 	
 	/**
@@ -466,7 +446,7 @@ public class Model {
 	 * @param observer - the observer to remove
 	 */
 	public void removeFieldObserver(Observer observer) {
-		fieldObservers.remove(observer);
+		DDMVC.removeObserver(observer, path.append("*"));
 	}
 	
 
@@ -918,7 +898,7 @@ public class Model {
 	 */
 	public void update(Path path) {
 		ModelUpdate update = new UnknownUpdate(getPath().append(path));
-		getModel(path).notifyObservers(update, UpdateLevel.VALUE);
+		DDMVC.notifyObservers(update, UpdateLevel.VALUE, path);
 	}
 	
 	//--------------------
@@ -933,21 +913,7 @@ public class Model {
 	 * @param level - the update level
 	 */
 	public void notifyObservers(ModelUpdate update, UpdateLevel level) {
-		if(level == UpdateLevel.REFERENTIAL) {
-			DDMVC.addNotify(getReferentialObservers(), update);
-			DDMVC.addNotify(getValueObservers(), update);
-			DDMVC.addNotify(getFieldObservers(), update);
-		}
-		else if(level == UpdateLevel.VALUE) {
-			DDMVC.addNotify(getValueObservers(), update);
-			DDMVC.addNotify(getFieldObservers(), update);
-		}
-		else {
-			DDMVC.addNotify(getFieldObservers(), update);
-		}
-		
-		if(getParent() != null)
-			getParent().notifyObservers(update, UpdateLevel.FIELD);
+		DDMVC.notifyObservers(update, level, path);
 	}
 	
 }

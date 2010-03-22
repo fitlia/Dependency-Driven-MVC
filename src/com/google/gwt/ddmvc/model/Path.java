@@ -123,6 +123,21 @@ public class Path {
 	}
 
 	/**
+	 * Get a path equal to this path, with the $ or * eliminated from the end,
+	 * if any
+	 * @return a non-terminal path
+	 */
+	public Path ignoreTerminal() {
+		List<String> newPathList = new LinkedList<String>();
+		newPathList.addAll(path);
+		
+		if(isTerminal())
+			newPathList.remove(newPathList.size() - 1);
+		
+		return new Path(newPathList);
+	}
+	
+	/**
 	 * @return the number of fields in this path
 	 */
 	public int size() {
@@ -214,6 +229,14 @@ public class Path {
 	 * @param other - the other path to look at
 	 * @return true if this path starts with the other path
 	 */
+	public boolean startsWith(String other) {
+		return startsWith(new Path(other));
+	}
+	
+	/**
+	 * @param other - the other path to look at
+	 * @return true if this path starts with the other path
+	 */
 	public boolean startsWith(Path other) {
 		try{
 			resolvePath(other);
@@ -221,6 +244,14 @@ public class Path {
 		} catch(InvalidPathException e) {
 			return false;
 		}
+	}
+	
+	/**
+	 * @param other - the other path to look at
+	 * @return true if this path ends with the other path
+	 */
+	public boolean endsWith(String other) {
+		return endsWith(new Path(other));
 	}
 	
 	/**
