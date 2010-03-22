@@ -22,18 +22,20 @@ import com.google.gwt.ddmvc.model.update.ModelUpdate;
 public class ModelModel<ModelType extends Model> extends Model {
 
 	private ModelType model;
+	private boolean isNull;
 	
 	/**
 	 * Instantiate a new blank ModelModel
-	 * Note - that if the default ModelModel, that a default Model is put in its
-	 * place temporarily to keep track of observers and make sure no errors are
-	 * encountered.  In general, you should take care to set the model before
-	 * it's too late, though.
+	 * Note - if the default constructor is used, it is effectively the equivalent
+	 * of declaring a field as null in Java.  Attempts to modify this model
+	 * without first setting the model to something else will fail.
+	 * However, observers can still be added to this and sub-models.
 	 */
 	@SuppressWarnings("unchecked")
 	public ModelModel() {
 		super();
 		this.model = (ModelType) new Model();
+		this.isNull = true;
 		model.setKey(getKey());
 		model.setParent(getParent());
 	}
@@ -45,6 +47,7 @@ public class ModelModel<ModelType extends Model> extends Model {
 	public ModelModel(ModelType model) {
 		super(null, null, null);
 		this.model = model;
+		this.isNull = false;
 		model.setKey(getKey());
 		model.setParent(getParent());
 	}

@@ -27,14 +27,14 @@ public class ValueModel<Type> extends Model {
 	private Type value;
 	
 	/**
-	 * Instantiate a new blank ValueModelTest
+	 * Instantiate a new blank ValueModel
 	 */
 	public ValueModel() {
 		super();
 	}
 	
 	/**
-	 * Instantiate a new ValueModelTest with the given value
+	 * Instantiate a new ValueModel with the given value
 	 * @param value - the value of the model
 	 */
 	public ValueModel(Type value) {

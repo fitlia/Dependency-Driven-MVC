@@ -140,7 +140,7 @@ public class Model {
 	 * Note - this could potentially break invariants, so it can only
 	 * be called by the Model class
 	 * @param key - the key to set this model to
-	 */191919
+	 */
 	protected void setKey(String key) {
 		this.key = key;
 		calculatePath();

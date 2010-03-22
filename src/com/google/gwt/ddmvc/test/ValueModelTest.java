@@ -104,7 +104,7 @@ public class ValueModelTest {
 	}
 	
 	@Test
-	public void testPath() {
+	public void path() {
 		root.setModel("cat.tabby", new ValueModel<String>("meow"));
 		assertTrue(root.getModel("cat.tabby").getPath().equals("cat.tabby"));
 	}
@@ -119,4 +119,15 @@ public class ValueModelTest {
 		assertTrue(obs.change == 1);
 	}
 	
+	//Are observers preserved even when a higher-level model has
+	//been replaced with a ValueModel?
+	@Test
+	public void copyObserversToValueModel() {
+		root.setValue("frog.toad", "bibbit");
+		root.setValue("frog.toad.green", "fibbit");
+		root.addObserver(obs, "frog.toad.green");
+		root.setModel("frog.toad", new ValueModel<String>("ribbit"));
+		assertTrue(root.getModel("frog.toad.green")
+				.getReferentialObservers().size() == 1);
+	}
 }

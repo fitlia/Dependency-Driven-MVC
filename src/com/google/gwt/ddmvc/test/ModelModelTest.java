@@ -176,7 +176,6 @@ public class ModelModelTest {
 		assertTrue(root.getModel("cat.tabby").getClass().equals(ModelModel.class));
 		root.getModel("cat.tabby").setModel(new Model("phes"));
 		assertTrue(root.getModel("cat.tabby").getClass().equals(Model.class));
-		System.out.println("testing reset model...");
 	}
 	
 }

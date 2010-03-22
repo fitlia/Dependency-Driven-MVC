@@ -1,8 +1,5 @@
 package com.google.gwt.ddmvc.model;
 
-import java.util.HashMap;
-
-
 /**
  * An ObjectModel attempts to emulate a native Java object in a manner
  * more amenable to key-value observing.  It operates by defining several
@@ -35,12 +32,18 @@ public abstract class ObjectModel extends Model {
 		return (Type) getValue(property.getKey());
 	}
 	
-	
+	/**
+	 * Get a child model by a subModel field
+	 * @param <ModelType> - the type of model to be returned (packed into 
+	 * the sub-model)
+	 * @param subModel - the subModel to access (should be owned by the model)
+	 * @return the model stored in that child model
+	 */	
 	@SuppressWarnings("unchecked")
 	public <ModelType extends Model> ModelType 
 			get(SubModel<ModelType> subModel) {
 		
-		return (ModelType) getChild(subModel.getKey())
+		return (ModelType) getChild(subModel.getKey());
 	}
 	
 	/**
