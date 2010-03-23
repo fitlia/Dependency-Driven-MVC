@@ -91,9 +91,9 @@ public abstract class ObjectModel extends Model {
 	 * @return the new property
 	 */
 	protected static <ModelType extends Model> SubModel<ModelType> 
-			subModel(String key) {
+			subModel(Class<ModelType> cls, String key) {
 		
-		return new SubModel<ModelType>(key);
+		return SubModel.create(cls, key);
 	}
 	
 }

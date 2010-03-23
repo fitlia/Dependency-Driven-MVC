@@ -9,13 +9,32 @@ package com.google.gwt.ddmvc.model;
  */
 public class SubModel<ModelType extends Model> extends Field {
 	
-	public SubModel(String key) {
+	/**
+	 * Instantiate a new SubModel
+	 * @param cls - the class of the SubModel
+	 * @param key - the key of the field
+	 */
+	public static <ModelType extends Model> SubModel<ModelType>
+			create(Class<ModelType> cls, String key) {
+		
+		return new SubModel<ModelType>(cls, key);
+	}
+	
+	private Class<ModelType> cls;
+	
+	/**
+	 * Instantiate a new SubModel
+	 * @param cls - the class of the SubModel
+	 * @param key - the key of the field
+	 */
+	private SubModel(Class<ModelType> cls, String key) {
 		super(key);
+		this.cls = cls;
 	}
 
 	@Override
 	public Model getModel() {
-		return new ModelModel<ModelType>();
+		return ModelModel.create(cls);
 	}
 	
 }

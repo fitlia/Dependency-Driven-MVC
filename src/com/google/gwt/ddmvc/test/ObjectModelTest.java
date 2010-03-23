@@ -18,7 +18,7 @@ public class ObjectModelTest {
 		public static final Property<Integer> 
 			AGE = property("age", 0);
 		public static final SubModel<Model> 
-			CHARACTER = subModel("character");
+			CHARACTER = subModel(Model.class, "character");
 		
 		private static final Field[] fields = new Field[] {
 				NAME, RACE, AGE, CHARACTER

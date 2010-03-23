@@ -1,5 +1,6 @@
 package com.google.gwt.ddmvc.model;
 
+import com.google.gwt.ddmvc.Utility;
 import com.google.gwt.ddmvc.model.exception.InvalidPathException;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
@@ -20,29 +21,54 @@ import com.google.gwt.ddmvc.model.update.ModelUpdate;
 public class ModelModel<ModelType extends Model> extends Model {
 
 	private ModelType model;
+	private Class<ModelType> cls;
 	
 	/**
 	 * Instantiate a new blank ModelModel
-	 * Note - if the default constructor is used, it is effectively the equivalent
-	 * of declaring a field as null in Java.  Attempts to modify this model
-	 * without first setting the model to something else will fail.
+	 * @param cls - the class of the model stored in this ModelModel
+	 * @return a new ModelModel
 	 */
-	public ModelModel() {
-		super();
-		this.model = null;
+	public static <ModelType extends Model> ModelModel<ModelType> 
+			create(Class<ModelType> cls) {
+		
+		return new ModelModel<ModelType>(cls, null);
+	}
+	
+	/**
+	 * Instantiate a new ModelModel with the given model, with the class
+	 * packed into the model
+	 * @param model - the value of the model
+	 * @return a new ModelModel
+	 */
+	@SuppressWarnings("unchecked")
+	public static <ModelType extends Model> ModelModel<ModelType> 
+			create(ModelType model) {
+		
+		return new ModelModel<ModelType>
+			((Class<ModelType>) model.getClass(), model);
 	}
 	
 	/**
 	 * Instantiate a new ModelModel with the given model
+	 * @param cls - the class of the model stored in this ModelModel
+	 * @param model - the value of the model
+	 * @return a new ModelModel
+	 */
+	public static <ModelType extends Model> ModelModel<ModelType> 
+			create(Class<ModelType> cls, ModelType model) {
+		
+		return new ModelModel<ModelType>(cls, model);
+	}
+	
+	/**
+	 * Instantiate a new ModelModel with the given model
+	 * @param cls - the class of the model stored in this ModelModel
 	 * @param model - the value of the model
 	 */
-	public ModelModel(ModelType model) {
+	private ModelModel(Class<ModelType> cls, ModelType model) {
 		super();
+		this.cls = cls;
 		this.model = model;
-		if(getKey() != null && getParent() != null) {
-			model.setKey(getKey());
-			model.setParent(getParent());
-		}
 	}
 	
 	/**
@@ -50,6 +76,13 @@ public class ModelModel<ModelType extends Model> extends Model {
 	 */
 	public ModelType getModel() {
 		return model;
+	}
+	
+	/**
+	 * @return the class of the Model held by this ModelModel
+	 */
+	public Class<ModelType> getModelClass() {
+		return cls;
 	}
 	
 	@Override
@@ -106,8 +139,14 @@ public class ModelModel<ModelType extends Model> extends Model {
 		if(result.getClass().getName()
 				.equals(ModelUpdate.SET_MODEL_TO.class.getName())) {
 			
+			
+			Model newModel = ((ModelUpdate.SET_MODEL_TO) result).getModel();
+			if(!Utility.aExtendsB(newModel.getClass(), cls))
+				throw new ClassCastException(newModel.getClass() 
+						+ " cannot be cast to " + cls);
+			
 			notifyObservers(update, UpdateLevel.REFERENTIAL);
-			model = (ModelType) ((ModelUpdate.SET_MODEL_TO) result).getModel();
+			model = (ModelType) newModel;
 			model.setKey(getKey());
 			model.setParent(getParent());
 		}
