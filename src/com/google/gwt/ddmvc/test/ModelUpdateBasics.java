@@ -17,52 +17,49 @@ import com.google.gwt.ddmvc.model.update.list.Prepend;
  */
 public class ModelUpdateBasics {
 	
-	private Model root;
-	
 	@Before
 	public void setUp() {
 		DDMVC.reset();
-		root = DDMVC.getDataRoot();
 		
-		root.setValue("frillo", "Hodgepodge");
-		root.setValue("something", "text");
-		root.setValue("lists.listA", new ArrayList<Integer>());
-		root.setValue("lists.listB", new ArrayList<Integer>());
+		DDMVC.setValue("frillo", "Hodgepodge");
+		DDMVC.setValue("something", "text");
+		DDMVC.setValue("lists.listA", new ArrayList<Integer>());
+		DDMVC.setValue("lists.listB", new ArrayList<Integer>());
 	}
 	
 	@Test
 	public void applySetValueUpdate() {
 		SetValue update = new SetValue("frillo", "hodgepodge");
-		root.handleUpdate(update);
-		assertTrue(root.getValue("frillo").equals("hodgepodge"));
+		DDMVC.handleUpdate(update);
+		assertTrue(DDMVC.getValue("frillo").equals("hodgepodge"));
 		
 		SetValue update2 = new SetValue("fresh", "bite");
-		root.handleUpdate(update2);
-		assertTrue(root.getValue("fresh").equals("bite"));
+		DDMVC.handleUpdate(update2);
+		assertTrue(DDMVC.getValue("fresh").equals("bite"));
 		
 		SetValue update3 = new SetValue("my.color.is", "red");
-		root.handleUpdate(update3);
-		assertTrue(root.getValue("my.color.is").equals("red"));
+		DDMVC.handleUpdate(update3);
+		assertTrue(DDMVC.getValue("my.color.is").equals("red"));
 	}
 	
 	@Test
 	public void applySetModelUpdate() {
 		Model bite = new Model("bite");
 		SetModel update = new SetModel("fresh", bite);
-		root.handleUpdate(update);
-		assertTrue(root.getValue("fresh").equals("bite"));
+		DDMVC.handleUpdate(update);
+		assertTrue(DDMVC.getValue("fresh").equals("bite"));
 		
 		Model red = new Model("red");
 		SetModel update2 = new SetModel("lists.listB", red);
-		root.handleUpdate(update2);
-		assertTrue(root.getValue("lists.listB").equals("red"));
+		DDMVC.handleUpdate(update2);
+		assertTrue(DDMVC.getValue("lists.listB").equals("red"));
 	}
 	
 	@Test
 	public void illegalUpdatePath() {
 		SetValue update = new SetValue("frillo.$", "hodgepodge");
 		try{
-			root.handleUpdate(update);
+			DDMVC.handleUpdate(update);
 		} catch(InvalidPathException e) {}
 	}
 	
@@ -70,7 +67,7 @@ public class ModelUpdateBasics {
 	public void illegalUpdatePath2() {
 		SetValue update = new SetValue("frillo.*", "hodgepodge");
 		try{
-			root.handleUpdate(update);
+			DDMVC.handleUpdate(update);
 		} catch(InvalidPathException e) {}
 	}
 	
@@ -91,16 +88,16 @@ public class ModelUpdateBasics {
 		
 		DDMVC.handleUpdates(updates);
 		
-		assertTrue(root.getValue("cow").equals("moo"));
-		assertTrue(root.getValue("shawn").equals(33));
+		assertTrue(DDMVC.getValue("cow").equals("moo"));
+		assertTrue(DDMVC.getValue("shawn").equals(33));
 		
 		
-		List<Integer> listA = (List<Integer>) root.getValue("lists.listA");
+		List<Integer> listA = (List<Integer>) DDMVC.getValue("lists.listA");
 		assertTrue(listA.size() == 3);
 		assertTrue(listA.get(0).equals(3));
 		assertTrue(listA.get(2).equals(2));
 		
-		List<Integer> listB = (List<Integer>) root.getValue("lists.listB");
+		List<Integer> listB = (List<Integer>) DDMVC.getValue("lists.listB");
 		assertTrue(listB.size() == 1);
 		assertTrue(listB.get(0).equals(0));
 	}

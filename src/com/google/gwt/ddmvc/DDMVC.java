@@ -529,6 +529,26 @@ public class DDMVC {
 	}
 	
 	//
+	// Explicit Update Handling
+	//
+	
+	/**
+	 * Send an UnkownUpdate notification to the observers of a model
+	 * @param pathString - the path to the model
+	 */
+	public static void update(String pathString) {
+		update(new Path(pathString));
+	}
+	
+	/**
+	 * Send an UnkownUpdate notification to the observers of a model
+	 * @param path - the path to the model
+	 */
+	public static void update(Path path) {
+		dataRoot.update(path);
+	}
+	
+	//
 	// Generic Update Handling
 	//
 	

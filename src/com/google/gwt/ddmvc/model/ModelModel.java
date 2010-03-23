@@ -37,10 +37,12 @@ public class ModelModel<ModelType extends Model> extends Model {
 	 * @param model - the value of the model
 	 */
 	public ModelModel(ModelType model) {
-		super(null, null, null);
+		super();
 		this.model = model;
-		model.setKey(getKey());
-		model.setParent(getParent());
+		if(getKey() != null && getParent() != null) {
+			model.setKey(getKey());
+			model.setParent(getParent());
+		}
 	}
 	
 	/**

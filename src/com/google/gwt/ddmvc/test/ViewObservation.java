@@ -20,84 +20,26 @@ import com.google.gwt.ddmvc.view.View;
  */
 public class ViewObservation {
 
-	private Model root;
-	
-	@Before
-	public void setUp() {
-		DDMVC.reset();
-		root = DDMVC.getDataRoot();
-	}	
-	
-	//
-	//
-	// SIMPLE OBSERVATION TESTS
-	//
-	//
-	
-	private class CountView extends View {
+	private class SimpleRenderCounter extends View {
 
-		public int myInt;
+		public int render;
 
 		@Override
-		public void initialize() {
+		public void initialize() {		
 			observe("property1.$");
 			observe("property2.$");
 			observe("property3.$");
-			observe("property4.$");
-			observe("property5.$");
-			observe("property6.$");
-			myInt = 0;
+			render = 0;
 		}
 
 		@Override
 		public void render() {
-			myInt++;
+			render++;
 		}
 		
 	}
 	
-	@SuppressWarnings("unchecked")
-	@Test
-	public void simpleViewObserving() {		
-		root.setValue("property1", "foo");
-		root.setValue("property2", "bar");
-		root.setValue("property3", new ArrayList<String>());
-		
-		CountView cv = new CountView();
-		assertTrue(cv.myInt == 1);
-		
-		root.setValue("property1", "pam");
-		DDMVC.runLoop();
-		assertTrue(cv.myInt == 2);
-		
-		root.setValue("property2", "wow");
-		DDMVC.runLoop();
-		assertTrue(cv.myInt == 3);
-		
-		root.update("property3");
-		DDMVC.runLoop();
-		assertTrue(cv.myInt == 4);
-		
-		((List<String>) root.getValue("property3")).add("bie");
-		DDMVC.runLoop();
-		assertTrue(cv.myInt == 4);
-		
-		root.setValue("property4", "nish");
-		DDMVC.runLoop();
-		assertTrue(cv.myInt == 5);
-		
-		root.update("property5");
-		DDMVC.runLoop();
-		assertTrue(cv.myInt == 6);
-	}	
-	
-	//
-	//
-	// RENDERING OPTIMIZATIONS
-	//
-	//
-	
-	private class CountView2 extends View {
+	private class RenderOptimizer extends View {
 
 		public int render;
 		public int setValue2;
@@ -150,151 +92,199 @@ public class ViewObservation {
 	
 	}
 	
-	private CountView2 cv2;
+	private SimpleRenderCounter src;
+	private RenderOptimizer ro;
 	
-	private void setup2() {
-		root.setValue("property1", 10);
-		root.setValue("property2", 10);
-		root.setValue("property3", new ArrayList<Integer>());
-		root.setValue("property4", 15);
+	@Before
+	public void setUp() {
+		DDMVC.reset();
 		
-		cv2 = new CountView2();
-	}
+		DDMVC.setValue("property1", 10);
+		DDMVC.setValue("property2", 10);
+		DDMVC.setValue("property3", new ArrayList<Integer>());
+		DDMVC.setValue("property4", 15);
+		DDMVC.setValue("dog", "bark");
+		DDMVC.setValue("dog.cat", "meow");
+		DDMVC.setValue("person.english", "hello");
+		DDMVC.setValue("frog", "ribbit");
+		DDMVC.setValue("frog.toad", "croak");
+		DDMVC.setValue("frog.toad.green", "crooak");
+		
+		src = new SimpleRenderCounter();
+		DDMVC.addObserver(src, "property4.$");
+		DDMVC.addObserver(src, "property5.$");
+		DDMVC.addObserver(src, "property6.$");
+		DDMVC.addObserver(src, "dog");
+		DDMVC.addObserver(src, "dog.cat");
+		DDMVC.addObserver(src, "person.english.$");
+		DDMVC.addObserver(src, "frog.*");
+
+		ro = new RenderOptimizer();
+	}	
+	
+	//
+	//
+	// SIMPLE OBSERVATION TESTS
+	//
+	//
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void simpleViewObserving() {		
+		DDMVC.setValue("property1", "foo");
+		DDMVC.setValue("property2", "bar");
+		DDMVC.setValue("property3", new ArrayList<String>());
+		
+		assertTrue(src.render == 1);
+		
+		DDMVC.setValue("property1", "pam");
+		DDMVC.runLoop();
+		assertTrue(src.render == 2);
+		
+		DDMVC.setValue("property2", "wow");
+		DDMVC.runLoop();
+		assertTrue(src.render == 3);
+		
+		DDMVC.update("property3");
+		DDMVC.runLoop();
+		assertTrue(src.render == 4);
+		
+		((List<String>) DDMVC.getValue("property3")).add("bie");
+		DDMVC.runLoop();
+		assertTrue(src.render == 4);
+		
+		DDMVC.setValue("property4", "nish");
+		DDMVC.runLoop();
+		assertTrue(src.render == 5);
+		
+		DDMVC.update("property5");
+		DDMVC.runLoop();
+		assertTrue(src.render == 6);
+	}	
+	
+	//
+	//
+	// RENDERING OPTIMIZATIONS
+	//
+	//
 	
 	@Test
 	public void testRenderOnly() {
-		setup2();
-		
-		root.setValue("property1", 12);
+		DDMVC.setValue("property1", 12);
 		DDMVC.runLoop();
-		assertTrue(cv2.render == 2);
-		assertTrue(cv2.setValue2 == 0);
-		assertTrue(cv2.append3 == 0);
-		assertTrue(cv2.prepend3 == 0);		
+		assertTrue(ro.render == 2);
+		assertTrue(ro.setValue2 == 0);
+		assertTrue(ro.append3 == 0);
+		assertTrue(ro.prepend3 == 0);		
 	}
 	
 	@Test
 	public void setValueOnly() {
-		setup2();
-		
-		root.setValue("property2", 45);
+		DDMVC.setValue("property2", 45);
 		DDMVC.runLoop();
-		assertTrue(cv2.render == 1);
-		assertTrue(cv2.setValue2 == 1);
-		assertTrue(cv2.append3 == 0);
-		assertTrue(cv2.prepend3 == 0);		
+		assertTrue(ro.render == 1);
+		assertTrue(ro.setValue2 == 1);
+		assertTrue(ro.append3 == 0);
+		assertTrue(ro.prepend3 == 0);		
 	}
 	
 	@Test
 	public void appendOnly() {
-		setup2();
-		
-		root.handleUpdate(new Append("property3", 33));
+		DDMVC.handleUpdate(new Append("property3", 33));
 		DDMVC.runLoop();
-		assertTrue(cv2.render == 1);
-		assertTrue(cv2.setValue2 == 0);
-		assertTrue(cv2.append3 == 1);
-		assertTrue(cv2.prepend3 == 0);		
+		assertTrue(ro.render == 1);
+		assertTrue(ro.setValue2 == 0);
+		assertTrue(ro.append3 == 1);
+		assertTrue(ro.prepend3 == 0);		
 	}
 	
 	@Test
 	public void prependOnly() {
-		setup2();
-		
-		root.handleUpdate(new Prepend("property3", 33));
+		DDMVC.handleUpdate(new Prepend("property3", 33));
 		DDMVC.runLoop();
-		assertTrue(cv2.render == 1);
-		assertTrue(cv2.setValue2 == 0);
-		assertTrue(cv2.append3 == 0);
-		assertTrue(cv2.prepend3 == 1);
+		assertTrue(ro.render == 1);
+		assertTrue(ro.setValue2 == 0);
+		assertTrue(ro.append3 == 0);
+		assertTrue(ro.prepend3 == 1);
 	}
 	
 	@Test
 	public void appendUnobservedOnly() {
-		setup2();
-		root.setValue("property2", new ArrayList<Integer>());
+		DDMVC.setValue("property2", new ArrayList<Integer>());
 		DDMVC.runLoop();
-		assertTrue(cv2.render == 1);
-		assertTrue(cv2.setValue2 == 1);
-		assertTrue(cv2.append3 == 0);
-		assertTrue(cv2.prepend3 == 0);
+		assertTrue(ro.render == 1);
+		assertTrue(ro.setValue2 == 1);
+		assertTrue(ro.append3 == 0);
+		assertTrue(ro.prepend3 == 0);
 		
-		root.handleUpdate(new Append("property2", 33));
+		DDMVC.handleUpdate(new Append("property2", 33));
 		DDMVC.runLoop();
-		assertTrue(cv2.render == 2);
-		assertTrue(cv2.setValue2 == 1);
-		assertTrue(cv2.append3 == 0);
-		assertTrue(cv2.prepend3 == 0);
+		assertTrue(ro.render == 2);
+		assertTrue(ro.setValue2 == 1);
+		assertTrue(ro.append3 == 0);
+		assertTrue(ro.prepend3 == 0);
 	}
 	
 	@Test
 	public void allAtOnce() {
-		setup2();
-		
-		root.setValue("property2", new ArrayList<Integer>());
-		root.handleUpdate(new Append("property3", 33));
-		root.handleUpdate(new Prepend("property3", 41));
+		DDMVC.setValue("property2", new ArrayList<Integer>());
+		DDMVC.handleUpdate(new Append("property3", 33));
+		DDMVC.handleUpdate(new Prepend("property3", 41));
 		
 		DDMVC.runLoop();
-		assertTrue(cv2.render == 1);
-		assertTrue(cv2.setValue2 == 1);
-		assertTrue(cv2.append3 == 1);
-		assertTrue(cv2.prepend3 == 1);
+		assertTrue(ro.render == 1);
+		assertTrue(ro.setValue2 == 1);
+		assertTrue(ro.append3 == 1);
+		assertTrue(ro.prepend3 == 1);
 	}
 	
 	@Test
 	public void severalWithOneUnobserver() {
-		setup2();
-		
-		root.setValue("property1", 1);
-		root.setValue("property2", 1);
-		root.handleUpdate(new Append("property3", 33));
-		root.handleUpdate(new Prepend("property3", 41));
+		DDMVC.setValue("property1", 1);
+		DDMVC.setValue("property2", 1);
+		DDMVC.handleUpdate(new Append("property3", 33));
+		DDMVC.handleUpdate(new Prepend("property3", 41));
 		
 		DDMVC.runLoop();
-		assertTrue(cv2.render == 2);
-		assertTrue(cv2.setValue2 == 0);
-		assertTrue(cv2.append3 == 0);
-		assertTrue(cv2.prepend3 == 0);
+		assertTrue(ro.render == 2);
+		assertTrue(ro.setValue2 == 0);
+		assertTrue(ro.append3 == 0);
+		assertTrue(ro.prepend3 == 0);
 	}
 	
 	@Test
 	public void propertyUpdateObserveration() {
-		setup2();
-		
-		root.setValue("property4", new ArrayList<Integer>());
+		DDMVC.setValue("property4", new ArrayList<Integer>());
 		DDMVC.runLoop();
-		assertTrue(cv2.render == 1);
-		assertTrue(cv2.any4 == 1);
+		assertTrue(ro.render == 1);
+		assertTrue(ro.any4 == 1);
 		
 		Append app = new Append("property4", 15);
-		root.handleUpdate(app);
+		DDMVC.handleUpdate(app);
 		DDMVC.runLoop();
-		assertTrue(cv2.render == 1);
-		assertTrue(cv2.any4 == 2);
+		assertTrue(ro.render == 1);
+		assertTrue(ro.any4 == 2);
 	}
 	
 	@Test
 	public void withError() {
-		setup2();
-		
-		root.setValue("property3", 1);
+		DDMVC.setValue("property3", 1);
 		DDMVC.runLoop();
-		assertTrue(cv2.render == 2);
-		assertTrue(cv2.setValue2 == 0);
-		assertTrue(cv2.append3 == 0);
-		assertTrue(cv2.prepend3 == 0);
+		assertTrue(ro.render == 2);
+		assertTrue(ro.setValue2 == 0);
+		assertTrue(ro.append3 == 0);
+		assertTrue(ro.prepend3 == 0);
 		
-		root.setValue("property2", 1);
-		root.handleUpdate(new Append("property3", 33));
+		DDMVC.setValue("property2", 1);
+		DDMVC.handleUpdate(new Append("property3", 33));
 		
 		DDMVC.runLoop();
-		assertTrue(cv2.render == 2);
-		assertTrue(cv2.setValue2 == 1);
-		assertTrue(cv2.append3 == 0);
-		assertTrue(cv2.prepend3 == 0);
-		assertTrue(cv2.excepted == 1);
-		assertTrue(root.getValue("property3").getClass()
+		assertTrue(ro.render == 2);
+		assertTrue(ro.setValue2 == 1);
+		assertTrue(ro.append3 == 0);
+		assertTrue(ro.prepend3 == 0);
+		assertTrue(ro.excepted == 1);
+		assertTrue(DDMVC.getValue("property3").getClass()
 				.equals(ExceptionEncountered.class));
 	}
 	
@@ -303,112 +293,80 @@ public class ViewObservation {
 	// HIERARCHY-SPECIFIC TESTS 
 	//                          
 	//
-
-	private class CountView3 extends View {
-
-		public int render;
+	
+	@Test
+	public void referentialObserving() {		
+		DDMVC.setValue("dog", "roof");
+		DDMVC.runLoop();
+		assertTrue(src.render == 1);
 		
-		@Override
-		public void initialize() {
-			observe("dog");
-			observe("dog.cat");
-			observe("person.english.$");
-			observe("frog.*");
-			
-			render = 0;
-		}
-	
-		@Override
-		public void render() {			
-			render++;
-		}
-	
-	}
-	
-	private CountView3 cv3;
-	
-	public void setup3() {		
-		root.setValue("dog", "bark");
-		root.setValue("dog.cat", "meow");
-		root.setValue("person.english", "hello");
-		root.setValue("frog", "ribbit");
-		root.setValue("frog.toad", "croak");
-		root.setValue("frog.toad.green", "crooak");
-
-		cv3 = new CountView3();
+		DDMVC.setModel("dog", new Model("roof"));
+		DDMVC.runLoop();
+		assertTrue(src.render == 2);
+		
+		DDMVC.setValue("dog.cat", "purr");
+		DDMVC.runLoop();
+		assertTrue(src.render == 2);
+		
+		DDMVC.setModel("dog.cat.tabby", new Model("purr"));
+		DDMVC.runLoop();
+		assertTrue(src.render == 2);
+		
+		DDMVC.setModel("dog.cat", new Model("purr"));
+		DDMVC.runLoop();
+		assertTrue(src.render == 3);
 	}
 	
 	@Test
-	public void referentialObserving() {
-		setup3();	
-		
-		root.setValue("dog", "roof");
+	public void valueObserving() {		
+		DDMVC.setValue("person.english", "sup, foo");
 		DDMVC.runLoop();
-		assertTrue(cv3.render == 1);
+		assertTrue(src.render == 2);
 		
-		root.setModel("dog", new Model("roof"));
+		DDMVC.setModel("person.english", new Model("sup, foo"));
 		DDMVC.runLoop();
-		assertTrue(cv3.render == 2);
-		
-		root.setValue("dog.cat", "purr");
-		DDMVC.runLoop();
-		assertTrue(cv3.render == 2);
-		
-		root.setModel("dog.cat.tabby", new Model("purr"));
-		DDMVC.runLoop();
-		assertTrue(cv3.render == 2);
-		
-		root.setModel("dog.cat", new Model("purr"));
-		DDMVC.runLoop();
-		assertTrue(cv3.render == 3);
-	}
-	
-	@Test
-	public void valueObserving() {
-		setup3();
-		
-		root.setValue("person.english", "sup, foo");
-		DDMVC.runLoop();
-		assertTrue(cv3.render == 2);
-		
-		root.setModel("person.english", new Model("sup, foo"));
-		DDMVC.runLoop();
-		assertTrue(cv3.render == 3);
+		assertTrue(src.render == 3);
 	}
 	
 	@Test
 	public void fieldObserving() {
-		setup3();
-		
-		root.setValue("frog", "smash");
+		DDMVC.setValue("frog", "smash");
 		DDMVC.runLoop();
-		assertTrue(cv3.render == 2);
+		assertTrue(src.render == 2);
 		
-		root.setValue("frog.toad", "smash");
+		DDMVC.setValue("frog.toad", "smash");
 		DDMVC.runLoop();
-		assertTrue(cv3.render == 3);
+		assertTrue(src.render == 3);
 		
-		root.setModel("frog.toad", new Model("smash"));
+		DDMVC.setModel("frog.toad", new Model("smash"));
 		DDMVC.runLoop();
-		assertTrue(cv3.render == 4);
+		assertTrue(src.render == 4);
 		
-		root.setModel("frog", new Model("smash"));
+		DDMVC.setModel("frog", new Model("smash"));
 		DDMVC.runLoop();
-		assertTrue(cv3.render == 5);
+		assertTrue(src.render == 5);
 	}
 	
 	@Test
 	public void observerRemoval() {
-		setup3();
-		CountView3 cv3_2 = new CountView3();
+		SimpleRenderCounter src2 = new SimpleRenderCounter();
 		
-		DDMVC.addObserver(cv3, "bog.$");
-		DDMVC.addObserver(cv3_2, "bog.fish.car.$");
+		DDMVC.addObserver(src, "bog.$");
+		DDMVC.addObserver(src2, "bog.fish.car.$");
 		
-		root.setValue("bog", 1);
-		root.setValue("bog.fish.car", 2);
-		
+		DDMVC.setValue("bog", 1);
+		DDMVC.setValue("bog.fish.car", 2);	
 		DDMVC.runLoop();
-		assertTrue(cv3.render == 2);
+		
+		assertTrue(src.render == 2);
+		assertTrue(src2.render == 2);
+		
+		DDMVC.removeObserver(src2, "bog.fish.car.$");
+		DDMVC.setValue("bog", 1);
+		DDMVC.setValue("bog.fish.car", 2);
+		DDMVC.runLoop();
+		
+		assertTrue(src.render == 3);
+		assertTrue(src2.render == 2);
 	}
 }

@@ -6,7 +6,6 @@ import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.event.Observer;
 import com.google.gwt.ddmvc.model.exception.InvalidPathException;
 import com.google.gwt.ddmvc.model.exception.ModelDoesNotExistException;
-import com.google.gwt.ddmvc.model.exception.ModelOverwriteException;
 import com.google.gwt.ddmvc.model.update.ModelDeleted;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.model.update.SetModel;
@@ -69,7 +68,8 @@ public class Model {
 	 * Instantiate a new blank model
 	 */
 	public Model() {
-		init(null, null, null);
+		this.childData = new HashMap<String, Model>();
+		calculatePath();
 	}
 	
 	/**
@@ -77,39 +77,8 @@ public class Model {
 	 * @param value - the value to attach to this model, can be null
 	 */
 	public Model(Object value) {
-		init(null, value, null);
-	}
-	
-	/**
-	 * Instantiate a new model
-	 * @param parent - the parent of this model, can be null for root
-	 * @param value - the value to attach to this model, can be null
-	 * @param key - the key to set this model to, can be null but not blank
-	 */
-	public Model(Model parent, Object value, String key) {		
-		init(parent,value,key);
-	}
-	
-	/**
-	 * Helper method for the constructors
-	 * @param parent
-	 * @param value
-	 * @param key
-	 */
-	private void init(Model parent, Object value, String key) {
-		if(key != null)
-			Path.validateKey(key);
-		
-		if(parent != null && key == null)
-			throw new InvalidPathException("You cannot instantiate a model with " +
-					"a parent, but no key.");
-		
-		this.value = value;
 		this.childData = new HashMap<String, Model>();
-		
-		this.key = key;
-		this.parent = parent;
-		
+		this.value = value;
 		calculatePath();
 	}
 	
@@ -137,6 +106,7 @@ public class Model {
 	 * @param key - the key to set this model to
 	 */
 	protected void setKey(String key) {
+		Path.validateKey(key);
 		this.key = key;
 		calculatePath();
 	}
@@ -254,7 +224,9 @@ public class Model {
 		Model model = childData.get(key);
 		if(model == null) {
 			//This will throw InvalidPathException if key is invalid, so we're safe
-			model = new Model(this, null, key);
+			model = new Model();
+			model.setParent(this);
+			model.setKey(key);
 			childData.put(key, model);
 		}
 		return model;
@@ -273,12 +245,9 @@ public class Model {
 	 * @param key - the key of the model to replace
 	 * @param model - the model to do the replacing
 	 */
-	protected void setChild(String key, Model model) {
-		Path.validateKey(key);
-		
+	protected void setChild(String key, Model model) {		
 		if(model.getParent() != null)
-			throw new ModelOverwriteException("A model cannot be set as a child" +
-				"if it already has a parent.");
+			model.getParent().deleteModel(model.getKey());
 		
 		model.setKey(key);
 		model.setParent(this);
@@ -680,6 +649,8 @@ public class Model {
 	 */
 	public void handleUpdate(ModelUpdate update) {
 		Path relative = update.getTarget().resolvePath(getPath());
+		if(relative.isTerminal())
+			throw new InvalidPathException("Update path cannot be terminal.");
 		handleUpdateSafe(update, relative);
 	}	
 	
@@ -696,10 +667,6 @@ public class Model {
 	protected void handleUpdateSafe(ModelUpdate update, Path relative) {
 		if(relative.getImmediate() == null)
 			applyUpdate(update);
-		else if(relative.getImmediate().equals("$"))
-			throw new InvalidPathException("Update path cannot end with '$'.");
-		else if(relative.getImmediate().equals("*"))
-			throw new InvalidPathException("Update path cannot end with '*'.");
 		else
 			getChild(relative.getImmediate())
 				.handleUpdateSafe(update, relative.advance());
@@ -764,7 +731,7 @@ public class Model {
 	 */
 	public void setValue(Path path, Object value) {
 		ModelUpdate update = new SetValue(getPath().append(path), value);
-		handleUpdateSafe(update, path);
+		handleUpdate(update);
 	}
 	
 	//
@@ -821,7 +788,7 @@ public class Model {
 	 */
 	public void setModel(Path path, Model model) {
 		ModelUpdate update = new SetModel(getPath().append(path), model);
-		handleUpdateSafe(update, path);
+		handleUpdate(update);
 	}
 	
 	//
@@ -845,13 +812,11 @@ public class Model {
 	 * @param path - the path to the model to be deleted
 	 */
 	public void deleteModel(Path path) {
+		if(path.isTerminal())
+			throw new InvalidPathException("Delete path cannot be terminal.");
 		if(path.size() == 0)
 			throw new InvalidPathException("Cannot delete a blank path, dummy!");
 		else if(path.size() == 1) {
-			if(path.getImmediate().equals("$"))
-				throw new InvalidPathException("Delete path cannot end with '$'.");
-			if(path.getImmediate().equals("*"))
-				throw new InvalidPathException("Delete path cannot end with '*'.");
 			if(!hasPath(path.getImmediate()))
 				throw new ModelDoesNotExistException(getPath().append(path));
 			

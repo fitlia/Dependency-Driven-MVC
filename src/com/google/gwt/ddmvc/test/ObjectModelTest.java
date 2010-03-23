@@ -1,5 +1,7 @@
 package com.google.gwt.ddmvc.test;
 
+import org.junit.Before;
+import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.model.Field;
 import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.ObjectModel;
@@ -10,10 +12,13 @@ public class ObjectModelTest {
 
 	private static class PersonModel extends ObjectModel {
 		
-		public static final Property<String> NAME = property("person");
-		public static final Property<String> RACE = property("race");
-		public static final Property<Integer> AGE = property("age");
-		public static final SubModel<Model> CHARACTER = subModel("character");
+		public static final Property<String> 
+			NAME = property(String.class, "person"),
+			RACE = property(String.class, "race");
+		public static final Property<Integer> 
+			AGE = property("age", 0);
+		public static final SubModel<Model> 
+			CHARACTER = subModel("character");
 		
 		private static final Field[] fields = new Field[] {
 				NAME, RACE, AGE, CHARACTER
@@ -23,6 +28,11 @@ public class ObjectModelTest {
 			super(fields);
 		}
 		
+	}
+	
+	@Before
+	public void setUp() {
+		DDMVC.reset();
 	}
 	
 }

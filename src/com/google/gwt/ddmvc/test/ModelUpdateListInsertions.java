@@ -6,7 +6,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import com.google.gwt.ddmvc.DDMVC;
-import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.update.list.Append;
 import com.google.gwt.ddmvc.model.update.list.AppendAll;
 import com.google.gwt.ddmvc.model.update.list.Prepend;
@@ -15,15 +14,13 @@ import com.google.gwt.ddmvc.model.update.list.PrependAll;
 public class ModelUpdateListInsertions {
 
 	private List<Integer> testList;
-	private Model root;
 	
 	@Before
 	public void setUp() {
 		DDMVC.reset();
-		root = DDMVC.getDataRoot();
 		
-		root.setValue("frillo", "Hodgepodge");
-		root.setValue("something", "text");
+		DDMVC.setValue("frillo", "Hodgepodge");
+		DDMVC.setValue("something", "text");
 		
 		testList = new ArrayList<Integer>();
 		testList.add(5);
@@ -36,14 +33,14 @@ public class ModelUpdateListInsertions {
 	@Test
 	public void applyListAppendUpdate() {
 		Append update = new Append("lists.listA", 33);
-		root.handleUpdate(update);
-		List<Integer> list = (List<Integer>) root.getValue("lists.listA");
+		DDMVC.handleUpdate(update);
+		List<Integer> list = (List<Integer>) DDMVC.getValue("lists.listA");
 		assertTrue(list.size() == 1);
 		assertTrue(list.get(0).equals(33));
 		
 		Append update2 = new Append("lists.listA", 505);
-		root.handleUpdate(update2);
-		list = (List<Integer>) root.getValue("lists.listA");
+		DDMVC.handleUpdate(update2);
+		list = (List<Integer>) DDMVC.getValue("lists.listA");
 		assertTrue(list.size() == 2);
 		assertTrue(list.get(0).equals(33));
 		assertTrue(list.get(1).equals(505));
@@ -54,15 +51,15 @@ public class ModelUpdateListInsertions {
 	public void applyListAppendAllUpdate() {
 		
 		AppendAll update = new AppendAll("lists.listA", testList);
-		root.handleUpdate(update);
-		List<Integer> list = (List<Integer>) root.getValue("lists.listA");
+		DDMVC.handleUpdate(update);
+		List<Integer> list = (List<Integer>) DDMVC.getValue("lists.listA");
 		assertTrue(list.size() == 4);
 		assertTrue(list.get(0).equals(5));
 		assertTrue(list.get(1).equals(10));
 		
 		AppendAll update2 = new AppendAll("lists.listA", testList);
-		root.handleUpdate(update2);
-		list = (List<Integer>) root.getValue("lists.listA");
+		DDMVC.handleUpdate(update2);
+		list = (List<Integer>) DDMVC.getValue("lists.listA");
 		assertTrue(list.size() == 8);
 		assertTrue(list.get(0).equals(5));
 		assertTrue(list.get(1).equals(10));
@@ -74,14 +71,14 @@ public class ModelUpdateListInsertions {
 	@Test
 	public void applyListPrependUpdate() {
 		Prepend update = new Prepend("lists.listA", 33);
-		root.handleUpdate(update);
-		List<Integer> list = (List<Integer>) root.getValue("lists.listA");
+		DDMVC.handleUpdate(update);
+		List<Integer> list = (List<Integer>) DDMVC.getValue("lists.listA");
 		assertTrue(list.size() == 1);
 		assertTrue(list.get(0).equals(33));
 		
 		Prepend update2 = new Prepend("lists.listA", 505);
-		root.handleUpdate(update2);
-		list = (List<Integer>) root.getValue("lists.listA");
+		DDMVC.handleUpdate(update2);
+		list = (List<Integer>) DDMVC.getValue("lists.listA");
 		assertTrue(list.size() == 2);
 		assertTrue(list.get(0).equals(505));
 		assertTrue(list.get(1).equals(33));
@@ -92,8 +89,8 @@ public class ModelUpdateListInsertions {
 	public void applyListPrependAllUpdate() {
 		
 		PrependAll update = new PrependAll("lists.listA", testList);
-		root.handleUpdate(update);
-		List<Integer> list = (List<Integer>) root.getValue("lists.listA");
+		DDMVC.handleUpdate(update);
+		List<Integer> list = (List<Integer>) DDMVC.getValue("lists.listA");
 		assertTrue(list.size() == 4);
 		assertTrue(list.get(0).equals(5));
 		assertTrue(list.get(1).equals(10));
@@ -104,8 +101,8 @@ public class ModelUpdateListInsertions {
 		
 		PrependAll update2 = 
 			new PrependAll("lists.listA", testList2);
-		root.handleUpdate(update2);
-		list = (List<Integer>) root.getValue("lists.listA");
+		DDMVC.handleUpdate(update2);
+		list = (List<Integer>) DDMVC.getValue("lists.listA");
 		assertTrue(list.size() == 6);
 		assertTrue(list.get(0).equals(20));
 		assertTrue(list.get(1).equals(60));

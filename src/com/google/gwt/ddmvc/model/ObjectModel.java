@@ -6,6 +6,9 @@ package com.google.gwt.ddmvc.model;
  * fields and limiting updates made to the model to those particular fields.
  * It supports fields being model by the SubModel field.
  * 
+ * Note that the class must not be an interface, @see ValueModel for 
+ * explanation.
+ * 
  * @author Kevin Dolan
  */
 public abstract class ObjectModel extends Model {
@@ -49,11 +52,36 @@ public abstract class ObjectModel extends Model {
 	/**
 	 * Create a new Property 
 	 * @param <T> - the Type to be stored in the model
+	 * @param cls - the class of the property
 	 * @param key - the key to represent the model
 	 * @return the new property
 	 */
-	protected static <T> Property<T> property(String key) {
-		return new Property<T>(key);
+	protected static <T> Property<T> property(Class<T> cls, String key) {
+		return Property.create(cls, key);
+	}
+	
+	/**
+	 * Create a new Property 
+	 * @param <T> - the Type to be stored in the model
+	 * @param cls - the class of the property
+	 * @param key - the key to represent the model
+	 * @param defaultValue - the value to default to
+	 * @return the new property
+	 */
+	protected static <T> Property<T> property(Class<T> cls, String key,
+			T defaultValue) {
+		return Property.create(cls, key, defaultValue);
+	}
+	
+	/**
+	 * Create a new Property, with the class packed into the default value
+	 * @param <T> - the Type to be stored in the model
+	 * @param key - the key to represent the model
+	 * @param defaultValue - the value to default to
+	 * @return the new property
+	 */
+	protected static <T> Property<T> property(String key, T defaultValue) {
+		return Property.create(key, defaultValue);
 	}
 	
 	/**

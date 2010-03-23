@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
-
 import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.event.Observer;
 import com.google.gwt.ddmvc.model.Model;
@@ -14,7 +13,6 @@ import com.google.gwt.ddmvc.model.Path;
 import com.google.gwt.ddmvc.model.Model.UpdateLevel;
 import com.google.gwt.ddmvc.model.exception.InvalidPathException;
 import com.google.gwt.ddmvc.model.exception.ModelDoesNotExistException;
-import com.google.gwt.ddmvc.model.exception.ModelOverwriteException;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.model.update.list.Append;
 
@@ -27,22 +25,21 @@ public class ModelTest {
 		public void notifyObservers(ModelUpdate update, UpdateLevel level) {}
 	}
 	
-	private Model root;
 	private Observer obs = new FakeObserver();
 	
 	@Before
 	public void setUp() throws Exception {
-		root = new Model();
+		DDMVC.reset();
 		
-		root.setValue("cat","meow");
-		root.setValue("dog", "bark");
-		root.setValue("person.french", "bonjour");
-		root.setValue("person.english", "hello");
-		root.setValue("lists.counting", new ArrayList<Integer>());
+		DDMVC.setValue("cat","meow");
+		DDMVC.setValue("dog", "bark");
+		DDMVC.setValue("person.french", "bonjour");
+		DDMVC.setValue("person.english", "hello");
+		DDMVC.setValue("lists.counting", new ArrayList<Integer>());
 		
-		root.setValue("frog", "ribbit");
-		root.setValue("frog.toad", "croak");
-		root.setValue("frog.jumping", "jump");
+		DDMVC.setValue("frog", "ribbit");
+		DDMVC.setValue("frog.toad", "croak");
+		DDMVC.setValue("frog.jumping", "jump");
 	}
 
 	//
@@ -56,16 +53,16 @@ public class ModelTest {
 	//
 	
 	@Test
-	public void testGetKey() {
-		Model english = (Model) root.get("person.english");
+	public void getKey() {
+		Model english = (Model) DDMVC.get("person.english");
 		assertTrue(english.getKey().equals("english"));
 	}
 
 	@Test
-	public void testGetPath() {
-		assertTrue(root.getPath() == Path.ROOT_PATH);
+	public void getPath() {
+		assertTrue(DDMVC.getDataRoot().getPath() == Path.ROOT_PATH);
 		
-		Model english = (Model) root.get("person.english");
+		Model english = (Model) DDMVC.get("person.english");
 		assertTrue(english.getPath().toString().equals("person.english"));
 	}
 	
@@ -74,25 +71,26 @@ public class ModelTest {
 	//
 	
 	@Test
-	public void testHasPath() {
-		assertTrue(root.hasPath("cat"));
-		assertTrue(root.hasPath("person"));
-		assertTrue(root.hasPath("person.english"));
-		assertTrue(root.hasPath("frog"));
-		assertTrue(root.hasPath("frog.toad"));
+	public void hasPath() {
+		assertTrue(DDMVC.hasPath("cat"));
+		assertTrue(DDMVC.hasPath("person"));
+		assertTrue(DDMVC.hasPath("person.english"));
+		assertTrue(DDMVC.hasPath("frog"));
+		assertTrue(DDMVC.hasPath("frog.toad"));
 		
-		assertFalse(root.hasPath("raccoon"));
-		assertFalse(root.hasPath("person.spanish"));
-		assertFalse(root.hasPath("raccoon.rabies"));
+		assertFalse(DDMVC.hasPath("raccoon"));
+		assertFalse(DDMVC.hasPath("person.spanish"));
+		assertFalse(DDMVC.hasPath("raccoon.rabies"));
 		
-		assertTrue(root.hasPath("cat.$"));
-		assertFalse(root.hasPath("$"));
-		assertTrue(root.hasPath("person.*"));
-		assertFalse(root.hasPath("cat.*"));
+		assertTrue(DDMVC.hasPath("cat.$"));
+		assertFalse(DDMVC.hasPath("$"));
+		assertTrue(DDMVC.hasPath("person.*"));
+		assertFalse(DDMVC.hasPath("cat.*"));
 	}
 	
 	@Test
-	public void testResolvePath() {
+	public void resolvePath() {
+		Model root = DDMVC.getDataRoot();
 		assertTrue(root.resolvePath("cat").equals("cat"));
 		assertTrue(root.resolvePath("person.english").equals("person.english"));
 		assertTrue(root.resolvePath("person.english.abe").equals("person.english"));
@@ -106,19 +104,19 @@ public class ModelTest {
 	//
 
 	@Test
-	public void testGetParent() {
-		assertTrue(root.getParent() == null);
-		Model cat = root.getModel("cat");
-		assertTrue(cat.getParent() == root);
+	public void getParent() {
+		assertTrue(DDMVC.getDataRoot().getParent() == null);
+		Model cat = DDMVC.getModel("cat");
+		assertTrue(cat.getParent() == DDMVC.getDataRoot());
 		
-		Model toad = root.getModel("frog.toad");
+		Model toad = DDMVC.getModel("frog.toad");
 		assertTrue(toad.getParent().getKey().equals("frog"));
 	}
-
+	
 	@Test
-	public void testGetRoot() {
-		Model english = root.getModel("person.english");
-		assertTrue(english.getRoot() == root);
+	public void getRoot() {
+		Model english = DDMVC.getModel("person.english");
+		assertTrue(english.getRoot() == DDMVC.getDataRoot());
 	}
 	
 	//
@@ -132,16 +130,16 @@ public class ModelTest {
 	//
 
 	@Test
-	public void testHasObservers() {
-		root.addObserver(obs, "dog.cat.rain.main");
+	public void hasObservers() {
+		DDMVC.addObserver(obs, "dog.cat.rain.main");
 		assertTrue(DDMVC.hasObservers("dog.cat.rain.main"));
 		
-		root.setValue("fish.raid", "maui");
-		root.addObserver(obs, "fish.gills.$");
+		DDMVC.setValue("fish.raid", "maui");
+		DDMVC.addObserver(obs, "fish.gills.$");
 		assertTrue(DDMVC.hasObservers("fish.gills"));
 		assertFalse(DDMVC.hasObservers("fish.raid"));
 		
-		root.addObserver(obs, "pal.*");
+		DDMVC.addObserver(obs, "pal.*");
 		assertTrue(DDMVC.hasObservers("pal.fish.cat"));
 	}
 		
@@ -156,46 +154,46 @@ public class ModelTest {
 	//
 	
 	@Test
-	public void testGetValue() {
-		Model cat = root.getModel("cat");
+	public void getValue() {
+		Model cat = DDMVC.getModel("cat");
 		assertTrue(cat.getValue().equals("meow"));
 	}
 	
 	@Test
-	public void testGetValueByObserver() {
-		Model cat = root.getModel("cat");
+	public void getValueByObserver() {
+		Model cat = DDMVC.getModel("cat");
 		assertTrue(cat.getValue(obs).equals("meow"));
 		assertTrue(cat.getValueObservers().contains(obs));
 	}
 	
 	@Test
-	public void testGetValueByString() {
-		assertTrue(root.getValue("cat").equals("meow"));
+	public void getValueByString() {
+		assertTrue(DDMVC.getValue("cat").equals("meow"));
 		
 		try {
-			root.getValue("cat.tabby");
+			DDMVC.getValue("cat.tabby");
 			fail();
 		} catch(ModelDoesNotExistException e) {}
 	}
 	
 	@Test
-	public void testGetValueByStringObserver() {
-		assertTrue(root.getValue("cat", obs).equals("meow"));
+	public void getValueByStringObserver() {
+		assertTrue(DDMVC.getValue("cat", obs).equals("meow"));
 		
-		Model cat = root.getModel("cat");
+		Model cat = DDMVC.getModel("cat");
 		assertTrue(cat.getValueObservers().contains(obs));
 	}
 
 	@Test
-	public void testGetValueByPath() {
-		assertTrue(root.getValue(new Path("cat")).equals("meow"));
+	public void getValueByPath() {
+		assertTrue(DDMVC.getValue(new Path("cat")).equals("meow"));
 	}
 	
 	@Test
-	public void testGetValueByPathObserver() {
-		assertTrue(root.getValue(new Path("person.english"), obs).equals("hello"));
+	public void getValueByPathObserver() {
+		assertTrue(DDMVC.getValue(new Path("person.english"), obs).equals("hello"));
 		
-		Model cat = root.getModel("person.english");
+		Model cat = DDMVC.getModel("person.english");
 		assertTrue(cat.getValueObservers().contains(obs));
 	}
 	
@@ -204,33 +202,33 @@ public class ModelTest {
 	//
 	
 	@Test
-	public void testGetModelByString() {
-		assertTrue(root.getModel("cat").getValue().equals("meow"));
+	public void getModelByString() {
+		assertTrue(DDMVC.getModel("cat").getValue().equals("meow"));
 		
 		try {
-			root.getModel("cat.tabby");
+			DDMVC.getModel("cat.tabby");
 			fail();
 		} catch(ModelDoesNotExistException e) {}
 	}
 	
 	@Test
-	public void testGetModelByStringObserver() {
-		assertTrue(root.getModel("cat", obs).getValue().equals("meow"));
+	public void getModelByStringObserver() {
+		assertTrue(DDMVC.getModel("cat", obs).getValue().equals("meow"));
 		
-		Model cat = root.getModel("cat");
+		Model cat = DDMVC.getModel("cat");
 		assertTrue(cat.getReferentialObservers().contains(obs));
 	}
 	
 	@Test
-	public void testGetModelByPath() {
-		assertTrue(root.getModel(new Path("cat")).getValue().equals("meow"));
+	public void getModelByPath() {
+		assertTrue(DDMVC.getModel(new Path("cat")).getValue().equals("meow"));
 	}
 	
 	@Test
-	public void testGetModelByPathObserver() {
-		assertTrue(root.getModel(new Path("cat"), obs).getValue().equals("meow"));
+	public void getModelByPathObserver() {
+		assertTrue(DDMVC.getModel(new Path("cat"), obs).getValue().equals("meow"));
 		
-		Model cat = root.getModel("cat");
+		Model cat = DDMVC.getModel("cat");
 		assertTrue(cat.getReferentialObservers().contains(obs));
 	}
 	
@@ -239,25 +237,25 @@ public class ModelTest {
 	//
 
 	@Test
-	public void testGetByPathStringObserver() {
-		assertTrue(root.get("person.french.$").equals("bonjour"));
-		assertTrue(((Model)root.get("person.french"))
+	public void getByPathStringObserver() {
+		assertTrue(DDMVC.get("person.french.$").equals("bonjour"));
+		assertTrue(((Model)DDMVC.get("person.french"))
 				.getValue().equals("bonjour"));
-		assertTrue(((Model)root.get(new Path("person.french.*")))
+		assertTrue(((Model)DDMVC.get(new Path("person.french.*")))
 				.getValue().equals("bonjour"));
 		
-		assertTrue(root.get("person.french.$", obs).equals("bonjour"));
-		assertTrue(root.getModel("person.french")
+		assertTrue(DDMVC.get("person.french.$", obs).equals("bonjour"));
+		assertTrue(DDMVC.getModel("person.french")
 				.getValueObservers().contains(obs));
 		
-		assertTrue(((Model)root.get("person.english", obs))
+		assertTrue(((Model)DDMVC.get("person.english", obs))
 				.getValue().equals("hello"));
-		assertTrue(root.getModel("person.english")
+		assertTrue(DDMVC.getModel("person.english")
 				.getReferentialObservers().contains(obs));
 		
-		assertTrue(((Model)root.get(new Path("cat.*"), obs))
+		assertTrue(((Model)DDMVC.get(new Path("cat.*"), obs))
 				.getValue().equals("meow"));
-		assertTrue(root.getModel("cat")
+		assertTrue(DDMVC.getModel("cat")
 				.getFieldObservers().contains(obs));
 	}
 	
@@ -269,25 +267,25 @@ public class ModelTest {
 	
 	//
 	// Generic update handling
-	//-
+	//
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testHandleUpdate() {
+	public void handleUpdate() {
 		ModelUpdate update = new Append("lists.counting", 1);
-		root.handleUpdate(update);
+		DDMVC.handleUpdate(update);
 		
-		List<Integer> counting = (List<Integer>) root.getValue("lists.counting");
+		List<Integer> counting = (List<Integer>) DDMVC.getValue("lists.counting");
 		assertTrue(counting.size() == 1);
 		assertTrue(counting.get(0).equals(1));
 		
 		update = new Append("lists.counting", 2);
-		root.handleUpdate(update);
+		DDMVC.handleUpdate(update);
 		assertTrue(counting.size() == 2);
 		assertTrue(counting.get(0).equals(1));
 		assertTrue(counting.get(1).equals(2));
 		
-		Model model = root.getModel("lists.counting");
+		Model model = DDMVC.getModel("lists.counting");
 		update = new Append("lists.counting", 3);
 		model.handleUpdate(update);
 		assertTrue(counting.size() == 3);
@@ -295,7 +293,7 @@ public class ModelTest {
 		assertTrue(counting.get(1).equals(2));
 		assertTrue(counting.get(2).equals(3));
 		
-		Model model2 = root.getModel("cat");
+		Model model2 = DDMVC.getModel("cat");
 		update = new Append("lists.counting", 4);
 		try{
 			model2.handleUpdate(update);
@@ -308,21 +306,22 @@ public class ModelTest {
 	//
 
 	@Test
-	public void testSetValueByObject() {
-		root.setValue("history");
-		assertTrue(root.getValue().equals("history"));
+	public void setValueByObject() {
+		Model model = DDMVC.getModel("person.english");
+		model.setValue(6);
+		assertTrue(DDMVC.getValue("person.english").equals(6));
 	}
 
 	@Test
-	public void testSetValueStringObject() {
-		root.setValue("cat.tabby","moo");
-		assertTrue(root.getValue("cat.tabby").equals("moo"));
+	public void setValueStringObject() {
+		DDMVC.setValue("cat.tabby","moo");
+		assertTrue(DDMVC.getValue("cat.tabby").equals("moo"));
 	}
 
 	@Test
-	public void testSetValuePathObject() {
-		root.setValue(new Path("cat.tabby"),"moo");
-		assertTrue(root.getValue("cat.tabby").equals("moo"));
+	public void setValuePathObject() {
+		DDMVC.setValue(new Path("cat.tabby"),"moo");
+		assertTrue(DDMVC.getValue("cat.tabby").equals("moo"));
 	}
 	
 	//
@@ -330,63 +329,52 @@ public class ModelTest {
 	//
 
 	@Test
-	public void testSetModelByModel() {
-		Model person = root.getModel("person");
+	public void setModelByModel() {
+		Model person = DDMVC.getModel("person");
 		Model newPerson = new Model("maw");
 		person.setModel(newPerson);
 		
-		assertTrue(root.getValue("person").equals("maw"));
+		assertTrue(DDMVC.getValue("person").equals("maw"));
 		
 		try {
-			root.getValue("person.english");
+			DDMVC.getValue("person.english");
 			fail();
 		} catch(ModelDoesNotExistException e) {}
 	}
 
 	@Test
-	public void testSetModelByStringModel() {
+	public void setModelByStringModel() {
 		Model newPerson = new Model("maw");
-		root.setModel("person", newPerson);
+		DDMVC.setModel("person", newPerson);
 		
-		assertTrue(root.getValue("person").equals("maw"));
+		assertTrue(DDMVC.getValue("person").equals("maw"));
 		
 		try {
-			root.getValue("person.english");
+			DDMVC.getValue("person.english");
 			fail();
 		} catch(ModelDoesNotExistException e) {}
 	}
 
 	@Test
-	public void testSetModelByPathModel() {
+	public void setModelByPathModel() {
 		Model newPerson = new Model("maw");
-		root.setModel(new Path("person"), newPerson);
+		DDMVC.setModel(new Path("person"), newPerson);
 		
-		assertTrue(root.getValue("person").equals("maw"));
+		assertTrue(DDMVC.getValue("person").equals("maw"));
 		
 		try {
-			root.getValue("person.english");
+			DDMVC.getValue("person.english");
 			fail();
 		} catch(ModelDoesNotExistException e) {}
-	}
-	
-	@Test
-	public void setIllegalModel() {
-		root.setValue("person", "hello");
-		Model newPerson = new Model(root, "maw", "anything");
-		try {
-			root.setModel("person", newPerson);
-			fail();
-		} catch(ModelOverwriteException e) {}
-		assertTrue(root.getValue("person").equals("hello"));
 	}
 	
 	@Test
 	public void setModelObserverDuplication() {
-		root.addObserver(obs, "frog.granouille.green");
-		root.setValue("frog.granouille.green", "bark");
-		root.setModel("frog", new Model("ribbit"));
+		DDMVC.addObserver(obs, "frog.granouille.green");
+		DDMVC.setValue("frog.granouille.green", "bark");
+		DDMVC.setModel("frog", new Model("ribbit"));
 		try{
-			root.getValue("frog.granouille.green");
+			DDMVC.getValue("frog.granouille.green");
 			fail();
 		} catch(ModelDoesNotExistException e) {}
 		assertTrue(DDMVC.getObservers("frog.granouille.green").contains(obs));
@@ -396,9 +384,30 @@ public class ModelTest {
 	public void pathSetting() {
 		Model dog = new Model("roof");
 		dog.setValue("cat", "meow");
-		root.setModel("dog", dog);
+		DDMVC.setModel("dog", dog);
 		
-		assertTrue(root.getModel("dog.cat").getPath().equals("dog.cat"));
+		assertTrue(DDMVC.getModel("dog.cat").getPath().equals("dog.cat"));
+	}
+	
+	@Test
+	public void moveModel() {
+		DDMVC.setValue("dog.food", "bones");
+		Model model = DDMVC.getModel("dog.food");
+		DDMVC.setModel("cat.food", model);
+		assertTrue(model.getParent() == DDMVC.getModel("cat"));
+		assertTrue(DDMVC.hasPath("cat.food"));
+		assertFalse(DDMVC.hasPath("dog.food"));
+	}
+
+	@Test
+	public void moveModelDifferentKey() {
+		DDMVC.setValue("dog.food", "bones");
+		Model model = DDMVC.getModel("dog.food");
+		DDMVC.setModel("cat.notfood", model);
+		assertTrue(model.getKey().equals("notfood"));
+		assertTrue(model.getParent() == DDMVC.getModel("cat"));
+		assertTrue(DDMVC.hasPath("cat.notfood"));
+		assertFalse(DDMVC.hasPath("dog.food"));
 	}
 	
 	//
@@ -407,14 +416,14 @@ public class ModelTest {
 	
 	@Test
 	public void deleteModelByString() {
-		root.deleteModel("person");
-		assertFalse(root.hasPath("person"));
+		DDMVC.deleteModel("person");
+		assertFalse(DDMVC.hasPath("person"));
 	}
 	
 	@Test
 	public void deleteModelByPath() {
-		root.deleteModel(new Path("person"));
-		assertFalse(root.hasPath("person"));
+		DDMVC.deleteModel(new Path("person"));
+		assertFalse(DDMVC.hasPath("person"));
 	}
 	
 }

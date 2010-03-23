@@ -11,7 +11,6 @@ import com.google.gwt.ddmvc.controller.ServerRequest;
 import com.google.gwt.ddmvc.controller.StandardController;
 import com.google.gwt.ddmvc.controller.ValidationError;
 import com.google.gwt.ddmvc.event.AppEvent;
-import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.view.View;
 
 public class StandardControllerTest {
@@ -66,14 +65,10 @@ public class StandardControllerTest {
 		}
 		
 		@Override
-		protected void onRequestSuccess(AppEvent event) {
-			
-		}
+		protected void onRequestSuccess(AppEvent event) {}
 		
 		@Override
-		protected void onRequestFailure(AppEvent event) {
-			
-		}
+		protected void onRequestFailure(AppEvent event) {}
 		
 	}
 	
@@ -110,20 +105,17 @@ public class StandardControllerTest {
 	private MyController controller;
 	private MyView view;
 	
-	private Model root;
-	
 	@Before
 	public void setUp() throws Exception {
 		DDMVC.reset();
 		
 		controller = new MyController();
 		view = new MyView();
-		root = DDMVC.getDataRoot();
 	}
 	
 	@Test
 	public void basicEventFiring() {
-		root.setValue("isValid", true);
+		DDMVC.setValue("isValid", true);
 		view.proxyEvent(new Event1());
 		DDMVC.runLoop();
 		
@@ -144,7 +136,7 @@ public class StandardControllerTest {
 	
 	@Test
 	public void multipleEvents() {
-		root.setValue("isValid", true);
+		DDMVC.setValue("isValid", true);
 		view.proxyEvent(new Event1());
 		view.proxyEvent(new Event2());
 		DDMVC.runLoop();
@@ -159,7 +151,7 @@ public class StandardControllerTest {
 	
 	@Test
 	public void modelObservation() {
-		root.setValue("isValid", true);
+		DDMVC.setValue("isValid", true);
 		view.proxyEvent(new Event2());
 		DDMVC.runLoop();
 		assertTrue(view.renderCount == 2);
@@ -167,7 +159,7 @@ public class StandardControllerTest {
 	
 	@Test
 	public void validationFailure() {
-		root.setValue("isValid", false);
+		DDMVC.setValue("isValid", false);
 		view.proxyEvent(new Event1());
 		DDMVC.runLoop();
 

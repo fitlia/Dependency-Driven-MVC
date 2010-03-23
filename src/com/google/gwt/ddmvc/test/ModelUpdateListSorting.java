@@ -7,21 +7,18 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import com.google.gwt.ddmvc.DDMVC;
-import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.update.list.Sort;
 
 public class ModelUpdateListSorting {
 
 	private List<Integer> testList;
-	private Model root;
 	
 	@Before
 	public void setUp() {
 		DDMVC.reset();
-		root = DDMVC.getDataRoot();
 		
-		root.setValue("frillo", "Hodgepodge");
-		root.setValue("something", "text");
+		DDMVC.setValue("frillo", "Hodgepodge");
+		DDMVC.setValue("something", "text");
 		
 		testList = new ArrayList<Integer>();
 		testList.add(5);
@@ -38,10 +35,10 @@ public class ModelUpdateListSorting {
 		list.add(90);
 		list.add(95);
 		list.add(3);
-		root.setValue("nam", list);
+		DDMVC.setValue("nam", list);
 		
-		root.handleUpdate(new Sort("nam"));
-		list = (List<Integer>) root.getValue("nam");
+		DDMVC.handleUpdate(new Sort("nam"));
+		list = (List<Integer>) DDMVC.getValue("nam");
 				
 		assertTrue(list.size() == 4);
 		assertTrue(list.get(0).equals(3));
@@ -58,7 +55,7 @@ public class ModelUpdateListSorting {
 		list.add(90);
 		list.add(95);
 		list.add(3);
-		root.setValue("nam", list);
+		DDMVC.setValue("nam", list);
 		
 		Comparator<Integer> myComp = new Comparator<Integer>() {
 
@@ -69,8 +66,8 @@ public class ModelUpdateListSorting {
 			
 		};
 		
-		root.handleUpdate(new Sort("nam", myComp));
-		list = (List<Integer>) root.getValue("nam");
+		DDMVC.handleUpdate(new Sort("nam", myComp));
+		list = (List<Integer>) DDMVC.getValue("nam");
 				
 		assertTrue(list.size() == 4);
 		assertTrue(list.get(0).equals(100));
