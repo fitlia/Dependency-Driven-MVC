@@ -20,7 +20,7 @@ import com.google.gwt.ddmvc.model.update.list.RemoveIndex;
  * 
  * @author Kevin Dolan
  */
-public class ModelUpdateListFiltering {
+public class ListFilteringTest {
 
 	private List<Integer> testList;
 	
@@ -64,7 +64,7 @@ public class ModelUpdateListFiltering {
 	
 	@Test
 	public void exceptionHandling() {
-		//TODO - move to ModelUpdateBasics
+		//TODO - move to ModelUpdateTest
 		
 		Append update3 = new Append("frillo", 5);
 		DDMVC.handleUpdate(update3);

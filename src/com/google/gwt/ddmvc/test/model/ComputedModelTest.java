@@ -17,7 +17,7 @@ import com.google.gwt.ddmvc.model.exception.ModelDoesNotExistException;
  * 
  * @author Kevin Dolan
  */
-public class ComputedModelObservation {
+public class ComputedModelTest {
 	
 	@Before
 	public void setUp() {

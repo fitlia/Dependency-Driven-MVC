@@ -5,10 +5,10 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses( {
-	ModelUpdateBasics.class,
-	ModelUpdateListFiltering.class,
-	ModelUpdateListInsertions.class,
-	ModelUpdateListSorting.class
+	ModelUpdateTest.class,
+	ListFilteringTest.class,
+	ListInsertionsTest.class,
+	ListSortingTest.class
 })
 
 public class Tests {}

@@ -14,7 +14,7 @@ import com.google.gwt.ddmvc.model.update.list.Sort;
  * 
  * @author Kevin Dolan
  */
-public class ModelUpdateListSorting {
+public class ListSortingTest {
 
 	private List<Integer> testList;
 	

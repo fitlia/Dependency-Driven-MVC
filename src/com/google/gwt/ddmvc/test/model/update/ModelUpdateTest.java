@@ -17,7 +17,7 @@ import com.google.gwt.ddmvc.model.update.list.Prepend;
  * 
  * @author Kevin Dolan
  */
-public class ModelUpdateBasics {
+public class ModelUpdateTest {
 	
 	@Before
 	public void setUp() {

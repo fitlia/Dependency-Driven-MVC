@@ -18,7 +18,7 @@ import com.google.gwt.ddmvc.view.View;
  * Tests of the DDMVC observation patterns 
  * @author Kevin Dolan
  */
-public class ViewObservation {
+public class ViewTest {
 
 	private class SimpleRenderCounter extends View {
 

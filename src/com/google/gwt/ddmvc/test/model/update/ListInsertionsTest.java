@@ -17,7 +17,7 @@ import com.google.gwt.ddmvc.model.update.list.PrependAll;
  * 
  * @author Kevin Dolan
  */
-public class ModelUpdateListInsertions {
+public class ListInsertionsTest {
 
 	private List<Integer> testList;
 	
