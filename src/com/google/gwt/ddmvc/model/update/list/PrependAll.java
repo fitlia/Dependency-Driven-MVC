@@ -49,7 +49,7 @@ public class PrependAll extends ModelUpdate {
 	 * @param target
 	 * @param collection - the collection of objects to prepend
 	 */
-	public PrependAll(Path target, 
+	public PrependAll(Path<?> target, 
 			Collection<? extends Object> collection) {
 		
 		super(target);
@@ -79,7 +79,7 @@ public class PrependAll extends ModelUpdate {
 	 * @param useLinkedList - true if you want to use linked-list, if new list
 	 * 				creation is necessary
 	 */
-	public PrependAll(Path target, Collection<? extends Object> collection, 
+	public PrependAll(Path<?> target, Collection<? extends Object> collection, 
 			boolean useLinkedList) {
 		
 		super(target);

@@ -13,7 +13,7 @@ import com.google.gwt.ddmvc.model.Path;
  */
 public abstract class ModelUpdate {
 	
-	protected Path target;
+	protected Path<?> target;
 	protected boolean isComplete;
 	protected Exception exception;
 	
@@ -41,7 +41,7 @@ public abstract class ModelUpdate {
 	 * @param target - the name of the model being targeted
 	 */
 	public ModelUpdate(String target) {
-		this.target = new Path(target);
+		this.target = Path.make(target);
 		this.isComplete = false;
 		this.exception = null;
 	}
@@ -50,7 +50,7 @@ public abstract class ModelUpdate {
 	 * Instantiate a new model update with the specified path
 	 * @param target - the name of the model being targeted
 	 */
-	public ModelUpdate(Path target) {
+	public ModelUpdate(Path<?> target) {
 		this.target = target;
 		this.isComplete = false;
 		this.exception = null;
@@ -78,7 +78,7 @@ public abstract class ModelUpdate {
 	/**
 	 * @return the absolute path to the model this update's target model
 	 */
-	public Path getTarget() {
+	public Path<?> getTarget() {
 		return target;
 	}
 	

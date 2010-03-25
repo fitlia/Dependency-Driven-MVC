@@ -26,7 +26,7 @@ public interface Observer {
 	/**
 	 * @return the path associated with this observer
 	 */
-	public Path getPath();
+	public Path<?> getPath();
 
 	/**
 	 * @return true if this model, or any of its child models has any type of

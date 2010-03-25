@@ -14,14 +14,14 @@ package com.google.gwt.ddmvc.model;
  * @author Kevin Dolan
  * @param <Type> - the type of object to store
  */
-public class Property<Type> extends Field {
+public class Property<Type> extends Field<Type> {
 	
 	/**
 	 * Instantiate a new property with a null default value
 	 * @param cls - the class of the parameterized type
 	 * @param key - the key of this property
 	 */
-	public static <Type> Property<Type> create(Class<Type> cls, String key) {
+	public static <Type> Property<Type> make(Class<Type> cls, String key) {
 		return new Property<Type>(cls, key, null);
 	}
 	
@@ -31,7 +31,7 @@ public class Property<Type> extends Field {
 	 * @param defaultValue - the default value to set
 	 */
 	@SuppressWarnings("unchecked")
-	public static <Type> Property<Type> create(String key, Type defaultValue) {
+	public static <Type> Property<Type> make(String key, Type defaultValue) {
 		return new Property<Type>((Class<Type>) defaultValue.getClass(),
 				key, defaultValue);
 	}
@@ -42,12 +42,11 @@ public class Property<Type> extends Field {
 	 * @param key - the key of this property
 	 * @param defaultValue - the default value to set
 	 */
-	public static <Type> Property<Type> create(Class<Type> cls, String key,
-			Type defaultValue) {
+	public static <Type> Property<Type> 
+			make(Class<Type> cls, String key, Type defaultValue) {
+		
 		return new Property<Type>(cls, key, defaultValue);
 	}
-	
-	private Class<Type> cls;
 	private Type defaultValue;
 
 	/**
@@ -56,21 +55,13 @@ public class Property<Type> extends Field {
 	 * @param key - the key of this property
 	 */
 	private Property(Class<Type> cls, String key, Type defaultValue) {
-		super(key);
-		this.cls = cls;
+		super(cls, key);
 		this.defaultValue = defaultValue;
 	}
 
 	@Override
 	public Model getModel() {
-		return ValueModel.create(cls, defaultValue);
-	}
-	
-	/**
-	 * @return the class contained by this property
-	 */
-	public Class<Type> getValueClass() {
-		return cls;
+		return ValueModel.make(cls, defaultValue);
 	}
 
 	/**
@@ -78,6 +69,11 @@ public class Property<Type> extends Field {
 	 */
 	public Type getDefaultValue() {
 		return defaultValue;
+	}
+	
+	@Override
+	public String getPathString() {
+		return key + ".$";
 	}
 	
 }

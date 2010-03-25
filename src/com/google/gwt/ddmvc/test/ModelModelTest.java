@@ -21,7 +21,7 @@ public class ModelModelTest {
 
 	private class FakeObserver implements Observer { 
 		public int change = 0;
-		public Path getPath() { return null; }
+		public Path<?> getPath() { return null; }
 		public void modelChanged(Collection<ModelUpdate> updates) {
 			change++;
 		}
@@ -37,7 +37,7 @@ public class ModelModelTest {
 	
 	@Test
 	public void basic() {
-		ModelModel<Model> myModel = ModelModel.create(new Model("meow"));
+		ModelModel<Model> myModel = ModelModel.make(new Model("meow"));
 		DDMVC.setModel("cat", myModel);
 		assertTrue(DDMVC.getValue("cat").equals("meow"));
 		assertTrue(myModel.getPath().equals("cat"));
@@ -46,7 +46,7 @@ public class ModelModelTest {
 	
 	@Test
 	public void deepSet() {
-		ModelModel<Model> myModel = ModelModel.create(new Model("meow"));
+		ModelModel<Model> myModel = ModelModel.make(new Model("meow"));
 		DDMVC.setValue("cat", "purr");
 		DDMVC.setModel("cat.tabby", myModel);
 		assertTrue(DDMVC.getValue("cat").equals("purr"));
@@ -60,7 +60,7 @@ public class ModelModelTest {
 	
 	@Test
 	public void setValue() {
-		ModelModel<Model> myModel = ModelModel.create(new Model("meow"));
+		ModelModel<Model> myModel = ModelModel.make(new Model("meow"));
 		DDMVC.setValue("cat", "purr");
 		DDMVC.setModel("cat.tabby", myModel);
 		DDMVC.setValue("cat.tabby", "hiss");
@@ -71,9 +71,9 @@ public class ModelModelTest {
 	@Test
 	public void setModel() {
 		ModelModel<ValueModel<String>> myModel = 
-			ModelModel.create(ValueModel.create("meow"));
+			ModelModel.make(ValueModel.make("meow"));
 		DDMVC.setModel("cat", myModel);
-		DDMVC.setModel("cat", ValueModel.create("purr"));
+		DDMVC.setModel("cat", ValueModel.make("purr"));
 		assertTrue(DDMVC.getModel("cat").getClass().equals(ModelModel.class));
 		assertTrue(DDMVC.getValue("cat").equals("purr"));
 	}
@@ -81,9 +81,9 @@ public class ModelModelTest {
 	@Test
 	public void setModelSubtype() {
 		ModelModel<Model> myModel = 
-			ModelModel.create(new Model("meow"));
+			ModelModel.make(new Model("meow"));
 		DDMVC.setModel("cat", myModel);
-		DDMVC.setModel("cat", ValueModel.create("purr"));
+		DDMVC.setModel("cat", ValueModel.make("purr"));
 		assertTrue(DDMVC.getModel("cat").getClass().equals(ModelModel.class));
 		assertTrue(DDMVC.getValue("cat").equals("purr"));
 	}
@@ -91,7 +91,7 @@ public class ModelModelTest {
 	@Test
 	public void setModelWrongType() {
 		ModelModel<ValueModel<String>> myModel = 
-			ModelModel.create(ValueModel.create("meow"));
+			ModelModel.make(ValueModel.make("meow"));
 		DDMVC.setModel("cat", myModel);
 		try {
 			DDMVC.setModel("cat", new Model());
@@ -102,7 +102,7 @@ public class ModelModelTest {
 	@Test
 	public void setValueModel() {
 		ModelModel<ValueModel<String>> myModel = 
-			ModelModel.create(ValueModel.create("meow"));
+			ModelModel.make(ValueModel.make("meow"));
 		DDMVC.setValue("cat", "purr");
 		DDMVC.setModel("cat.tabby", myModel);	
 		DDMVC.setValue("cat.tabby", "hiss");
@@ -116,7 +116,7 @@ public class ModelModelTest {
 	
 	@Test
 	public void distalSet() {
-		ModelModel<Model> myModel = ModelModel.create(new Model("meow"));
+		ModelModel<Model> myModel = ModelModel.make(new Model("meow"));
 		DDMVC.setValue("cat", "purr");
 		DDMVC.setModel("cat.tabby", myModel);
 		DDMVC.setValue("cat.tabby.male.fish", "reeo");
@@ -129,7 +129,7 @@ public class ModelModelTest {
 	
 	@Test
 	public void properReflection() {
-		ModelModel<Model> myModel = ModelModel.create(new Model("meow"));
+		ModelModel<Model> myModel = ModelModel.make(new Model("meow"));
 		DDMVC.setValue("cat", "purr");
 		DDMVC.setModel("cat.tabby", myModel);
 		assertTrue(DDMVC.getModel("cat.tabby").getClass().equals(ModelModel.class));
@@ -137,7 +137,7 @@ public class ModelModelTest {
 	
 	@Test
 	public void addObserver() {
-		ModelModel<Model> myModel = ModelModel.create(new Model("meow"));
+		ModelModel<Model> myModel = ModelModel.make(new Model("meow"));
 		DDMVC.setValue("cat", "purr");
 		DDMVC.setModel("cat.tabby", myModel);
 		DDMVC.addObserver(obs, "cat.tabby.$");
@@ -149,7 +149,7 @@ public class ModelModelTest {
 	
 	@Test
 	public void addSubObserver() {
-		ModelModel<Model> myModel = ModelModel.create(new Model("meow"));
+		ModelModel<Model> myModel = ModelModel.make(new Model("meow"));
 		DDMVC.setValue("cat", "purr");
 		DDMVC.setModel("cat.tabby", myModel);
 		DDMVC.addObserver(obs, "cat.tabby.male.$");
@@ -161,7 +161,7 @@ public class ModelModelTest {
 	
 	@Test
 	public void addSubObserver2() {
-		ModelModel<Model> myModel = ModelModel.create(new Model("meow"));
+		ModelModel<Model> myModel = ModelModel.make(new Model("meow"));
 		DDMVC.setValue("cat", "purr");
 		DDMVC.setModel("cat.tabby", myModel);
 		DDMVC.addObserver(obs, "cat.tabby.*");
@@ -174,7 +174,7 @@ public class ModelModelTest {
 	
 	@Test
 	public void addSubObserver3() {
-		ModelModel<Model> myModel = ModelModel.create(new Model("meow"));
+		ModelModel<Model> myModel = ModelModel.make(new Model("meow"));
 		DDMVC.setValue("cat", "purr");
 		DDMVC.setModel("cat.tabby", myModel);
 		DDMVC.addObserver(obs, "cat.tabby");
@@ -191,7 +191,7 @@ public class ModelModelTest {
 	
 	@Test
 	public void defaultConstructor() {
-		ModelModel<Model> myModel = ModelModel.create(Model.class);
+		ModelModel<Model> myModel = ModelModel.make(Model.class);
 		DDMVC.setValue("cat", "purr");
 		DDMVC.setModel("cat.tabby", myModel);
 		try {
@@ -202,7 +202,7 @@ public class ModelModelTest {
 	
 	@Test
 	public void replaceModel() {
-		ModelModel<Model> myModel = ModelModel.create(new Model("meow"));
+		ModelModel<Model> myModel = ModelModel.make(new Model("meow"));
 		DDMVC.setModel("cat.tabby", myModel);
 		DDMVC.deleteModel("cat.tabby");
 		assertFalse(DDMVC.hasPath("cat.tabby"));

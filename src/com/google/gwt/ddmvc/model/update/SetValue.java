@@ -28,7 +28,7 @@ public class SetValue extends ModelUpdate {
 	 * @param target
 	 * @param data
 	 */
-	public SetValue(Path target, Object data) {
+	public SetValue(Path<?> target, Object data) {
 		super(target);
 		this.data = data;
 	}

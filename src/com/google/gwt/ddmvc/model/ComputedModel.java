@@ -8,8 +8,6 @@ import com.google.gwt.ddmvc.model.update.ModelUpdate;
 /**
  * Represents a value which depends on some other model(s). 
  * @author Kevin Dolan
- *
- * @param <Type> the type of data returned by this model
  */
 public abstract class ComputedModel extends Model implements Observer {
 	

@@ -29,7 +29,7 @@ public class SetModel extends ModelUpdate {
 	 * @param target
 	 * @param model
 	 */
-	public SetModel(Path target, Model model) {
+	public SetModel(Path<?> target, Model model) {
 		super(target);
 		this.model = model;
 	}

@@ -31,7 +31,7 @@ public class KeepAllThatMatch extends RemoveAllThatMatch {
 	 * @param target
 	 * @param filter - the filter that will determine which elements are removed
 	 */
-	public KeepAllThatMatch(Path target, ListFilter filter) {
+	public KeepAllThatMatch(Path<?> target, ListFilter filter) {
 		super(target, filter);
 		this.removeMatches = false;
 	}

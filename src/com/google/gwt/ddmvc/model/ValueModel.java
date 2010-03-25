@@ -32,7 +32,7 @@ public class ValueModel<Type> extends Model {
 	 * @param cls - the class of the value held by this model
 	 * @return a ValueModel of the given type
 	 */
-	public static <Type> ValueModel<Type> create(Class<Type> cls) {
+	public static <Type> ValueModel<Type> make(Class<Type> cls) {
 		return new ValueModel<Type>(cls, null);
 	}
 	
@@ -44,7 +44,7 @@ public class ValueModel<Type> extends Model {
 	 * @return a ValueModel of the given type
 	 */
 	@SuppressWarnings("unchecked")
-	public static <Type> ValueModel<Type> create(Type value) {
+	public static <Type> ValueModel<Type> make(Type value) {
 		return new ValueModel<Type>((Class<Type>) value.getClass(), value);
 	}
 	
@@ -55,7 +55,7 @@ public class ValueModel<Type> extends Model {
 	 * @param value - the value to set initially
 	 * @return a ValueModel of the given type
 	 */
-	public static <Type> ValueModel<Type> create(Class<Type> cls, Type value) {
+	public static <Type> ValueModel<Type> make(Class<Type> cls, Type value) {
 		return new ValueModel<Type>(cls, value);
 	}
 	
@@ -103,7 +103,7 @@ public class ValueModel<Type> extends Model {
 	}
 	
 	@Override
-	protected void handleUpdateSafe(ModelUpdate update, Path relative) {
+	protected void handleUpdateSafe(ModelUpdate update, Path<?> relative) {
 		if(relative.getImmediate() == null)
 			applyUpdate(update);
 		else

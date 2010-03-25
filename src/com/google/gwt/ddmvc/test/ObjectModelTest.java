@@ -13,7 +13,7 @@ public class ObjectModelTest {
 	private static class PersonModel extends ObjectModel {
 		
 		public static final Property<String> 
-			NAME = property(String.class, "person"),
+			NAME = property(String.class, "name"),
 			RACE = property(String.class, "race");
 		public static final Property<Integer> 
 			AGE = property("age", 0);

@@ -6,16 +6,18 @@ package com.google.gwt.ddmvc.model;
  * of type-safety on models.
  * @author Kevin Dolan
  */
-public abstract class Field {
+public abstract class Field<Type> {
 
-	private String key;
+	protected String key;
+	protected Class<Type> cls;
 	
 	/**
 	 * Instantiate a new Field
 	 * @param key - they key to assign to the model
 	 */
-	public Field(String key) {
+	protected Field(Class<Type> cls, String key) {
 		this.key = key;
+		this.cls = cls;
 	}
 	
 	/**
@@ -26,7 +28,19 @@ public abstract class Field {
 	}
 	
 	/**
+	 * @return the class referred to by this field
+	 */
+	public Class<?> getFieldClass() {
+		return cls;
+	}
+	
+	/**
 	 * @return the model that is used to represent this Field
 	 */
 	public abstract Model getModel();
+	
+	/**
+	 * @return the pathString to append for this field
+	 */
+	public abstract String getPathString();
 }

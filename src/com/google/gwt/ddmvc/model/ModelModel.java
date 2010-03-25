@@ -29,7 +29,7 @@ public class ModelModel<ModelType extends Model> extends Model {
 	 * @return a new ModelModel
 	 */
 	public static <ModelType extends Model> ModelModel<ModelType> 
-			create(Class<ModelType> cls) {
+			make(Class<ModelType> cls) {
 		
 		return new ModelModel<ModelType>(cls, null);
 	}
@@ -42,7 +42,7 @@ public class ModelModel<ModelType extends Model> extends Model {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <ModelType extends Model> ModelModel<ModelType> 
-			create(ModelType model) {
+			make(ModelType model) {
 		
 		return new ModelModel<ModelType>
 			((Class<ModelType>) model.getClass(), model);
@@ -55,7 +55,7 @@ public class ModelModel<ModelType extends Model> extends Model {
 	 * @return a new ModelModel
 	 */
 	public static <ModelType extends Model> ModelModel<ModelType> 
-			create(Class<ModelType> cls, ModelType model) {
+			make(Class<ModelType> cls, ModelType model) {
 		
 		return new ModelModel<ModelType>(cls, model);
 	}
@@ -120,7 +120,7 @@ public class ModelModel<ModelType extends Model> extends Model {
 	}
 	
 	@Override
-	protected void handleUpdateSafe(ModelUpdate update, Path relative) {
+	protected void handleUpdateSafe(ModelUpdate update, Path<?> relative) {
 		if(relative.getImmediate() == null)
 			applyUpdate(update);
 		else if(relative.getImmediate().equals("$"))

@@ -7,7 +7,7 @@ package com.google.gwt.ddmvc.model;
  * @author Kevin Dolan
  * @param <Type> - the type of object to store
  */
-public class SubModel<ModelType extends Model> extends Field {
+public class SubModel<ModelType extends Model> extends Field<ModelType> {
 	
 	/**
 	 * Instantiate a new SubModel
@@ -15,12 +15,10 @@ public class SubModel<ModelType extends Model> extends Field {
 	 * @param key - the key of the field
 	 */
 	public static <ModelType extends Model> SubModel<ModelType>
-			create(Class<ModelType> cls, String key) {
+			make(Class<ModelType> cls, String key) {
 		
 		return new SubModel<ModelType>(cls, key);
 	}
-	
-	private Class<ModelType> cls;
 	
 	/**
 	 * Instantiate a new SubModel
@@ -28,13 +26,17 @@ public class SubModel<ModelType extends Model> extends Field {
 	 * @param key - the key of the field
 	 */
 	private SubModel(Class<ModelType> cls, String key) {
-		super(key);
-		this.cls = cls;
+		super(cls, key);
 	}
 
 	@Override
 	public Model getModel() {
-		return ModelModel.create(cls);
+		return ModelModel.make(cls);
+	}
+
+	@Override
+	public String getPathString() {
+		return key;
 	}
 	
 }

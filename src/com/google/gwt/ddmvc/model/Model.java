@@ -60,7 +60,7 @@ public class Model {
 	
 	private String key;
 	private Model parent;
-	private Path path;
+	private Path<?> path;
 	private HashMap<String, Model> childData;
 	protected Object value;
 	
@@ -115,7 +115,7 @@ public class Model {
 	 * Get the path upward from this model to the top model
 	 * @return the path from the root to this model
 	 */
-	public Path getPath() {
+	public Path<?> getPath() {
 		return path;
 	}
 	
@@ -161,7 +161,7 @@ public class Model {
 	 * @return true if there exists the path
 	 */
 	public boolean hasPath(String pathString) {
-		return hasPath(new Path(pathString));
+		return hasPath(Path.make(pathString));
 	}
 	
 	/**
@@ -172,7 +172,7 @@ public class Model {
 	 * @param path - the path to check
 	 * @return true if there exists the path
 	 */
-	public boolean hasPath(Path path) {
+	public boolean hasPath(Path<?> path) {
 		if(path.getImmediate() == null)
 			return true;
 		if(path.getImmediate().equals("*"))
@@ -189,29 +189,29 @@ public class Model {
 	/**
 	 * Return the deepest path through this model consistent with the provided
 	 * path.
-	 * Note - If this model has no children, resolvePath(new Path("dog")) will
+	 * Note - If this model has no children, resolvePath(Path.make("dog")) will
 	 * return a blank path.
 	 * @param pathString - the path to resolve
 	 * @return the resolved path.
 	 */
-	public Path resolvePath(String pathString) {
-		return resolvePath(new Path(pathString));
+	public Path<?> resolvePath(String pathString) {
+		return resolvePath(Path.make(pathString));
 	}
 	
 	/**
 	 * Return the deepest path through this model consistent with the provided
 	 * path.
-	 * Note - If this model has no children, resolvePath(new Path("dog")) will
+	 * Note - If this model has no children, resolvePath(Path.make("dog")) will
 	 * return a blank path.
 	 * @param path - the path to resolve
 	 * @return the resolved path.
 	 */
-	public Path resolvePath(Path path) {
+	public Path<?> resolvePath(Path<?> path) {
 		if(hasChild(path.getImmediate()))
-			return (new Path(path.getImmediate()))
+			return (Path.make(path.getImmediate()))
 				.append(getChild(path.getImmediate()).resolvePath(path.advance()));
 		
-		return new Path("");
+		return Path.make("");
 	}
 	
 	/**
@@ -377,7 +377,7 @@ public class Model {
 	 * @param pathString - the path (relative to this model) to observe
 	 */
 	public void addObserver(Observer observer, String pathString) {
-		addObserver(observer, new Path(pathString));
+		addObserver(observer, Path.make(pathString));
 	}
 	
 	/**
@@ -389,7 +389,7 @@ public class Model {
 	 * @param observer - the observer to add, if null will not be added
 	 * @param path - the path (relative to this model) to observe
 	 */
-	public void addObserver(Observer observer, Path path) {
+	public void addObserver(Observer observer, Path<?> path) {
 		DDMVC.addObserver(observer, this.path.append(path));
 	}
 	
@@ -469,7 +469,7 @@ public class Model {
 	 * @return the associated value of the field represented by this path
 	 */
 	public Object getValue(String pathString) {
-		return getValue(new Path(pathString), null);
+		return getValue(Path.make(pathString), null);
 	}
 	
 	/**
@@ -481,7 +481,7 @@ public class Model {
 	 * @return the associated value of the field represented by this path
 	 */
 	public Object getValue(String pathString, Observer observer) {
-		return getValue(new Path(pathString), observer);
+		return getValue(Path.make(pathString), observer);
 	}
 	
 	/**
@@ -490,7 +490,7 @@ public class Model {
 	 * @param pathString - the string to parse for the path
 	 * @return the associated value of the field represented by this path
 	 */
-	public Object getValue(Path path) {
+	public <Type> Type getValue(Path<Type> path) {
 		return getValue(path, null);
 	}
 	
@@ -502,10 +502,11 @@ public class Model {
 	 * @param observer - the observer to add
 	 * @return the associated value of the field represented by this path
 	 */
-	public Object getValue(Path path, Observer observer) {
+	@SuppressWarnings("unchecked")
+	public <Type> Type getValue(Path<Type> path, Observer observer) {
 		if(path.isTerminal())
 			throw new InvalidPathException("Value query paths must be non-terminal.");
-		return get(path.append("$"), observer);
+		return (Type) get(path.append("$"), observer);
 	}
 	
 	//
@@ -520,7 +521,7 @@ public class Model {
 	 * @return the model at the given path
 	 */
 	public Model getModel(String pathString) {
-		return getModel(new Path(pathString), null);
+		return getModel(Path.make(pathString), null);
 	}
 	
 	/**
@@ -532,7 +533,7 @@ public class Model {
 	 * @return the model at the given path
 	 */
 	public Model getModel(String pathString, Observer observer) {
-		return getModel(new Path(pathString), observer);
+		return getModel(Path.make(pathString), observer);
 	}
 	
 	/**
@@ -542,7 +543,7 @@ public class Model {
 	 * @param path - the path to the model
 	 * @return the model at the given path
 	 */
-	public Model getModel(Path path) {
+	public Model getModel(Path<?> path) {
 		return getModel(path, null);
 	}
 	
@@ -554,7 +555,7 @@ public class Model {
 	 * @param observer - the observer to add
 	 * @return the model at the given path
 	 */
-	public Model getModel(Path path, Observer observer) {
+	public Model getModel(Path<?> path, Observer observer) {
 		if(path.isTerminal())
 			throw new InvalidPathException("Model query paths must be non-terminal.");
 		return (Model) get(path, observer);
@@ -572,7 +573,7 @@ public class Model {
 	 * @return the value/model represented by the path-string
 	 */
 	public Object get(String pathString) {
-		return get(new Path(pathString), null);
+		return get(Path.make(pathString), null);
 	}
 	
 	/**
@@ -581,7 +582,7 @@ public class Model {
 	 * @param path - the path to access
 	 * @return the value/model represented by the path
 	 */
-	public Object get(Path path) {
+	public <Type> Type get(Path<Type> path) {
 		return get(path, null);
 	}
 	
@@ -594,7 +595,7 @@ public class Model {
 	 * @return the value/model represented by the path-string
 	 */
 	public Object get(String pathString, Observer observer) {
-		return get(new Path(pathString), observer);
+		return get(Path.make(pathString), observer);
 	}
 	
 	/**
@@ -611,17 +612,18 @@ public class Model {
 	 * @param observer - the observer to add, if null it will not be added
 	 * @return the value/model represented by the path
 	 */
-	public Object get(Path path, Observer observer) {
+	@SuppressWarnings("unchecked")
+	public <Type> Type get(Path<Type> path, Observer observer) {
 		if(path.getImmediate() == null) {
 			addReferentialObserver(observer);
-			return this;
+			return (Type) this;
 		}
 		if(path.getImmediate().equals("*")) {
 			addFieldObserver(observer);
-			return this;
+			return (Type) this;
 		}
 		if(path.getImmediate().equals("$"))
-			return getValue(observer);
+			return (Type) getValue(observer);
 		
 		String key = path.getImmediate();
 		if(!hasPath(key))
@@ -648,7 +650,7 @@ public class Model {
 	 * @param update - the update request being processed
 	 */
 	public void handleUpdate(ModelUpdate update) {
-		Path relative = update.getTarget().resolvePath(getPath());
+		Path<?> relative = update.getTarget().resolvePath(getPath());
 		if(relative.isTerminal())
 			throw new InvalidPathException("Update path cannot be terminal.");
 		handleUpdateSafe(update, relative);
@@ -664,7 +666,7 @@ public class Model {
 	 * @param update - the update to apply
 	 * @param relative - the relative path to pursue
 	 */
-	protected void handleUpdateSafe(ModelUpdate update, Path relative) {
+	protected void handleUpdateSafe(ModelUpdate update, Path<?> relative) {
 		if(relative.getImmediate() == null)
 			applyUpdate(update);
 		else
@@ -704,7 +706,7 @@ public class Model {
 	 * @param value - the value to set
 	 */
 	public void setValue(Object value) {
-		setValue(new Path(""), value);
+		setValue(Path.make(""), value);
 	}
 	
 	/**
@@ -717,7 +719,7 @@ public class Model {
 	 * @param value - the value to set
 	 */
 	public void setValue(String pathString, Object value) {
-		setValue(new Path(pathString), value);
+		setValue(Path.make(pathString), value);
 	}
 	
 	/**
@@ -729,7 +731,7 @@ public class Model {
 	 * @param path - the path relative to this model
 	 * @param value - the value to set
 	 */
-	public void setValue(Path path, Object value) {
+	public void setValue(Path<?> path, Object value) {
 		ModelUpdate update = new SetValue(getPath().append(path), value);
 		handleUpdate(update);
 	}
@@ -751,7 +753,7 @@ public class Model {
 	 * @param model - the model to set
 	 */
 	public void setModel(Model model) {
-		setModel(new Path(""), model);
+		setModel(Path.make(""), model);
 	}
 	
 	/**
@@ -769,7 +771,7 @@ public class Model {
 	 * @param pathString - the path relative to this model
 	 */
 	public void setModel(String pathString, Model model) {
-		setModel(new Path(pathString), model);
+		setModel(Path.make(pathString), model);
 	}
 	
 	/**
@@ -786,7 +788,7 @@ public class Model {
 	 * @param value - the model to set
 	 * @param path - the path relative to this model
 	 */
-	public void setModel(Path path, Model model) {
+	public void setModel(Path<?> path, Model model) {
 		ModelUpdate update = new SetModel(getPath().append(path), model);
 		handleUpdate(update);
 	}
@@ -801,7 +803,7 @@ public class Model {
 	 * @param pathString - the path to the model to be deleted
 	 */
 	public void deleteModel(String pathString) {
-		deleteModel(new Path(pathString));
+		deleteModel(Path.make(pathString));
 	}
 	
 	/**
@@ -811,7 +813,7 @@ public class Model {
 	 * be called unless you're sure you won't want the values again.
 	 * @param path - the path to the model to be deleted
 	 */
-	public void deleteModel(Path path) {
+	public void deleteModel(Path<?> path) {
 		if(path.isTerminal())
 			throw new InvalidPathException("Delete path cannot be terminal.");
 		if(path.size() == 0)
@@ -843,7 +845,7 @@ public class Model {
 	 * to be passed along.
 	 */
 	public void update() {
-		update(new Path(""));
+		update(Path.make(""));
 	}	
 	
 	/**
@@ -854,7 +856,7 @@ public class Model {
 	 * @param pathString - the path string representing the target model
 	 */
 	public void update(String pathString) {
-		update(new Path(pathString));
+		update(Path.make(pathString));
 	}
 	
 	/**
@@ -864,7 +866,7 @@ public class Model {
 	 * causes the ModelUpdate UnknownUpdate to be passed along.
 	 * @param path - the path representing the target model
 	 */
-	public void update(Path path) {
+	public void update(Path<?> path) {
 		ModelUpdate update = new UnknownUpdate(getPath().append(path));
 		DDMVC.notifyObservers(update, UpdateLevel.VALUE, path);
 	}

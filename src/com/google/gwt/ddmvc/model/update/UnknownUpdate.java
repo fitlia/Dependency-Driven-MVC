@@ -17,7 +17,7 @@ public class UnknownUpdate extends ModelUpdate {
 	/**
 	 * @param target
 	 */
-	public UnknownUpdate(Path target) {
+	public UnknownUpdate(Path<?> target) {
 		super(target);
 		this.isComplete = true;
 	}

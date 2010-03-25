@@ -19,7 +19,7 @@ import com.google.gwt.ddmvc.model.update.list.Append;
 public class ModelTest {
 	
 	private class FakeObserver implements Observer {
-		public Path getPath() { return null; }
+		public Path<?> getPath() { return null; }
 		public void modelChanged(Collection<ModelUpdate> updates) {}
 		public boolean hasObservers() { return false; }
 		public void notifyObservers(ModelUpdate update, UpdateLevel level) {}
@@ -186,12 +186,12 @@ public class ModelTest {
 
 	@Test
 	public void getValueByPath() {
-		assertTrue(DDMVC.getValue(new Path("cat")).equals("meow"));
+		assertTrue(DDMVC.getValue(Path.make("cat")).equals("meow"));
 	}
 	
 	@Test
 	public void getValueByPathObserver() {
-		assertTrue(DDMVC.getValue(new Path("person.english"), obs).equals("hello"));
+		assertTrue(DDMVC.getValue(Path.make("person.english"), obs).equals("hello"));
 		
 		Model cat = DDMVC.getModel("person.english");
 		assertTrue(cat.getValueObservers().contains(obs));
@@ -221,12 +221,12 @@ public class ModelTest {
 	
 	@Test
 	public void getModelByPath() {
-		assertTrue(DDMVC.getModel(new Path("cat")).getValue().equals("meow"));
+		assertTrue(DDMVC.getModel(Path.make("cat")).getValue().equals("meow"));
 	}
 	
 	@Test
 	public void getModelByPathObserver() {
-		assertTrue(DDMVC.getModel(new Path("cat"), obs).getValue().equals("meow"));
+		assertTrue(DDMVC.getModel(Path.make("cat"), obs).getValue().equals("meow"));
 		
 		Model cat = DDMVC.getModel("cat");
 		assertTrue(cat.getReferentialObservers().contains(obs));
@@ -241,7 +241,7 @@ public class ModelTest {
 		assertTrue(DDMVC.get("person.french.$").equals("bonjour"));
 		assertTrue(((Model)DDMVC.get("person.french"))
 				.getValue().equals("bonjour"));
-		assertTrue(((Model)DDMVC.get(new Path("person.french.*")))
+		assertTrue(((Model)DDMVC.get(Path.make("person.french.*")))
 				.getValue().equals("bonjour"));
 		
 		assertTrue(DDMVC.get("person.french.$", obs).equals("bonjour"));
@@ -253,7 +253,7 @@ public class ModelTest {
 		assertTrue(DDMVC.getModel("person.english")
 				.getReferentialObservers().contains(obs));
 		
-		assertTrue(((Model)DDMVC.get(new Path("cat.*"), obs))
+		assertTrue(((Model)DDMVC.get(Path.make("cat.*"), obs))
 				.getValue().equals("meow"));
 		assertTrue(DDMVC.getModel("cat")
 				.getFieldObservers().contains(obs));
@@ -320,7 +320,7 @@ public class ModelTest {
 
 	@Test
 	public void setValuePathObject() {
-		DDMVC.setValue(new Path("cat.tabby"),"moo");
+		DDMVC.setValue(Path.make("cat.tabby"),"moo");
 		assertTrue(DDMVC.getValue("cat.tabby").equals("moo"));
 	}
 	
@@ -358,7 +358,7 @@ public class ModelTest {
 	@Test
 	public void setModelByPathModel() {
 		Model newPerson = new Model("maw");
-		DDMVC.setModel(new Path("person"), newPerson);
+		DDMVC.setModel(Path.make("person"), newPerson);
 		
 		assertTrue(DDMVC.getValue("person").equals("maw"));
 		
@@ -422,7 +422,7 @@ public class ModelTest {
 	
 	@Test
 	public void deleteModelByPath() {
-		DDMVC.deleteModel(new Path("person"));
+		DDMVC.deleteModel(Path.make("person"));
 		assertFalse(DDMVC.hasPath("person"));
 	}
 	

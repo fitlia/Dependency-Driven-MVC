@@ -57,7 +57,7 @@ public abstract class ObjectModel extends Model {
 	 * @return the new property
 	 */
 	protected static <T> Property<T> property(Class<T> cls, String key) {
-		return Property.create(cls, key);
+		return Property.make(cls, key);
 	}
 	
 	/**
@@ -70,7 +70,7 @@ public abstract class ObjectModel extends Model {
 	 */
 	protected static <T> Property<T> property(Class<T> cls, String key,
 			T defaultValue) {
-		return Property.create(cls, key, defaultValue);
+		return Property.make(cls, key, defaultValue);
 	}
 	
 	/**
@@ -81,7 +81,7 @@ public abstract class ObjectModel extends Model {
 	 * @return the new property
 	 */
 	protected static <T> Property<T> property(String key, T defaultValue) {
-		return Property.create(key, defaultValue);
+		return Property.make(key, defaultValue);
 	}
 	
 	/**
@@ -93,7 +93,7 @@ public abstract class ObjectModel extends Model {
 	protected static <ModelType extends Model> SubModel<ModelType> 
 			subModel(Class<ModelType> cls, String key) {
 		
-		return SubModel.create(cls, key);
+		return SubModel.make(cls, key);
 	}
 	
 }
