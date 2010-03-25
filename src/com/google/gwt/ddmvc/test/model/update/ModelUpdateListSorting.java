@@ -1,4 +1,4 @@
-package com.google.gwt.ddmvc.test;
+package com.google.gwt.ddmvc.test.model.update;
 
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
@@ -9,6 +9,11 @@ import org.junit.Test;
 import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.model.update.list.Sort;
 
+/**
+ * Tests the list-sorting ModelUpdates for expected functionality.
+ * 
+ * @author Kevin Dolan
+ */
 public class ModelUpdateListSorting {
 
 	private List<Integer> testList;

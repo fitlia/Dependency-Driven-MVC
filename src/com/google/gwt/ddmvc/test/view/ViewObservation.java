@@ -1,4 +1,4 @@
-package com.google.gwt.ddmvc.test;
+package com.google.gwt.ddmvc.test.view;
 
 import static org.junit.Assert.*;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package com.google.gwt.ddmvc.test;
+package com.google.gwt.ddmvc.test.model.update;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -15,6 +15,11 @@ import com.google.gwt.ddmvc.model.update.list.RemoveAllEqualTo;
 import com.google.gwt.ddmvc.model.update.list.RemoveAllThatMatch;
 import com.google.gwt.ddmvc.model.update.list.RemoveIndex;
 
+/**
+ * Tests the list-filtering ModelUpdate methods for expected functionality.
+ * 
+ * @author Kevin Dolan
+ */
 public class ModelUpdateListFiltering {
 
 	private List<Integer> testList;
@@ -59,6 +64,8 @@ public class ModelUpdateListFiltering {
 	
 	@Test
 	public void exceptionHandling() {
+		//TODO - move to ModelUpdateBasics
+		
 		Append update3 = new Append("frillo", 5);
 		DDMVC.handleUpdate(update3);
 		assertTrue(update3.getException() != null);

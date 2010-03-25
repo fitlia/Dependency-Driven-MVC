@@ -1,4 +1,4 @@
-package com.google.gwt.ddmvc.test;
+package com.google.gwt.ddmvc.test.model;
 
 import org.junit.Before;
 import com.google.gwt.ddmvc.DDMVC;

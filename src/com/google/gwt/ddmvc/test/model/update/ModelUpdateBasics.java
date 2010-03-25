@@ -1,4 +1,4 @@
-package com.google.gwt.ddmvc.test;
+package com.google.gwt.ddmvc.test.model.update;
 
 import static org.junit.Assert.*;
 import java.util.ArrayList;
@@ -10,8 +10,10 @@ import com.google.gwt.ddmvc.model.exception.InvalidPathException;
 import com.google.gwt.ddmvc.model.update.*;
 import com.google.gwt.ddmvc.model.update.list.Append;
 import com.google.gwt.ddmvc.model.update.list.Prepend;
+
 /**
- * Tests for DDMVC handling of ModelUpdates 
+ * Tests for DDMVC handling of standard ModelUpdates, particularly SetValue
+ * and SetModel.  Also tests the list-processing capabilities of DDMVC.
  * 
  * @author Kevin Dolan
  */
@@ -91,7 +93,6 @@ public class ModelUpdateBasics {
 		assertTrue(DDMVC.getValue("cow").equals("moo"));
 		assertTrue(DDMVC.getValue("shawn").equals(33));
 		
-		
 		List<Integer> listA = (List<Integer>) DDMVC.getValue("lists.listA");
 		assertTrue(listA.size() == 3);
 		assertTrue(listA.get(0).equals(3));
@@ -101,5 +102,7 @@ public class ModelUpdateBasics {
 		assertTrue(listB.size() == 1);
 		assertTrue(listB.get(0).equals(0));
 	}
+	
+	//TODO - Exceptions encountered in list processing?
 	
 }

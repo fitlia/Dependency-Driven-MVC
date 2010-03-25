@@ -1,6 +1,8 @@
-package com.google.gwt.ddmvc.test;
+package com.google.gwt.ddmvc.test.model;
 
 import static org.junit.Assert.*;
+
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -9,13 +11,22 @@ import org.junit.Test;
 import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.event.Observer;
 import com.google.gwt.ddmvc.model.Model;
+import com.google.gwt.ddmvc.model.ObjectModel;
 import com.google.gwt.ddmvc.model.Path;
+import com.google.gwt.ddmvc.model.Property;
+import com.google.gwt.ddmvc.model.SubModel;
 import com.google.gwt.ddmvc.model.Model.UpdateLevel;
 import com.google.gwt.ddmvc.model.exception.InvalidPathException;
 import com.google.gwt.ddmvc.model.exception.ModelDoesNotExistException;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.model.update.list.Append;
 
+/**
+ * ModelTest tests all the standard data-model features of the DDMVC library,
+ * particularly through the proxies provided by the static DDMVC singleton.
+ * 
+ * @author Kevin Dolan
+ */
 public class ModelTest {
 	
 	private class FakeObserver implements Observer {
@@ -83,9 +94,51 @@ public class ModelTest {
 		assertFalse(DDMVC.hasPath("raccoon.rabies"));
 		
 		assertTrue(DDMVC.hasPath("cat.$"));
-		assertFalse(DDMVC.hasPath("$"));
+		assertTrue(DDMVC.hasPath("$"));
 		assertTrue(DDMVC.hasPath("person.*"));
-		assertFalse(DDMVC.hasPath("cat.*"));
+		assertTrue(DDMVC.hasPath("cat.*"));		
+	}
+	
+	@Test
+	public void hasPathWithField() {
+		assertTrue(DDMVC.hasPath("person", 
+				Property.make(String.class, "english")));
+		assertTrue(DDMVC.hasPath("person", 
+				SubModel.make(Model.class, "english")));
+		
+		assertFalse(DDMVC.hasPath("person", 
+				Property.make(String.class, "spanish")));
+		assertFalse(DDMVC.hasPath("person", 
+				SubModel.make(Model.class, "spanish")));
+	}
+	
+	@Test
+	public void pathIsTypeValid() {
+		assertTrue(DDMVC.pathIsTypeValid(Path.make("cat")));
+		assertTrue(DDMVC.pathIsTypeValid("", 
+				Property.make(String.class, "cat")));
+		assertTrue(DDMVC.pathIsTypeValid("person", 
+				Property.make(String.class, "english")));
+		assertTrue(DDMVC.pathIsTypeValid("lists", 
+				Property.make(AbstractList.class, "counting")));
+		assertTrue(DDMVC.pathIsTypeValid("person",
+				SubModel.make(Model.class, "french")));
+		
+		assertFalse(DDMVC.pathIsTypeValid("person", 
+				Property.make(Integer.class, "english")));
+		assertFalse(DDMVC.pathIsTypeValid("person",
+				SubModel.make(ObjectModel.class, "french")));
+		
+		try {
+			DDMVC.pathIsTypeValid("person", 
+					Property.make(Integer.class, "mexican"));
+			fail();
+		} catch(ModelDoesNotExistException e) {}
+		
+		try {
+			DDMVC.pathIsTypeValid(Path.make("person.english.*"));
+			fail();
+		} catch(InvalidPathException e) {}
 	}
 	
 	@Test

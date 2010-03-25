@@ -1,6 +1,9 @@
-package com.google.gwt.ddmvc.test;
+package com.google.gwt.ddmvc.test.model;
 
 import static org.junit.Assert.*;
+
+import java.util.List;
+
 import org.junit.Test;
 
 import com.google.gwt.ddmvc.model.Model;
@@ -9,6 +12,15 @@ import com.google.gwt.ddmvc.model.Property;
 import com.google.gwt.ddmvc.model.SubModel;
 import com.google.gwt.ddmvc.model.exception.InvalidPathException;
 
+/**
+ * PathTest provides unit tests for all the methods in the Path class.
+ * 
+ * Particular effort is made to break the invariants of the Path class by
+ * invalid inputs, since paths will often be built directly by programmers,
+ * and this would be a very easy point of error.
+ * 
+ * @author Kevin Dolan
+ */
 public class PathTest {
 	
 	//
@@ -21,6 +33,10 @@ public class PathTest {
 		assertTrue(path1.getImmediate().equals("dog"));
 		assertTrue(path1.advance().getImmediate() == null);
 		assertTrue(path1.size() == 1);
+		
+		assertFalse(path1.isTerminal());
+		assertFalse(path1.isValuePath());
+		assertFalse(path1.isFieldPath());
 	}
 	
 	@Test
@@ -29,10 +45,18 @@ public class PathTest {
 		assertTrue(path1.getImmediate().equals("dog"));
 		assertTrue(path1.size() == 2);
 		
+		assertFalse(path1.isTerminal());
+		assertFalse(path1.isValuePath());
+		assertFalse(path1.isFieldPath());
+		
 		Path<?> path2 = path1.advance();
 		assertTrue(path2.getImmediate().equals("Cat_1"));
 		assertTrue(path2.advance().getImmediate() == null);
 		assertTrue(path2.size() == 1);
+		
+		assertFalse(path2.isTerminal());
+		assertFalse(path2.isValuePath());
+		assertFalse(path2.isFieldPath());
 	}
 	
 	@Test
@@ -40,6 +64,10 @@ public class PathTest {
 		Path<?> path1 = Path.make("dog.Cat_1.candle");
 		assertTrue(path1.getImmediate().equals("dog"));
 		assertTrue(path1.size() == 3);
+		
+		assertFalse(path1.isTerminal());
+		assertFalse(path1.isValuePath());
+		assertFalse(path1.isFieldPath());
 		
 		Path<?> path2 = path1.advance();
 		assertTrue(path2.getImmediate().equals("Cat_1"));
@@ -56,12 +84,24 @@ public class PathTest {
 		Path<?> path1 = Path.make("dog.Cat_1.*");
 		assertTrue(path1.getImmediate().equals("dog"));
 		
+		assertTrue(path1.isTerminal());
+		assertFalse(path1.isValuePath());
+		assertTrue(path1.isFieldPath());
+		
 		Path<?> path2 = path1.advance();
 		assertTrue(path2.getImmediate().equals("Cat_1"));
+		
+		assertTrue(path2.isTerminal());
+		assertFalse(path2.isValuePath());
+		assertTrue(path2.isFieldPath());
 		
 		Path<?> path3 = path2.advance();
 		assertTrue(path3.getImmediate().equals("*"));
 		assertTrue(path3.advance().getImmediate() == null);
+		
+		assertTrue(path3.isTerminal());
+		assertFalse(path3.isValuePath());
+		assertTrue(path3.isFieldPath());
 	}
 	
 	@Test
@@ -76,13 +116,22 @@ public class PathTest {
 		Path<?> path1 = Path.make("*");
 		assertTrue(path1.getImmediate().equals("*"));
 		assertTrue(path1.advance().getImmediate() == null);
+	
+		assertTrue(path1.isTerminal());
+		assertFalse(path1.isValuePath());
+		assertTrue(path1.isFieldPath());
 	}
 
+	
 	@Test
 	public void cashOnly() {
 		Path<?> path1 = Path.make("$");
 		assertTrue(path1.getImmediate().equals("$"));
 		assertTrue(path1.advance().getImmediate() == null);
+		
+		assertTrue(path1.isTerminal());
+		assertTrue(path1.isValuePath());
+		assertFalse(path1.isFieldPath());
 	}
 	
 	@Test
@@ -92,7 +141,10 @@ public class PathTest {
 		assertTrue(path1.getExpectedType().equals(String.class));
 		assertTrue(path1.leftMost().equals("string"));
 		assertTrue(path1.rightMost().equals("$"));
+		
 		assertTrue(path1.isTerminal());
+		assertTrue(path1.isValuePath());
+		assertFalse(path1.isFieldPath());
 	}
 	
 	@Test
@@ -103,8 +155,13 @@ public class PathTest {
 		assertTrue(path1.leftMost().equals("string"));
 		assertTrue(path1.rightMost().equals("gizelle"));
 		assertFalse(path1.isTerminal());
+		
+		assertFalse(path1.isTerminal());
+		assertFalse(path1.isValuePath());
+		assertFalse(path1.isFieldPath());
 	}
 
+	
 	@Test
 	public void makeModel() {
 		Path<Model> path1 = Path.makeModel("string.gizelle");
@@ -121,7 +178,10 @@ public class PathTest {
 		assertTrue(path1.size() == 2);
 		assertTrue(path1.getImmediate().equals("title"));
 		assertTrue(path1.rightMost().equals("$"));
+		
 		assertTrue(path1.isTerminal());
+		assertTrue(path1.isValuePath());
+		assertFalse(path1.isFieldPath());
 	}
 	
 	@Test
@@ -142,7 +202,10 @@ public class PathTest {
 		assertTrue(path1.advance().getImmediate().equals("dog"));
 		assertTrue(path1.advance().advance().getImmediate().equals("title"));
 		assertTrue(path1.rightMost().equals("$"));
+		
 		assertTrue(path1.isTerminal());
+		assertTrue(path1.isValuePath());
+		assertFalse(path1.isFieldPath());
 	}
 	
 	@Test
@@ -154,7 +217,10 @@ public class PathTest {
 		assertTrue(path1.advance().getImmediate().equals("dog"));
 		assertTrue(path1.advance().advance().getImmediate().equals("title"));
 		assertTrue(path1.advance().advance().advance().getImmediate() == null);
+		
 		assertFalse(path1.isTerminal());
+		assertFalse(path1.isValuePath());
+		assertFalse(path1.isFieldPath());
 	}
 	
 	//
@@ -283,6 +349,14 @@ public class PathTest {
 		catch(InvalidPathException e) {}
 	}
 	
+	@Test
+	public void makeParameterizedInterface() {
+		try {
+			Path.make(List.class, "doesnt.matter");
+			fail();
+		} catch(InvalidPathException e) {}
+	}
+	
 	//
 	// Path manipulators
 	//
@@ -370,6 +444,10 @@ public class PathTest {
 		Path<?> path1 = Path.make("dog.cat");
 		Path<?> path2 = path1.append("$");
 		assertTrue(path2.toString().equals("dog.cat.$"));
+		
+		assertTrue(path2.isTerminal());
+		assertTrue(path2.isValuePath());
+		assertFalse(path2.isFieldPath());
 	}
 	
 	@Test
@@ -381,7 +459,10 @@ public class PathTest {
 		assertTrue(path2.advance().getImmediate().equals("dog"));
 		assertTrue(path2.advance().advance().getImmediate().equals("title"));
 		assertTrue(path2.rightMost().equals("$"));
+		
 		assertTrue(path2.isTerminal());
+		assertTrue(path2.isValuePath());
+		assertFalse(path2.isFieldPath());
 	}
 	
 	@Test
@@ -393,7 +474,10 @@ public class PathTest {
 		assertTrue(path2.advance().getImmediate().equals("dog"));
 		assertTrue(path2.advance().advance().getImmediate().equals("title"));
 		assertTrue(path2.advance().advance().advance().getImmediate() == null);
+		
 		assertFalse(path2.isTerminal());
+		assertFalse(path2.isValuePath());
+		assertFalse(path2.isFieldPath());
 	}
 	
 	@Test
@@ -476,4 +560,5 @@ public class PathTest {
 		
 		assertTrue(path1.endsWith(path1));
 	}	
+
 }

@@ -3,6 +3,7 @@ package com.google.gwt.ddmvc.model;
 import java.util.HashMap;
 import java.util.Set;
 import com.google.gwt.ddmvc.DDMVC;
+import com.google.gwt.ddmvc.Utility;
 import com.google.gwt.ddmvc.event.Observer;
 import com.google.gwt.ddmvc.model.exception.InvalidPathException;
 import com.google.gwt.ddmvc.model.exception.ModelDoesNotExistException;
@@ -112,7 +113,8 @@ public class Model {
 	}
 	
 	/**
-	 * Get the path upward from this model to the top model
+	 * Get the path upward from this model to the top model.
+	 * This path will be parameterized by the type of this model.
 	 * @return the path from the root to this model
 	 */
 	public Path<?> getPath() {
@@ -126,7 +128,7 @@ public class Model {
 		if(parent == null || key == null)
 			this.path = Path.ROOT_PATH;
 		else
-			this.path = parent.getPath().append(key);
+			this.path = parent.getPath().append(Path.make(getClass(), key));
 		
 		for(Model subModel : childData.values())
 			subModel.calculatePath();
@@ -154,11 +156,10 @@ public class Model {
 	}
 	
 	/**
-	 * @proxy hasPath(Path)
-	 * Determine whether or not a field path exists, by path-string.
-	 * Note, will throw an exception if the path ends in $ or *
-	 * @param path - the path to check
+	 * Determine whether or not a field path exists.
+	 * @param path - the path to check, relative to this model.
 	 * @return true if there exists the path
+	 * @proxy hasPath(Path)
 	 */
 	public boolean hasPath(String pathString) {
 		return hasPath(Path.make(pathString));
@@ -166,24 +167,73 @@ public class Model {
 	
 	/**
 	 * Determine whether or not a field path exists.
-	 * Note, if the path ends in $, it will return true if the associated value
-	 * is non-null.  If the the path ends in *, it will return true if the model
-	 * has any children.
-	 * @param path - the path to check
+	 * Note - This does not pay attention to parameterization whatsoever.  Also,
+	 * any terminal fields will be ignored.
+	 * @param path - the path to check, relative to this model.
+	 * @param field - the field to check past the path.
+	 * @return true if there exists the path
+	 * @proxy hasPath(Path)
+	 */
+	public boolean hasPath(String pathString, Field<?> field) {
+		return hasPath(Path.make(pathString, field));
+	}
+	
+	/**
+	 * Determine whether or not a field path exists.
+	 * Note - This does not pay attention to parameterization whatsoever.  Also,
+	 * any terminal fields will be ignored.
+	 * @param path - the path to check, relative to this model
 	 * @return true if there exists the path
 	 */
 	public boolean hasPath(Path<?> path) {
+		path = path.ignoreTerminal();
+		
 		if(path.getImmediate() == null)
 			return true;
-		if(path.getImmediate().equals("*"))
-			return childData.size() > 0;
-		if(path.getImmediate().equals("$"))
-			return myValue() != null;
 		
 		if(!hasChild(path.getImmediate()))
 			return false;
 		
 		return getChild(path.getImmediate()).hasPath(path.advance());
+	}
+	
+	/**
+	 * Determine whether or not a given path matches the type referred to by the
+	 * path.  
+	 * If the path refers to a model that does not exist, 
+	 * ModelDoesNotExistException will be thrown.
+	 * @param pathString - the path to check, relative to this model
+	 * @param field - the field past that path to check
+	 * @return true if the type of the model/value referred to by the path 
+	 */
+	public boolean pathIsTypeValid(String pathString, Field<?> field) {
+		return pathIsTypeValid(Path.make(pathString, field));
+	}
+	
+	/**
+	 * Determine whether or not a given path matches the type referred to by the
+	 * path.  
+	 * If the path refers to a model that does not exist, 
+	 * ModelDoesNotExistException will be thrown.
+	 * If the path is a field-path, InvalidPathException will be thrown.
+	 * @param path - the path to check, relative to this model
+	 * @return true if the type of the model/value referred to by the path 
+	 */
+	public boolean pathIsTypeValid(Path<?> path) {		
+		if(path.isFieldPath())
+			throw new InvalidPathException("pathIsTypeValid() cannot be called" +
+					" on a field path.");
+		
+		if(path.getImmediate() == null)
+			return Utility.aExtendsB(getClass(), path.getExpectedType());
+		
+		if(path.getImmediate().equals("$"))
+			return Utility.aExtendsB(value.getClass(), path.getExpectedType());
+		
+		if(!hasChild(path.getImmediate()))
+			throw new ModelDoesNotExistException(this.path.append(path));
+		
+		return getChild(path.getImmediate()).pathIsTypeValid(path.advance());
 	}
 	
 	/**
@@ -197,6 +247,7 @@ public class Model {
 	public Path<?> resolvePath(String pathString) {
 		return resolvePath(Path.make(pathString));
 	}
+	
 	
 	/**
 	 * Return the deepest path through this model consistent with the provided
@@ -213,6 +264,7 @@ public class Model {
 		
 		return Path.make("");
 	}
+	
 	
 	/**
 	 * Return the child model referenced by a given key.  If no model exists
@@ -231,6 +283,7 @@ public class Model {
 		}
 		return model;
 	}
+	
 	
 	/**
 	 * Set the child at the given key to a new model.  Observers will be preserved

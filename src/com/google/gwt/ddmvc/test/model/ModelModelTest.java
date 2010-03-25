@@ -1,4 +1,4 @@
-package com.google.gwt.ddmvc.test;
+package com.google.gwt.ddmvc.test.model;
 
 import static org.junit.Assert.*;
 
@@ -15,6 +15,12 @@ import com.google.gwt.ddmvc.model.ValueModel;
 import com.google.gwt.ddmvc.model.Model.UpdateLevel;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
+/**
+ * Testing the ModelModel model-type, with a focus on breaking type-safety
+ * invariants, and abnormal model method functionality.
+ * 
+ * @author Kevin Dolan
+ */
 public class ModelModelTest {
 
 	private FakeObserver obs;

@@ -8,18 +8,9 @@ import org.junit.runners.Suite;
  * @author Kevin Dolan
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses( { 
-	PathTest.class,
-	ModelTest.class,
-	ModelUpdateBasics.class,
-	ModelUpdateListFiltering.class,
-	ModelUpdateListInsertions.class,
-	ModelUpdateListSorting.class,
-	ValueModelTest.class,
-	ModelModelTest.class,
-	ObjectModelTest.class,
-	ViewObservation.class,
-	ComputedModelObservation.class,
-	StandardControllerTest.class
+@Suite.SuiteClasses( {
+	com.google.gwt.ddmvc.test.controller.Tests.class,
+	com.google.gwt.ddmvc.test.model.Tests.class,
+	com.google.gwt.ddmvc.test.view.Tests.class,
 })
 public class Tests {}

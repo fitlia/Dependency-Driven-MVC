@@ -14,6 +14,7 @@ import com.google.gwt.ddmvc.controller.Controller;
 import com.google.gwt.ddmvc.controller.ServerRequest;
 import com.google.gwt.ddmvc.event.AppEvent;
 import com.google.gwt.ddmvc.event.Observer;
+import com.google.gwt.ddmvc.model.Field;
 import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.Path;
 import com.google.gwt.ddmvc.model.Model.UpdateLevel;
@@ -64,6 +65,10 @@ public class DDMVC {
 	 * Generally, there is no need to have any other rooted models, though
 	 * there's nothing stopping you from doing that.  It just won't behave
 	 * as expected in all circumstanced.  Really, just don't do it!
+	 * 
+	 * Also, most reasonably public methods of the data root are proxied through
+	 * DDMVC, so it is very unlikely that you would ever even need a reference
+	 * to it.
 	 * 
 	 * @return the data root.
 	 */
@@ -239,7 +244,6 @@ public class DDMVC {
 	 * @param pathString - the path to add the observer to (defines what type of 
 	 * observer it is according to the right-most path field)
 	 */
-	
 	public static void addObserver(Observer observer, String pathString) {
 		addObserver(observer, Path.make(pathString));
 	}
@@ -251,7 +255,6 @@ public class DDMVC {
 	 * @param path - the path to add the observer to (defines what type of 
 	 * observer it is according to the right-most path field)
 	 */
-	
 	public static void addObserver(Observer observer, Path<?> path) {
 		Set<Observer> observers = getObserversSafe(path, true);
 		observers.add(observer);
@@ -259,6 +262,7 @@ public class DDMVC {
 	
 	//
 	// Observer Removal
+	//
 	
 	/**
 	 * Remove an observer from the set of observers, according to the path 
@@ -315,21 +319,63 @@ public class DDMVC {
 	//
 	
 	/**
-	 * Determine whether or not the data-store has a model at the given path
-	 * @param pathString - the path to check
-	 * @return true if a model exists
+	 * Determine whether or not a field path exists.
+	 * @param path - the path to check, relative to this model.
+	 * @return true if there exists the path
+	 * @proxy hasPath(Path)
 	 */
 	public static boolean hasPath(String pathString) {
 		return hasPath(Path.make(pathString));
 	}
+
+	/**
+	 * Determine whether or not a field path exists.
+	 * Note - This does not pay attention to parameterization whatsoever.  Also,
+	 * any terminal fields will be ignored.
+	 * @param path - the path to check, relative to this model.
+	 * @param field - the field to check past the path.
+	 * @return true if there exists the path
+	 * @proxy hasPath(Path)
+	 */
+	public static boolean hasPath(String pathString, Field<?> field) {
+		return hasPath(Path.make(pathString, field));
+	}
 	
 	/**
-	 * Determine whether or not the data-store has a model at the given path
-	 * @param path - the path to check
-	 * @return true if a model exists
+	 * Determine whether or not a field path exists.
+	 * Note - This does not pay attention to parameterization whatsoever.  Also,
+	 * any terminal fields will be ignored.
+	 * @param path - the path to check, relative to this model
+	 * @return true if there exists the path
 	 */
 	public static boolean hasPath(Path<?> path) {
 		return dataRoot.hasPath(path);
+	}
+	
+	/**
+	 * Determine whether or not a given path matches the type referred to by the
+	 * path.  
+	 * If the path refers to a model that does not exist, 
+	 * ModelDoesNotExistException will be thrown.
+	 * @param pathString - the path to check, relative to this model
+	 * @param field - the field past that path to check
+	 * @return true if the type of the model/value referred to by the path 
+	 */
+	public static boolean pathIsTypeValid(String pathString, Field<?> field) {
+		return pathIsTypeValid(Path.make(pathString, field));
+	}
+	
+	/**
+	 * Determine whether or not a given path matches the type referred to by the
+	 * path.  
+	 * If the path refers to a model that does not exist, 
+	 * ModelDoesNotExistException will be thrown.
+	 * If the path is a field-path, InvalidPathException will be thrown.
+	 * @param path - the path to check, relative to this model
+	 * @return true if the type of the model/value referred to by the path 
+	 */
+	public static boolean pathIsTypeValid(Path<?> path) {
+		return dataRoot.pathIsTypeValid(path);
 	}
 	
 	//

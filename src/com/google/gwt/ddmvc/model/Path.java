@@ -9,9 +9,17 @@ import com.google.gwt.ddmvc.model.exception.InvalidPathException;
 
 /**
  * A Path represents a traversible path through a model data.
+ * 
  * Path is reflectively parameterized by the expected return type of the path.
- * This is entirely logical and may not actually reflect the type of the model
- * at the given path.
+ * 
+ * This expected return type may not actually reflect the type referred to by
+ * a path.  The parameterization of a Path merely provides a means of adding
+ * some compile-time type-casting convenience for programmers.  Use of these
+ * features is entirely optional, but recommended.
+ * 
+ * In general, if a value at a given path does not match the expected type,
+ * a run-time InvalidPathException should be thrown to indicate the mistake.
+ * 
  * @author Kevin Dolan
  * 
  * @param <Type> the type of data expected at the address, most commonly Object
@@ -20,6 +28,8 @@ public class Path<Type> {
 	
 	private List<String> path;
 	private boolean isTerminal;
+	private boolean isValuePath;
+	private boolean isFieldPath;
 	private Class<?> expectedType;
 	
 	//
@@ -100,7 +110,7 @@ public class Path<Type> {
 	 * This can be used to reference the root without the need to create 
 	 * a new path
 	 */
-	public static final Path<?> ROOT_PATH = new Path<Object>(null, "");
+	public static final Path<?> ROOT_PATH = new Path<Object>(Object.class, "");
 	
 	//
 	// Validators
@@ -177,12 +187,9 @@ public class Path<Type> {
 	 * @param pathString - the path string to parse
 	 */
 	private Path(Class<?> expectedType, String pathString) {
-		this.expectedType = expectedType;
+		List<String> path;
 		if(pathString.length() > 0) {	
 			validatePathString(pathString);
-			
-			isTerminal = 
-				pathString.indexOf('$') >= 0 || pathString.indexOf('*') >= 0;
 			
 			String[] split = pathString.split("[.]");
 			path = new LinkedList<String>();
@@ -193,6 +200,7 @@ public class Path<Type> {
 		else {
 			path = Collections.emptyList();
 		}
+		init(expectedType, path);
 	}
 	
 	/**
@@ -201,11 +209,21 @@ public class Path<Type> {
 	 * @param path - the list of fields
 	 */
 	private Path(Class<?> expectedType, List<String> path) {
+		init(expectedType, path);
+	}
+	
+	private void init(Class<?> expectedType, List<String> path) {
+		if(expectedType.isInterface())
+			throw new InvalidPathException("Paths cannot be parameterized to an " +
+					"interface due to limitations of GWT type-reflection.");
+		
 		this.expectedType = expectedType;
 		this.path = path;
 		if(path.size() > 0) {
 			String right = rightMost();
-			isTerminal = right.equals("*") || right.equals("$");
+			isValuePath = right.equals("$");
+			isFieldPath = right.equals("*");
+			isTerminal = isValuePath || isFieldPath;
 		}
 	}
 	
@@ -260,6 +278,20 @@ public class Path<Type> {
 	 */
 	public boolean isTerminal() {
 		return isTerminal;
+	}
+
+	/**
+	 * @return whether or not this path is terminated by a $
+	 */
+	public boolean isValuePath() {
+		return isValuePath;
+	}
+	
+	/**
+	 * @return whether or not this path is terminated by a *
+	 */
+	public boolean isFieldPath() {
+		return isFieldPath;
 	}
 	
 	@Override
@@ -324,17 +356,18 @@ public class Path<Type> {
 	
 	/**
 	 * Get a path equal to this path, with the $ or * eliminated from the end,
-	 * if any
+	 * if any.  Note - this will necessarily make this path refer to a model.
 	 * @return a non-terminal path
 	 */
-	public Path<Object> ignoreTerminal() {
+	public Path<Model> ignoreTerminal() {		
+		if(!isTerminal())
+			return new Path<Model>(Model.class, path);
+			
 		List<String> newPathList = new LinkedList<String>();
 		newPathList.addAll(path);
+		newPathList.remove(newPathList.size() - 1);
 		
-		if(isTerminal())
-			newPathList.remove(newPathList.size() - 1);
-		
-		return new Path<Object>(Object.class, newPathList);
+		return new Path<Model>(Model.class, newPathList);
 	}	
 
 	/**

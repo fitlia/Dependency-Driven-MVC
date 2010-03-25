@@ -1,4 +1,4 @@
-package com.google.gwt.ddmvc.test;
+package com.google.gwt.ddmvc.test.model.update;
 
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
@@ -11,6 +11,12 @@ import com.google.gwt.ddmvc.model.update.list.AppendAll;
 import com.google.gwt.ddmvc.model.update.list.Prepend;
 import com.google.gwt.ddmvc.model.update.list.PrependAll;
 
+/**
+ * Tests the various List insertion ModelUpdate methods for expected 
+ * functionality.
+ * 
+ * @author Kevin Dolan
+ */
 public class ModelUpdateListInsertions {
 
 	private List<Integer> testList;

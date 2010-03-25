@@ -1,4 +1,4 @@
-package com.google.gwt.ddmvc.test;
+package com.google.gwt.ddmvc.test.model;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -10,6 +10,13 @@ import com.google.gwt.ddmvc.RunLoopException;
 import com.google.gwt.ddmvc.model.ComputedModel;
 import com.google.gwt.ddmvc.model.exception.ModelDoesNotExistException;
 
+/**
+ * This class tests the observation methods for computed models, with a
+ * simple incrementer computed model.  Some effort is made to cause
+ * exceptions by the removal of dependencies.
+ * 
+ * @author Kevin Dolan
+ */
 public class ComputedModelObservation {
 	
 	@Before
@@ -27,7 +34,7 @@ public class ComputedModelObservation {
 			this.isCache = isCache;
 			this.imm = imm;
 		}
-		
+
 		@Override
 		public boolean isCacheable() {
 			return isCache;
@@ -183,4 +190,5 @@ public class ComputedModelObservation {
 					.equals(ModelDoesNotExistException.class));
 	}
 	
+	//TODO - type safety tests
 }

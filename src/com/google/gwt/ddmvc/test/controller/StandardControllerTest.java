@@ -1,4 +1,4 @@
-package com.google.gwt.ddmvc.test;
+package com.google.gwt.ddmvc.test.controller;
 
 import static org.junit.Assert.*;
 
@@ -13,6 +13,12 @@ import com.google.gwt.ddmvc.controller.ValidationError;
 import com.google.gwt.ddmvc.event.AppEvent;
 import com.google.gwt.ddmvc.view.View;
 
+/**
+ * Tests the methods of the StandController for expected behavior and
+ * exception handling.
+ * 
+ * @author Kevin Dolan
+ */
 public class StandardControllerTest {
 
 	private class MyController extends StandardController {
@@ -106,7 +112,7 @@ public class StandardControllerTest {
 	private MyView view;
 	
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		DDMVC.reset();
 		
 		controller = new MyController();
