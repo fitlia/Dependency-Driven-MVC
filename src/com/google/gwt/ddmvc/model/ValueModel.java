@@ -118,7 +118,7 @@ public class ValueModel<Type> extends Model {
 		if(result.getClass().getName()
 				.equals(ModelUpdate.SET_MODEL_TO.class.getName())) {
 			
-			notifyObservers(update, UpdateLevel.REFERENTIAL);
+			notifyObservers(update, UpdateLevel.REFERENCE);
 			getParent().setChild(getKey(), 
 					(((ModelUpdate.SET_MODEL_TO) result).getModel()));
 		}

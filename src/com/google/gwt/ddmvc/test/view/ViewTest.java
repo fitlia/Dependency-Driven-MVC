@@ -169,7 +169,7 @@ public class ViewTest {
 	//
 	
 	@Test
-	public void testRenderOnly() {
+	public void renderOnly() {
 		DDMVC.setValue("property1", 12);
 		DDMVC.runLoop();
 		assertTrue(ro.render == 2);

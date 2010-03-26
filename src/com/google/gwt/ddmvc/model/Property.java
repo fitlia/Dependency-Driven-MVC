@@ -55,7 +55,7 @@ public class Property<Type> extends Field<Type> {
 	 * @param key - the key of this property
 	 */
 	private Property(Class<Type> cls, String key, Type defaultValue) {
-		super(cls, key);
+		super(cls, FieldType.VALUE, key);
 		this.defaultValue = defaultValue;
 	}
 

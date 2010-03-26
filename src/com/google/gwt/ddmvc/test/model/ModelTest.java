@@ -6,6 +6,8 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+
 import org.junit.Before;
 import org.junit.Test;
 import com.google.gwt.ddmvc.DDMVC;
@@ -37,9 +39,11 @@ public class ModelTest {
 	}
 	
 	private Observer obs = new FakeObserver();
+	private Observer obs2 = new FakeObserver();
+	private Observer obs3 = new FakeObserver();
 	
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		DDMVC.reset();
 		
 		DDMVC.setValue("cat","meow");
@@ -177,10 +181,6 @@ public class ModelTest {
 	// Observer Methods
 	//
 	//
-	
-	//
-	// Existence
-	//
 
 	@Test
 	public void hasObservers() {
@@ -195,7 +195,79 @@ public class ModelTest {
 		DDMVC.addObserver(obs, "pal.*");
 		assertTrue(DDMVC.hasObservers("pal.fish.cat"));
 	}
+	
+	@Test
+	public void getObservers() {
+		DDMVC.addObserver(obs, "dog.cat");
+		DDMVC.addObserver(obs2, "dog.cat.$");
+		DDMVC.addObserver(obs3, "dog.cat.*");
+		assertTrue(DDMVC.getObservers("dog.cat").contains(obs));
+		assertTrue(DDMVC.getObservers("dog.cat.$").contains(obs2));
+		assertTrue(DDMVC.getObservers("dog.cat.*").contains(obs3));
+		assertTrue(DDMVC.getObservers("dog.cat").size() == 1);;
+		assertTrue(DDMVC.getObservers("dog.cat.$").size() == 1);;
+		assertTrue(DDMVC.getObservers("dog.cat.*").size() == 1);;
+	}
+	
+	@Test
+	public void getAllObservers() {
+		DDMVC.addObserver(obs, "dog.cat");
+		DDMVC.addObserver(obs2, "dog.cat.$");
+		DDMVC.addObserver(obs3, "dog.cat.*");
+		assertTrue(DDMVC.getAllObservers("dog.cat").size() == 3);
 		
+		DDMVC.addObserver(obs, "rat.smat");
+		DDMVC.addObserver(obs, "rat.smat.*");
+		DDMVC.addObserver(obs, "rat.smat.$");
+		assertTrue(DDMVC.getAllObservers("rat.smat").size() == 1);
+		
+		assertTrue(DDMVC.getAllObservers("rat").size() == 0);
+	}
+	
+	@Test
+	public void getAllAffected() {
+		DDMVC.addObserver(obs, "dog.*");
+		DDMVC.addObserver(obs2, "dog.cat.$");
+		DDMVC.addObserver(obs3, "dog.cat");
+		
+		Set<Observer> set = DDMVC.getAllAffected("dog.cat", UpdateLevel.REFERENCE);
+		assertTrue(set.size() == 3);
+		assertTrue(set.contains(obs));
+		assertTrue(set.contains(obs2));
+		assertTrue(set.contains(obs3));
+		
+		set = DDMVC.getAllAffected("dog.cat", UpdateLevel.VALUE);
+		assertTrue(set.size() == 2);
+		assertTrue(set.contains(obs));
+		assertTrue(set.contains(obs2));
+		
+		set = DDMVC.getAllAffected("dog.cat.smat", UpdateLevel.VALUE);
+		assertTrue(set.size() == 1);
+		assertTrue(set.contains(obs));
+	}
+	
+	@Test
+	public void removeObserver() {
+		DDMVC.addObserver(obs, "dog.*");
+		DDMVC.addObserver(obs, "dog");
+		DDMVC.addObserver(obs, "dog.cat");
+		DDMVC.removeObserver(obs, "dog.cat");
+		assertTrue(DDMVC.getObservers("dog.*").size() == 1);
+		assertTrue(DDMVC.getObservers("dog").size() == 1);
+		assertTrue(DDMVC.getObservers("dog.cat").size() == 0);
+		
+		DDMVC.addObserver(obs, "dog.cat");
+		DDMVC.removeObserver(obs, "dog");
+		assertTrue(DDMVC.getObservers("dog.*").size() == 1);
+		assertTrue(DDMVC.getObservers("dog").size() == 0);
+		assertTrue(DDMVC.getObservers("dog.cat").size() == 1);
+		
+		DDMVC.removeObserver(obs, "dog.*");
+		assertTrue(DDMVC.getObservers("dog.*").size() == 0);
+		assertTrue(DDMVC.getObservers("dog").size() == 0);
+		assertTrue(DDMVC.getObservers("dog.cat").size() == 1);
+	}
+	
 	//
 	//
 	// Accessors

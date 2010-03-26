@@ -145,7 +145,7 @@ public class ModelModel<ModelType extends Model> extends Model {
 				throw new ClassCastException(newModel.getClass() 
 						+ " cannot be cast to " + cls);
 			
-			notifyObservers(update, UpdateLevel.REFERENTIAL);
+			notifyObservers(update, UpdateLevel.REFERENCE);
 			model = (ModelType) newModel;
 			model.setKey(getKey());
 			model.setParent(getParent());

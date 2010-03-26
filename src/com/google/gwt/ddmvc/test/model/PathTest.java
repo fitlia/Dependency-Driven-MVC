@@ -160,7 +160,6 @@ public class PathTest {
 		assertFalse(path1.isValuePath());
 		assertFalse(path1.isFieldPath());
 	}
-
 	
 	@Test
 	public void makeModel() {

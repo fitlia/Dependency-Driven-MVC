@@ -1,6 +1,8 @@
 package com.google.gwt.ddmvc.test.model;
 
 import org.junit.Before;
+import org.junit.Test;
+
 import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.model.Field;
 import com.google.gwt.ddmvc.model.Model;
@@ -33,6 +35,11 @@ public class ObjectModelTest {
 	@Before
 	public void setUp() {
 		DDMVC.reset();
+	}
+
+	@Test
+	public void noTest() {
+		
 	}
 	
 }

@@ -26,7 +26,7 @@ public class SubModel<ModelType extends Model> extends Field<ModelType> {
 	 * @param key - the key of the field
 	 */
 	private SubModel(Class<ModelType> cls, String key) {
-		super(cls, key);
+		super(cls, FieldType.MODEL, key);
 	}
 
 	@Override
