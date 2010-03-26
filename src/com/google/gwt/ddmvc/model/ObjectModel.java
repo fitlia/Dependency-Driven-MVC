@@ -1,53 +1,62 @@
 package com.google.gwt.ddmvc.model;
 
+import java.util.HashMap;
+import java.util.Map;
+import com.google.gwt.ddmvc.model.exception.InvalidPathException;
+
 /**
  * An ObjectModel attempts to emulate a native Java object in a manner
  * more amenable to key-value observing.  It operates by defining several
  * fields and limiting updates made to the model to those particular fields.
- * It supports fields being model by the SubModel field.
  * 
- * Note that the class must not be an interface, @see ValueModel for 
- * explanation.
+ * The Object model has a number of static factory methods for convenience for
+ * creating Properties and SubModels.  They should be utilized when defining
+ * fields for an Object Model.
  * 
  * @author Kevin Dolan
  */
 public abstract class ObjectModel extends Model {
+	
+	private Map<String, Field<?>> fields;
+	
+	//
+	// Constructor
+	//
 	
 	/**
 	 * Create a new ObjectModel with the fields packed in an array.
 	 * Once created, the fields cannot be changed.
 	 * @param fields - the fields to create in an array.
 	 */
-	public ObjectModel(Field[] fields) {
-		for(Field field : fields)
-			super.setChild(field.getKey(), field.getModel());
+	public ObjectModel(Field<?>[] fields) {
+		this.fields = new HashMap<String, Field<?>>();
+		for(Field<?> field : fields) {
+			this.fields.put(field.getKey(), field);
+			setChild(field.getKey(), field.getModel());
+		}
 	}
+
+	//
+	// Model Method Overriding
+	//
 	
-	/**
-	 * Get the value of a child by the property field
-	 * @param <Type> - the type of object to be returned (packed into 
-	 * the property)
-	 * @param property - the property to access (should be owned by the model)
-	 * @return the value stored in that property
-	 */
-	@SuppressWarnings("unchecked")
-	public <Type> Type get(Property<Type> property) {
-		return (Type) getValue(property.getKey());
-	}
-	
-	/**
-	 * Get a child model by a subModel field
-	 * @param <ModelType> - the type of model to be returned (packed into 
-	 * the sub-model)
-	 * @param subModel - the subModel to access (should be owned by the model)
-	 * @return the model stored in that child model
-	 */	
-	@SuppressWarnings("unchecked")
-	public <ModelType extends Model> ModelType 
-			get(SubModel<ModelType> subModel) {
+	@Override
+	protected void setChild(String key, Model model) {
+		if(!fields.containsKey(key))
+			throw new InvalidPathException("Key " + key + " is not a field in " +
+					"ObjectModel at " + getPath());
 		
-		return (ModelType) getChild(subModel.getKey());
+		Field<?> field = fields.get(key);
+		if(!field.isValidModel(model))
+			throw new InvalidPathException("New Model is not compatible with " +
+					"ObjectModel at " + getPath());
+		
+		super.setChild(key, model);
 	}
+	
+	//
+	// Factory Field Methods
+	//
 	
 	/**
 	 * Create a new Property 

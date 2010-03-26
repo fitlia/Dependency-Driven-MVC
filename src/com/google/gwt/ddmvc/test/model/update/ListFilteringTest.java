@@ -8,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.model.update.ExceptionEncountered;
-import com.google.gwt.ddmvc.model.update.list.Append;
 import com.google.gwt.ddmvc.model.update.list.KeepAllThatMatch;
 import com.google.gwt.ddmvc.model.update.list.ListFilter;
 import com.google.gwt.ddmvc.model.update.list.RemoveAllEqualTo;
@@ -60,27 +59,6 @@ public class ListFilteringTest {
 				.equals(ee.getException().getClass()));
 		assertTrue(ee.getCause() == update2);
 		
-	}
-	
-	@Test
-	public void exceptionHandling() {
-		//TODO - move to ModelUpdateTest
-		
-		Append update3 = new Append("frillo", 5);
-		DDMVC.handleUpdate(update3);
-		assertTrue(update3.getException() != null);
-		ExceptionEncountered ee = (ExceptionEncountered) DDMVC.getValue("frillo");
-		assertTrue(ClassCastException.class
-				.equals(ee.getException().getClass()));
-		assertTrue(ee.getCause() == update3);
-		
-		RemoveIndex update4 = new RemoveIndex("f", 5);
-		DDMVC.handleUpdate(update4);
-		assertTrue(update4.getException() != null);
-		ee = (ExceptionEncountered) DDMVC.getValue("f");
-		assertTrue(NullPointerException.class
-				.equals(ee.getException().getClass()));
-		assertTrue(ee.getCause() == update4);
 	}
 	
 	@SuppressWarnings("unchecked")

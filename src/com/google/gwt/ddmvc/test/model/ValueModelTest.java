@@ -20,6 +20,7 @@ import com.google.gwt.ddmvc.model.update.list.Append;
 public class ValueModelTest {
 
 	private FakeObserver obs;
+	private FakeObserver obs2;
 
 	private class FakeObserver implements Observer {
 		public int change = 0;
@@ -35,6 +36,7 @@ public class ValueModelTest {
 	public void setUp() {
 		DDMVC.reset();
 		obs = new FakeObserver();
+		obs2 = new FakeObserver();
 	}
 	
 	@Test
@@ -64,6 +66,8 @@ public class ValueModelTest {
 		DDMVC.setModel("cat", ValueModel.make("meow"));
 		DDMVC.setValue("cat", "purr");
 		assertTrue(DDMVC.getValue("cat").equals("purr"));
+		assertTrue(DDMVC.getModel("cat").getPath().getExpectedType()
+				.equals(ValueModel.class));
 		
 		DDMVC.setModel("frog.toad", ValueModel.make("ribbit"));
 		DDMVC.setValue("frog.toad", "croak");
@@ -110,15 +114,7 @@ public class ValueModelTest {
 		} catch(InvalidPathException e) {}
 		assertTrue(DDMVC.getValue("cat").equals("meow"));
 	}
-	
-	@Test
-	public void setTypeSafe() {
-		ValueModel<Integer> vm = ValueModel.make(1);
-		DDMVC.setModel("cat", vm);
-		vm.set(22);
-		assertTrue(DDMVC.getValue("cat").equals(22));
-	}
-	
+		
 	@Test
 	public void reset() {
 		DDMVC.setModel("cat", ValueModel.make("meow"));
@@ -142,6 +138,12 @@ public class ValueModelTest {
 		DDMVC.setValue("frog.toad", "cooow");
 		DDMVC.runLoop();
 		assertTrue(obs.change == 1);
+		
+		DDMVC.addObserver(obs2, "frog.toad");
+		DDMVC.setModel("frog.toad", new Model("rooo"));
+		DDMVC.runLoop();
+		assertTrue(obs.change == 2);
+		assertTrue(obs2.change == 1);
 	}
 
 }

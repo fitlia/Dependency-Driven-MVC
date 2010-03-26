@@ -22,12 +22,17 @@ public class ObjectModelTest {
 		public static final SubModel<Model> 
 			CHARACTER = subModel(Model.class, "character");
 		
-		private static final Field[] fields = new Field[] {
-				NAME, RACE, AGE, CHARACTER
+		private static Field<?,?,?>[] fields = new Field[] { 
+			NAME, RACE, AGE, CHARACTER 
 		};
 		
 		public PersonModel() {
 			super(fields);
+		}
+		
+		public PersonModel(String name) {
+			super(fields);
+			setValue(NAME, "ronald");
 		}
 		
 	}
@@ -38,8 +43,8 @@ public class ObjectModelTest {
 	}
 
 	@Test
-	public void noTest() {
-		
+	public void basicModelFeatures() {
+		PersonModel pm = new PersonModel();
 	}
 	
 }

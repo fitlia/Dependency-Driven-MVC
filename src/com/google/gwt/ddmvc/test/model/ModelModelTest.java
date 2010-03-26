@@ -115,9 +115,10 @@ public class ModelModelTest {
 		assertTrue(DDMVC.getValue("cat.tabby").equals("hiss"));
 		assertTrue(myModel.getModel().getValue().equals("hiss"));
 		ValueModel<String> tabby = myModel.getModel();
-		tabby.set("pow");
+		tabby.setValue("pow");
 		assertTrue(DDMVC.getValue("cat.tabby").equals("pow"));
 		assertTrue(myModel.getModel().getValue().equals("pow"));
+		assertTrue(myModel.getModel().getClass().equals(ValueModel.class));
 	}
 	
 	@Test

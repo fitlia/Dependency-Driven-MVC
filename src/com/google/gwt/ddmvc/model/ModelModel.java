@@ -67,6 +67,10 @@ public class ModelModel<ModelType extends Model> extends Model {
 	 */
 	private ModelModel(Class<ModelType> cls, ModelType model) {
 		super();
+		
+		if(cls.isInterface())
+			throw new IllegalArgumentException("Class cannot be an interface.");
+		
 		this.cls = cls;
 		this.model = model;
 	}
@@ -131,29 +135,23 @@ public class ModelModel<ModelType extends Model> extends Model {
 			model.handleUpdateSafe(update, relative);
 	}
 	
+	@Override
+	protected void resetValue(Object value) {
+		model.resetValue(value);
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
-	protected void applyUpdate(ModelUpdate update) {		
-		Object result = update.process(model.myValue());
+	protected void handleSetModelTo(ModelUpdate.SET_MODEL_TO smt) {
+		Model newModel = smt.getModel();
 		
-		if(result.getClass().getName()
-				.equals(ModelUpdate.SET_MODEL_TO.class.getName())) {
-			
-			
-			Model newModel = ((ModelUpdate.SET_MODEL_TO) result).getModel();
-			if(!Utility.aExtendsB(newModel.getClass(), cls))
-				throw new ClassCastException(newModel.getClass() 
-						+ " cannot be cast to " + cls);
-			
-			notifyObservers(update, UpdateLevel.REFERENCE);
-			model = (ModelType) newModel;
-			model.setKey(getKey());
-			model.setParent(getParent());
-		}
-		else {
-			notifyObservers(update, UpdateLevel.VALUE);
-			model.value = result;
-		}
+		if(!Utility.aExtendsB(newModel.getClass(), cls))
+			throw new ClassCastException(newModel.getClass() 
+					+ " cannot be cast to " + cls);
+		
+		model = (ModelType) newModel;
+		model.setKey(getKey());
+		model.setParent(getParent());
 	}
 	
 }

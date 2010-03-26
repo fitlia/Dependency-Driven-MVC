@@ -1,12 +1,15 @@
 package com.google.gwt.ddmvc.model;
 
 import java.util.Collection;
-
 import com.google.gwt.ddmvc.event.Observer;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
- * Represents a value which depends on some other model(s). 
+ * Represents a value which depends on some other model(s).
+ * 
+ * Note - ModelUpdates which would try to affect this model will have no effect,
+ * other than to replace the model with something else.
+ * 
  * @author Kevin Dolan
  */
 public abstract class ComputedModel extends Model implements Observer {

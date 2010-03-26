@@ -1,5 +1,7 @@
 package com.google.gwt.ddmvc.model;
 
+import com.google.gwt.ddmvc.Utility;
+
 
 /**
  * A Property is a Field that stores a native Java object (by means of a 
@@ -14,7 +16,7 @@ package com.google.gwt.ddmvc.model;
  * @author Kevin Dolan
  * @param <Type> - the type of object to store
  */
-public class Property<Type> extends Field<Type> {
+public class Property<Type> extends Field<Type, ValueModel, Type> {
 	
 	/**
 	 * Instantiate a new property with a null default value
@@ -55,13 +57,14 @@ public class Property<Type> extends Field<Type> {
 	 * @param key - the key of this property
 	 */
 	private Property(Class<Type> cls, String key, Type defaultValue) {
-		super(cls, FieldType.VALUE, key);
+		super(cls, ValueModel.class, cls, FieldType.VALUE, key);
+		
 		this.defaultValue = defaultValue;
 	}
 
 	@Override
 	public Model getModel() {
-		return ValueModel.make(cls, defaultValue);
+		return ValueModel.make(getValueType(), defaultValue);
 	}
 
 	/**
@@ -74,6 +77,15 @@ public class Property<Type> extends Field<Type> {
 	@Override
 	public String getPathString() {
 		return key + ".$";
+	}
+
+	@Override
+	public boolean isValidModel(Model model) {
+		if(!Utility.aExtendsB(model.getClass(), ValueModel.class))
+			return false;
+		
+		ValueModel<?> vm = (ValueModel<?>) model;
+		return Utility.aExtendsB(vm.getValueClass(), getValueType());
 	}
 	
 }

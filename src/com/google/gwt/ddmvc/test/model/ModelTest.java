@@ -17,6 +17,7 @@ import com.google.gwt.ddmvc.model.ObjectModel;
 import com.google.gwt.ddmvc.model.Path;
 import com.google.gwt.ddmvc.model.Property;
 import com.google.gwt.ddmvc.model.SubModel;
+import com.google.gwt.ddmvc.model.ValueModel;
 import com.google.gwt.ddmvc.model.Model.UpdateLevel;
 import com.google.gwt.ddmvc.model.exception.InvalidPathException;
 import com.google.gwt.ddmvc.model.exception.ModelDoesNotExistException;
@@ -79,6 +80,7 @@ public class ModelTest {
 		
 		Model english = (Model) DDMVC.get("person.english");
 		assertTrue(english.getPath().toString().equals("person.english"));
+		assertTrue(english.getPath().getExpectedType().equals(Model.class));
 	}
 	
 	//
@@ -383,6 +385,19 @@ public class ModelTest {
 		assertTrue(DDMVC.getModel("cat")
 				.getFieldObservers().contains(obs));
 	}
+	
+	@Test
+	public void getParameterizedWrongType() {
+		try {
+			DDMVC.get(Path.make(Integer.class, "person.french.$"));
+			fail();
+		} catch(ClassCastException e) {}
+		
+		try {
+			DDMVC.get(Path.make(ValueModel.class, "person.french"));
+			fail();
+		} catch(ClassCastException e) {}
+	}	
 	
 	//
 	//

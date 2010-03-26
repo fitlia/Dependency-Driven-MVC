@@ -1,15 +1,18 @@
 package com.google.gwt.ddmvc.test.model.update;
 
 import static org.junit.Assert.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.*;
+
 import com.google.gwt.ddmvc.*;
 import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.exception.InvalidPathException;
 import com.google.gwt.ddmvc.model.update.*;
 import com.google.gwt.ddmvc.model.update.list.Append;
 import com.google.gwt.ddmvc.model.update.list.Prepend;
+import com.google.gwt.ddmvc.model.update.list.RemoveIndex;
 
 /**
  * Tests for DDMVC handling of standard ModelUpdates, particularly SetValue
@@ -74,6 +77,24 @@ public class ModelUpdateTest {
 	}
 	
 	@Test
+	public void exceptionHandling() {
+		Append update3 = new Append("frillo", 5);
+		DDMVC.handleUpdate(update3);
+		assertTrue(update3.getException() != null);
+		ExceptionEncountered ee = (ExceptionEncountered) DDMVC.getValue("frillo");
+		assertTrue(ClassCastException.class.equals(ee.getException().getClass()));
+		assertTrue(ee.getCause() == update3);
+		
+		RemoveIndex update4 = new RemoveIndex("f", 5);
+		DDMVC.handleUpdate(update4);
+		assertTrue(update4.getException() != null);
+		ee = (ExceptionEncountered) DDMVC.getValue("f");
+		assertTrue(NullPointerException.class
+				.equals(ee.getException().getClass()));
+		assertTrue(ee.getCause() == update4);
+	}
+	
+	@Test
 	@SuppressWarnings("unchecked")
 	public void updateListProcessing() {
 		List<ModelUpdate> updates = new ArrayList<ModelUpdate>();
@@ -81,6 +102,8 @@ public class ModelUpdateTest {
 		updates.add(new SetValue("cow", "moo"));
 		updates.add(new SetValue("shawn", 32));
 		updates.add(new SetValue("shawn", 33));
+		
+		updates.add(new Append("frillo", 5));
 		
 		updates.add(new Append("lists.listA", 1));
 		updates.add(new Append("lists.listA", 2));
@@ -101,8 +124,9 @@ public class ModelUpdateTest {
 		List<Integer> listB = (List<Integer>) DDMVC.getValue("lists.listB");
 		assertTrue(listB.size() == 1);
 		assertTrue(listB.get(0).equals(0));
+		
+		ExceptionEncountered ee = (ExceptionEncountered) DDMVC.getValue("frillo");
+		assertTrue(ClassCastException.class.equals(ee.getException().getClass()));
 	}
-	
-	//TODO - Exceptions encountered in list processing?
 	
 }

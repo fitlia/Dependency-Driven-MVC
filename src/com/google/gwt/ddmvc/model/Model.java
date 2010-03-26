@@ -175,7 +175,7 @@ public class Model {
 	 * @return true if there exists the path
 	 * @proxy hasPath(Path)
 	 */
-	public boolean hasPath(String pathString, Field<?> field) {
+	public boolean hasPath(String pathString, Field<?,?,?> field) {
 		return hasPath(Path.make(pathString, field));
 	}
 	
@@ -207,7 +207,7 @@ public class Model {
 	 * @param field - the field past that path to check
 	 * @return true if the type of the model/value referred to by the path 
 	 */
-	public boolean pathIsTypeValid(String pathString, Field<?> field) {
+	public boolean pathIsTypeValid(String pathString, Field<?,?,?> field) {
 		return pathIsTypeValid(Path.make(pathString, field));
 	}
 	
@@ -258,10 +258,9 @@ public class Model {
 	 * @param field - the field past the path to resolve
 	 * @return the resolved path.
 	 */
-	public Path<?> resolvePath(String pathString, Field<?> field) {
+	public Path<?> resolvePath(String pathString, Field<?,?,?> field) {
 		return resolvePath(Path.make(pathString, field));
 	}
-	
 	
 	/**
 	 * Return the deepest path through this model consistent with the provided
@@ -279,7 +278,6 @@ public class Model {
 		return Path.make("");
 	}
 	
-	
 	/**
 	 * Return the child model referenced by a given key.  If no model exists
 	 * with that key, it will be created and returned.
@@ -289,43 +287,37 @@ public class Model {
 	protected Model getChild(String key) {
 		Model model = childData.get(key);
 		if(model == null) {
-			//This will throw InvalidPathException if key is invalid, so we're safe
+			Path.validateKey(key);
 			model = new Model();
-			model.setParent(this);
-			model.setKey(key);
-			childData.put(key, model);
+			setChild(key, model);
 		}
 		return model;
 	}
-	
 	
 	/**
 	 * Set the child at the given key to a new model.  Observers will be preserved
 	 * from the old model, because those are stored by DDMVC and unrelated to
 	 * model.
 	 * 
-	 * If the new model has a parent set, 
-	 * ModelOverwriteException will be thrown.
-	 * 
 	 * Note - this will not send any notifications
 	 * 
 	 * @param key - the key of the model to replace
-	 * @param model - the model to do the replacing
+	 * @param model - the model to do the replacing, if null, nothing will happen
 	 */
 	protected void setChild(String key, Model model) {		
-		if(model.getParent() != null)
-			model.getParent().deleteModel(model.getKey());
-		
-		model.setKey(key);
-		model.setParent(this);
-		
-		childData.put(key, model);
+		if(model != null) {
+			if(model.getParent() != null)
+				model.getParent().deleteModel(model.getKey());
+			
+			model.setKey(key);
+			model.setParent(this);
+			
+			childData.put(key, model);
+		}
 	}
 	
 	//
 	// Parent Models
-	//
-	
 	//
 	
 	/**
@@ -335,7 +327,6 @@ public class Model {
 		return parent;
 	}
 	
-	
 	/**
 	 * Set the parent reference to point to a new model.
 	 * @param parent - the new parent to set
@@ -344,7 +335,6 @@ public class Model {
 		parent = model;
 		calculatePath();
 	}
-	
 	
 	/**
 	 * @return the root model of this model
@@ -365,8 +355,6 @@ public class Model {
 	// Existence
 	//
 	
-	//
-	
 	/**
 	 * @return true if a change to this model would result in any observers
 	 * being notified
@@ -379,8 +367,6 @@ public class Model {
 	// Getters
 	//
 	
-	//
-	
 	/**
 	 * @return the set of referential observers, unmodifiable
 	 */
@@ -388,14 +374,12 @@ public class Model {
 		return DDMVC.getObservers(path);
 	}
 	
-	
 	/**
 	 * @return the set of value observers, unmodifiable
 	 */
 	public Set<Observer> getValueObservers() {
 		return DDMVC.getObservers(path.append("$"));
 	}
-	
 	
 	/**
 	 * @return the set of field observers, unmodifiable
@@ -406,8 +390,6 @@ public class Model {
 	
 	//
 	// Adders
-	//
-	
 	//
 	
 	/**
@@ -434,7 +416,6 @@ public class Model {
 			DDMVC.addObserver(observer, path.append("$"));
 	}
 	
-	
 	/**
 	 * Add a field observer to this model
 	 * A field observer pays attention to changes in the model referenced
@@ -446,7 +427,6 @@ public class Model {
 		if(observer != null)
 			DDMVC.addObserver(observer, path.append("*"));
 	}
-	
 	
 	/**
 	 * Add an observer to a model's set of observers, according to the
@@ -461,7 +441,6 @@ public class Model {
 		addObserver(observer, Path.make(pathString));
 	}
 	
-
 	/**
 	 * Add an observer to a model's set of observers, according to the
 	 * path variable.  If the path ends in a field name, it will
@@ -473,7 +452,7 @@ public class Model {
 	 * @proxy addObserver(Observer, Path)
 	 */
 	public void addObserver(Observer observer, String pathString,
-			Field<?> field) {
+			Field<?,?,?> field) {
 		
 		addObserver(observer, Path.make(pathString, field));
 	}
@@ -494,8 +473,6 @@ public class Model {
 	// Removals
 	//
 	
-	//
-	
 	/**
 	 * Remove an observer from the set of referential observers
 	 * @param observer - the observer to remove
@@ -504,7 +481,6 @@ public class Model {
 		DDMVC.removeObserver(observer, path);
 	}
 	
-	
 	/**
 	 * Remove an observer from the set of value observers
 	 * @param observer - the observer to remove
@@ -512,7 +488,6 @@ public class Model {
 	public void removeValueObserver(Observer observer) {
 		DDMVC.removeObserver(observer, path.append("$"));
 	}
-	
 	
 	/**
 	 * Remove an observer from the set of field observers
@@ -532,8 +507,6 @@ public class Model {
 	// Value Accessors
 	//
 	
-	//
-	
 	/**
 	 * Get the value associated with this model, for internal use.
 	 * By default, this returns the value field, but it can be overridden to
@@ -544,7 +517,6 @@ public class Model {
 		return value;
 	}
 	
-	
 	/**
 	 * Get the associated value.
 	 * @return the value
@@ -553,7 +525,6 @@ public class Model {
 	public Object getValue() {
 		return getValue((Observer) null);
 	}
-	
 	
 	/**
 	 * Get the associated value, and add a value observer.
@@ -565,8 +536,7 @@ public class Model {
 		addValueObserver(observer);
 		return myValue();
 	}
-	
-	
+
 	/**
 	 * Get the associated value, by a particular path.
 	 * Note - any terminal fields on the path will be ignored, and subsequently
@@ -580,18 +550,29 @@ public class Model {
 	}
 	
 	/**
+	 * Get the associated value, by a particular field.
+	 * @param <Type> - the return type, packed into the field
+	 * @param field - the field to access
+	 * @return the associated value of the field represented by this path
+	 * @proxy getValue(Path, Observer)
+	 */
+	public <Type> Type getValue(Field<Type,?,?> field) {
+		return getValue(Path.makeValue(field), null);
+	}
+	
+	/**
 	 * Get the associated value, by a particular path.
 	 * Note - any terminal fields on the path will be ignored, and subsequently
 	 * a value field will be appended to ensure the path refers to a value.
+	 * @param <Type> - the return type, packed into the field
 	 * @param pathString - the string to parse for the path
 	 * @param field - the field past the path to access
 	 * @return the associated value of the field represented by this path
 	 * @proxy getValue(Path, Observer)
 	 */
-	public Object getValue(String pathString, Field<?> field) {
-		return getValue(Path.make(pathString, field), null);
+	public <Type> Type getValue(String pathString, Field<Type,?,?> field) {
+		return getValue(Path.makeValue(pathString, field), null);
 	}
-	
 	
 	/**
 	 * Get the associated value, by a particular path, as a string, and add
@@ -608,18 +589,32 @@ public class Model {
 	}	
 	
 	/**
+	 * Get the associated value, by a particular field, and add a value observer
+	 * @param <Type> - the return type, packed into the field
+	 * @param field - the field to access
+	 * @return the associated value of the field represented by this path
+	 * @proxy getValue(Path, Observer)
+	 */
+	public <Type> Type getValue(Field<Type,?,?> field, Observer observer) {
+		return getValue(Path.makeValue(field), observer);
+	}
+	
+	/**
 	 * Get the associated value, by a particular path, as a string, and add
 	 * a value observer
 	 * Note - any terminal fields on the path will be ignored, and subsequently
 	 * a value field will be appended to ensure the path refers to a value.
+	 * @param <Type> - the return type, packed into the field
 	 * @param pathString - the string to parse for the path
 	 * @param field - the field past the path to access
 	 * @param observer - the observer to add
 	 * @return the associated value of the field represented by this path
 	 * @proxy getValue(Path, Observer)
 	 */
-	public Object getValue(String pathString, Field<?> field, Observer observer) {
-		return getValue(Path.make(pathString, field), observer);
+	public <Type> Type getValue(String pathString, Field<Type,?,?> field,
+			Observer observer) {
+		
+		return getValue(Path.makeValue(pathString, field), observer);
 	}	
 
 	/**
@@ -633,7 +628,6 @@ public class Model {
 	public Object getValue(Path<?> path) {
 		return getValue(path, null);
 	}
-	
 	
 	/**
 	 * Get the associated value, by a particular path, and add
@@ -655,8 +649,6 @@ public class Model {
 	// Model Accessors
 	//
 	
-	//
-	
 	/**
 	 * Get a model at a given path.
 	 * If the path ends in $, it will be ignored.
@@ -666,6 +658,16 @@ public class Model {
 	 */
 	public Model getModel(String pathString) {
 		return getModel(Path.make(pathString), null);
+	}
+	
+	/**
+	 * Get a model at a given field.
+	 * @param field - the field to access
+	 * @return the model at the given path
+	 * @proxy getModel(Path, Observer)
+	 */
+	public Model getModel(Field<?> field) {
+		return getModel(Path.make(field), null);
 	}
 	
 	/**
@@ -680,7 +682,6 @@ public class Model {
 		return getModel(pathString, field, null);
 	}
 	
-	
 	/**
 	 * Get a model at a given path, and add a reference/field observer.  The type
 	 * of observer to add will depend on whether or not the path ends in *.
@@ -691,6 +692,17 @@ public class Model {
 	 */
 	public Model getModel(String pathString, Observer observer) {
 		return getModel(Path.make(pathString), observer);
+	}
+	
+	/**
+	 * Get a model at a given field, and add an observer.
+	 * @param field - the field to access
+	 * @param observer - the observer to add
+	 * @return the model at the given path
+	 * @proxy getModel(Path, Observer)
+	 */
+	public Model getModel(Field<?> field, Observer observer) {
+		return getModel(Path.make(field), observer);
 	}
 	
 	/**
@@ -747,6 +759,17 @@ public class Model {
 	public Object get(String pathString) {
 		return get(Path.make(pathString), null);
 	}
+
+	/**
+	 * Get the reference of the field
+	 * @param <Type> - the type to return, packed in the Field
+	 * @param field - the field to access
+	 * @return the model/value referred to by the field
+	 * @proxy get(Path, Observer)
+	 */
+	public <Type> Type get(Field<Type> field) {
+		return get(Path.make(field), null);
+	}
 	
 	/**
 	 * Get the reference of the path
@@ -781,6 +804,18 @@ public class Model {
 	public Object get(String pathString, Observer observer) {
 		return get(Path.make(pathString), observer);
 	}	
+	
+	/**
+	 * Get the reference of the field
+	 * @param <Type> - the type to return, packed in the Field
+	 * @param field - the field to access
+	 * @param observer - observer to add
+	 * @return the model/value referred to by the field
+	 * @proxy get(Path, Observer)
+	 */
+	public <Type> Type get(Field<Type> field, Observer observer) {
+		return get(Path.make(field), observer);
+	}
 	
 	/**
 	 * Get the reference of the path, and add an observer (type determined by the
@@ -872,7 +907,6 @@ public class Model {
 		handleUpdateSafe(update, relative);
 	}	
 	
-	
 	/**
 	 * Handle a model update, with a path relative to this model.  Bypasses
 	 * checking if the addresses are consistent, so can only be called by
@@ -903,14 +937,31 @@ public class Model {
 		if(result.getClass().getName()
 				.equals(ModelUpdate.SET_MODEL_TO.class.getName())) {
 			
+			handleSetModelTo((ModelUpdate.SET_MODEL_TO) result);
 			notifyObservers(update, UpdateLevel.REFERENCE);
-			parent.setChild(key, 
-					(((ModelUpdate.SET_MODEL_TO) result).getModel()));
 		}
 		else {
+			resetValue(result);
 			notifyObservers(update, UpdateLevel.VALUE);
-			value = result;
 		}
+	}
+	
+	/**
+	 * Reset the value of this model to another value;
+	 * Override this method for custom value-setting
+	 * @param value - the value to set
+	 */
+	protected void resetValue(Object value) {
+		this.value = value;
+	}
+	
+	/**
+	 * Handle a SET_MODEL_TO command;
+	 * Override this method for custom model resetting
+	 * @param smt - the SET_MODEL_TO object
+	 */
+	protected void handleSetModelTo(ModelUpdate.SET_MODEL_TO smt) {
+		parent.setChild(key, smt.getModel());
 	}
 	
 	//
@@ -936,6 +987,16 @@ public class Model {
 	 */
 	public void setValue(String pathString, Object value) {
 		setValue(Path.make(pathString), value);
+	}
+	
+	/**
+	 * Set the value associated with the model referenced by the field
+	 * @param field - the field to set
+	 * @param value - the value to set
+	 * @proxy setValue(Path, Object)
+	 */
+	public void setValue(Field<?> field, Object value) {
+		setValue(Path.make(field), value);
 	}
 	
 	/**
@@ -980,8 +1041,8 @@ public class Model {
 	/**
 	 * Set the model reference by the path, relative to this model; 
 	 * notify observers of the change
-	 * @param model - the model to set
 	 * @param pathString - the path relative to this model
+	 * @param model - the model to set
 	 * @proxy setModel(Path, Model)
 	 */
 	public void setModel(String pathString, Model model) {
@@ -989,11 +1050,21 @@ public class Model {
 	}
 	
 	/**
+	 * Set the model reference by the field
+	 * @param field - the field to access
+	 * @param model - the model to set
+	 * @proxy setModel(Path, Model)
+	 */
+	public void setModel(Field<?> field, Model model) {
+		setModel(Path.make(field), model);
+	}
+	
+	/**
 	 * Set the model reference by the path, relative to this model; 
 	 * notify observers of the change
-	 * @param model - the model to set
 	 * @param pathString - the path relative to this model
 	 * @param field - the field past the path to access
+	 * @param model - the model to set
 	 * @proxy setModel(Path, Model)
 	 */
 	public void setModel(String pathString, Field<?> field, Model model) {
@@ -1003,9 +1074,9 @@ public class Model {
 	/**
 	 * Set the model reference by the path, relative to this model; 
 	 * notify observers of the change
-	 * @param model - the model to set
 	 * @param pathString - the path relative to this model
 	 * @param field - the field past the path to access
+	 * @param model - the model to set
 	 * @proxy handleUpdateSafe(SetModel, Path)
 	 */
 	public void setModel(Path<?> path, Model model) {
@@ -1024,6 +1095,15 @@ public class Model {
 	 */
 	public void deleteModel(String pathString) {
 		deleteModel(Path.make(pathString));
+	}
+	
+	/**
+	 * Delete the reference to a model
+	 * @param field - the field to delete
+	 * @proxy deleteModel(Path)
+	 */
+	public void deleteModel(Field<?> field) {
+		deleteModel(Path.make(field));
 	}
 	
 	/**
@@ -1077,7 +1157,6 @@ public class Model {
 	public void update() {
 		update(Path.make(""));
 	}	
-	
 	
 	/**
 	 * Notify the observers of a value change to a model relative to this one,

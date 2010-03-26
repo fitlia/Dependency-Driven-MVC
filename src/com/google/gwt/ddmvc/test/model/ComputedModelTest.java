@@ -189,6 +189,4 @@ public class ComputedModelTest {
 			assertTrue(e.getException().getClass()
 					.equals(ModelDoesNotExistException.class));
 	}
-	
-	//TODO - type safety tests
 }

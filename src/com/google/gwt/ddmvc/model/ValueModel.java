@@ -70,6 +70,7 @@ public class ValueModel<Type> extends Model {
 		
 		if(cls.isInterface())
 			throw new IllegalArgumentException("Class cannot be an interface.");
+		
 		this.cls = cls;
 		this.value = value;
 	}
@@ -93,15 +94,6 @@ public class ValueModel<Type> extends Model {
 		return (Type) super.getValue(observer);
 	}
 	
-	/**
-	 * Type-safe value setting method.
-	 * Use this instead of setValue(...) to enforce type-safety in your own code.
-	 * @param value - the value to set
-	 */
-	public void set(Type value) {
-		super.setValue(value);
-	}
-	
 	@Override
 	protected void handleUpdateSafe(ModelUpdate update, Path<?> relative) {
 		if(relative.getImmediate() == null)
@@ -112,22 +104,10 @@ public class ValueModel<Type> extends Model {
 	}
 	
 	@Override
-	protected void applyUpdate(ModelUpdate update) {
-		Object result = update.process(value);
-		
-		if(result.getClass().getName()
-				.equals(ModelUpdate.SET_MODEL_TO.class.getName())) {
-			
-			notifyObservers(update, UpdateLevel.REFERENCE);
-			getParent().setChild(getKey(), 
-					(((ModelUpdate.SET_MODEL_TO) result).getModel()));
-		}
-		else {
-			if(!Utility.aExtendsB(result.getClass(), cls))
-				throw new ClassCastException(result.getClass().getName() 
-						+ " cannot be cast to " + cls.getName());
-			notifyObservers(update, UpdateLevel.VALUE);
-			value = result;
-		}
+	protected void resetValue(Object value) {
+		if(!Utility.aExtendsB(value.getClass(), cls))
+			throw new ClassCastException(getPath() 
+					+ " cannot be cast to " + cls.getName());
+		super.resetValue(value);
 	}
 }
