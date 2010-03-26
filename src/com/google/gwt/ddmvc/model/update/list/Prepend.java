@@ -46,7 +46,7 @@ public class Prepend extends ModelUpdate {
 	 * @param target
 	 * @param data - the item to be prepended to the list
 	 */
-	public Prepend(Path<?> target, Object data) {	
+	public Prepend(Path<?,?,?> target, Object data) {	
 		super(target);
 		this.data = data;
 		useLinkedList = false;
@@ -59,7 +59,7 @@ public class Prepend extends ModelUpdate {
 	 * @param useLinkedList - true if you want to use linked-list, if new list
 	 * 				creation is necessary
 	 */
-	protected Prepend(Path<?> target, Object data, boolean useLinkedList) {
+	protected Prepend(Path<?,?,?> target, Object data, boolean useLinkedList) {
 		super(target);
 		this.data = data;
 		this.useLinkedList = useLinkedList;

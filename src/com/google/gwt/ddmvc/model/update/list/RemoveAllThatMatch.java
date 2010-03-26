@@ -40,7 +40,7 @@ public class RemoveAllThatMatch extends ModelUpdate {
 	 * @param target
 	 * @param filter - the filter that will determine which elements are removed
 	 */
-	public RemoveAllThatMatch(Path<?> target, ListFilter filter) {
+	public RemoveAllThatMatch(Path<?,?,?> target, ListFilter filter) {
 		super(target);
 		removeMatches = true;
 		this.filter = filter;

@@ -1,11 +1,8 @@
 package com.google.gwt.ddmvc.model;
 
 import com.google.gwt.ddmvc.Utility;
-import com.google.gwt.ddmvc.event.Observer;
 import com.google.gwt.ddmvc.model.exception.InvalidPathException;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
-
-
 
 /**
  * A value model is a model which can only contain a value of a particular
@@ -21,51 +18,40 @@ import com.google.gwt.ddmvc.model.update.ModelUpdate;
  * necessarily created directly.
  * 
  * @author Kevin Dolan
- *
- * @param <Type> the type of value held by this model
  */
-public class ValueModel<Type> extends Model {
+public class ValueModel extends Model {
+	
+	private Class<?> cls;
 	
 	/**
-	 * Instantiate a new Value Model of the given type
-	 * @param <Type> the type (packed into the class)
-	 * @param cls - the class of the value held by this model
-	 * @return a ValueModel of the given type
+	 * Instantiate a new ValueModel with the given value, where the class is
+	 * determined by the type of value given
+	 * @param value - the value of the model
 	 */
-	public static <Type> ValueModel<Type> make(Class<Type> cls) {
-		return new ValueModel<Type>(cls, null);
+	public ValueModel(Object value) {
+		super();		
+		
+		this.cls = value.getClass();
+		this.value = value;
 	}
 	
 	/**
-	 * Instantiate a new Value Model, whose type is defined by whatever class the
-	 * initial value is
-	 * @param <Type> the type (packed into the value)
-	 * @param value - the value to set initially
-	 * @return a ValueModel of the given type
+	 * Instantiate a new ValueModel with the given class
+	 * @param cls - the class to use to enforce type-safety
 	 */
-	@SuppressWarnings("unchecked")
-	public static <Type> ValueModel<Type> make(Type value) {
-		return new ValueModel<Type>((Class<Type>) value.getClass(), value);
+	public ValueModel(Class<?> cls) {
+		super();		
+		
+		this.cls = cls;
+		this.value = null;
 	}
-	
-	/**
-	 * Instantiate a new Value Model of the given type, with a preset value
-	 * @param <Type> the type (packed into the class)
-	 * @param cls - the class of the value held by this model
-	 * @param value - the value to set initially
-	 * @return a ValueModel of the given type
-	 */
-	public static <Type> ValueModel<Type> make(Class<Type> cls, Type value) {
-		return new ValueModel<Type>(cls, value);
-	}
-	
-	private Class<Type> cls;
 	
 	/**
 	 * Instantiate a new ValueModel with the given value
+	 * @param cls - the class to use to enforce type-safety
 	 * @param value - the value of the model
 	 */
-	private ValueModel(Class<Type> cls, Type value) {
+	public ValueModel(Class<?> cls, Object value) {
 		super();
 		
 		if(cls.isInterface())
@@ -78,24 +64,12 @@ public class ValueModel<Type> extends Model {
 	/**
 	 * @return the class reference held by this ValueModel
 	 */
-	public Class<Type> getValueClass() {
+	public Class<?> getValueClass() {
 		return cls;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	public Type getValue() {
-		return (Type) super.getValue();
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public Type getValue(Observer observer) {
-		return (Type) super.getValue(observer);
-	}
-	
-	@Override
-	protected void handleUpdateSafe(ModelUpdate update, Path<?> relative) {
+	protected void handleUpdateSafe(ModelUpdate update, Path<?,?,?> relative) {
 		if(relative.getImmediate() == null)
 			applyUpdate(update);
 		else

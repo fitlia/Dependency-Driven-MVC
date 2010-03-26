@@ -64,7 +64,7 @@ public class Property<Type> extends Field<Type, ValueModel, Type> {
 
 	@Override
 	public Model getModel() {
-		return ValueModel.make(getValueType(), defaultValue);
+		return new ValueModel(getValueType(), defaultValue);
 	}
 
 	/**
@@ -84,7 +84,7 @@ public class Property<Type> extends Field<Type, ValueModel, Type> {
 		if(!Utility.aExtendsB(model.getClass(), ValueModel.class))
 			return false;
 		
-		ValueModel<?> vm = (ValueModel<?>) model;
+		ValueModel vm = (ValueModel) model;
 		return Utility.aExtendsB(vm.getValueClass(), getValueType());
 	}
 	

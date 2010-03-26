@@ -17,7 +17,7 @@ import com.google.gwt.ddmvc.model.exception.InvalidPathException;
  */
 public abstract class ObjectModel extends Model {
 	
-	private Map<String, Field<?>> fields;
+	private Map<String, Field<?,?,?>> fields;
 	
 	//
 	// Constructor
@@ -28,9 +28,9 @@ public abstract class ObjectModel extends Model {
 	 * Once created, the fields cannot be changed.
 	 * @param fields - the fields to create in an array.
 	 */
-	public ObjectModel(Field<?>[] fields) {
-		this.fields = new HashMap<String, Field<?>>();
-		for(Field<?> field : fields) {
+	public ObjectModel(Field<?,?,?>[] fields) {
+		this.fields = new HashMap<String, Field<?,?,?>>();
+		for(Field<?,?,?> field : fields) {
 			this.fields.put(field.getKey(), field);
 			setChild(field.getKey(), field.getModel());
 		}
@@ -46,7 +46,7 @@ public abstract class ObjectModel extends Model {
 			throw new InvalidPathException("Key " + key + " is not a field in " +
 					"ObjectModel at " + getPath());
 		
-		Field<?> field = fields.get(key);
+		Field<?,?,?> field = fields.get(key);
 		if(!field.isValidModel(model))
 			throw new InvalidPathException("New Model is not compatible with " +
 					"ObjectModel at " + getPath());

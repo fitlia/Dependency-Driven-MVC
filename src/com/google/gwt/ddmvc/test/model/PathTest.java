@@ -1,11 +1,7 @@
 package com.google.gwt.ddmvc.test.model;
 
 import static org.junit.Assert.*;
-
-import java.util.List;
-
 import org.junit.Test;
-
 import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.Path;
 import com.google.gwt.ddmvc.model.Property;
@@ -123,7 +119,6 @@ public class PathTest {
 		assertTrue(path1.isFieldPath());
 	}
 
-	
 	@Test
 	public void cashOnly() {
 		Path<?,?,?> path1 = Path.make("$");
@@ -135,16 +130,6 @@ public class PathTest {
 		assertFalse(path1.isFieldPath());
 	}
 	
-	@Test
-	public void makeModel() {
-		Path<Object,Model,Model> path1 = Path.makeModel("string.gizelle");
-		assertTrue(path1.size() == 2);
-		assertTrue(path1.leftMost().equals("string"));
-		assertTrue(path1.rightMost().equals("gizelle"));
-		assertFalse(path1.isTerminal());
-	}
-	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void makeWithProperty() {
 		Path<String,ValueModel,String> path1 = 
@@ -168,7 +153,6 @@ public class PathTest {
 		assertFalse(path1.isTerminal());
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void makeWithStringProperty() {
 		Path<String,ValueModel,String> path1 = Path.make("cat.dog", 
@@ -197,6 +181,113 @@ public class PathTest {
 		assertFalse(path1.isTerminal());
 		assertFalse(path1.isValuePath());
 		assertFalse(path1.isFieldPath());
+	}
+	
+	@Test
+	public void makeValue() {
+		Path<?,?,?> path1 = Path.makeValue("something.$");
+		assertTrue(path1.equals("something.$"));
+		
+		path1 = Path.makeValue("something.nothing");
+		assertTrue(path1.equals("something.nothing.$"));
+		
+		path1 = Path.makeValue("something.nothing.*");
+		assertTrue(path1.equals("something.nothing.$"));
+	}
+	
+	@Test
+	public void makeValueWithField() {
+		Path<?,?,?> path1 = Path.makeValue(Property.make(String.class, "tom"));
+		assertTrue(path1.equals("tom.$"));
+		assertTrue(path1.getValueType().equals(String.class));
+		assertTrue(path1.getModelType().equals(ValueModel.class));
+		assertTrue(path1.getReferenceType().equals(String.class));
+		
+		path1 = Path.makeValue(SubModel.make(Model.class, "tom"));
+		assertTrue(path1.equals("tom.$"));
+		assertTrue(path1.getValueType().equals(Object.class));
+		assertTrue(path1.getModelType().equals(Model.class));
+		assertTrue(path1.getReferenceType().equals(Object.class));
+	}
+	
+	@Test
+	public void makeValueWithStringField() {
+		Path<?,?,?> path1 = Path.makeValue("sam",
+				Property.make(String.class, "tom"));
+		assertTrue(path1.equals("sam.tom.$"));
+		assertTrue(path1.getValueType().equals(String.class));
+		assertTrue(path1.getModelType().equals(ValueModel.class));
+		assertTrue(path1.getReferenceType().equals(String.class));
+		
+		path1 = Path.makeValue("sam.noel", SubModel.make(Model.class, "tom"));
+		assertTrue(path1.equals("sam.noel.tom.$"));
+		assertTrue(path1.size() == 4);
+		assertTrue(path1.getValueType().equals(Object.class));
+		assertTrue(path1.getModelType().equals(Model.class));
+		assertTrue(path1.getReferenceType().equals(Object.class));
+		
+		try {
+			Path.makeValue("sam.*", SubModel.make(Model.class, "tom"));
+			fail();
+		} catch (InvalidPathException e) {}
+	}
+	
+	@Test
+	public void makeModelString() {
+		Path<Object,Model,Model> path1 = Path.makeModel("string.gizelle");
+		assertTrue(path1.size() == 2);
+		assertTrue(path1.leftMost().equals("string"));
+		assertTrue(path1.rightMost().equals("gizelle"));
+		assertFalse(path1.isTerminal());
+		
+		path1 = Path.makeModel("string.gizelle.$");
+		assertTrue(path1.size() == 2);
+		assertTrue(path1.leftMost().equals("string"));
+		assertTrue(path1.rightMost().equals("gizelle"));
+		assertFalse(path1.isTerminal());
+		
+		path1 = Path.makeModel("string.gizelle.*");
+		assertTrue(path1.size() == 3);
+		assertTrue(path1.leftMost().equals("string"));
+		assertTrue(path1.rightMost().equals("*"));
+		assertTrue(path1.isTerminal());
+	}
+	
+	@Test
+	public void makeModelWithField() {
+		Path<?,?,?> path1 = Path.makeModel(Property.make(String.class, "tom"));
+		assertTrue(path1.equals("tom"));
+		assertTrue(path1.getValueType().equals(String.class));
+		assertTrue(path1.getModelType().equals(ValueModel.class));
+		assertTrue(path1.getReferenceType().equals(ValueModel.class));
+		
+		path1 = Path.makeModel(SubModel.make(Model.class, "tom"));
+		assertTrue(path1.equals("tom"));
+		assertTrue(path1.getValueType().equals(Object.class));
+		assertTrue(path1.getModelType().equals(Model.class));
+		assertTrue(path1.getReferenceType().equals(Model.class));
+	}
+
+	@Test
+	public void makeModelWithStringField() {
+		Path<?,?,?> path1 = Path.makeModel("sam",
+				Property.make(String.class, "tom"));
+		assertTrue(path1.equals("sam.tom"));
+		assertTrue(path1.getValueType().equals(String.class));
+		assertTrue(path1.getModelType().equals(ValueModel.class));
+		assertTrue(path1.getReferenceType().equals(ValueModel.class));
+		
+		path1 = Path.makeModel("sam.noel", SubModel.make(Model.class, "tom"));
+		assertTrue(path1.equals("sam.noel.tom"));
+		assertTrue(path1.size() == 3);
+		assertTrue(path1.getValueType().equals(Object.class));
+		assertTrue(path1.getModelType().equals(Model.class));
+		assertTrue(path1.getReferenceType().equals(Model.class));
+		
+		try {
+			Path.makeModel("sam.*", SubModel.make(Model.class, "tom"));
+			fail();
+		} catch (InvalidPathException e) {}
 	}
 	
 	//
@@ -307,32 +398,6 @@ public class PathTest {
 		} catch(InvalidPathException e) {}
 	}
 	
-	@Test
-	public void makeParameterizedWrong() {
-		try {
-			Path.make(String.class, "string.gizelle");
-			fail();
-		}
-		catch(InvalidPathException e) {}
-	}
-	
-	@Test
-	public void makeModelWrong() {
-		try {
-			Path.makeModel("string.gizelle.$");
-			fail();
-		}
-		catch(InvalidPathException e) {}
-	}
-	
-	@Test
-	public void makeParameterizedInterface() {
-		try {
-			Path.make(List.class, "doesnt.matter");
-			fail();
-		} catch(InvalidPathException e) {}
-	}
-	
 	//
 	// Path manipulators
 	//
@@ -429,7 +494,8 @@ public class PathTest {
 	@Test
 	public void appendProperty() {
 		Path<?,?,?> path1 = Path.make("cat.dog");
-		Path<String> path2 = path1.append(Property.make(String.class, "title"));
+		Path<String,ValueModel,String> path2 = 
+			path1.append(Property.make(String.class, "title"));
 		assertTrue(path2.size() == 4);
 		assertTrue(path2.getImmediate().equals("cat"));
 		assertTrue(path2.advance().getImmediate().equals("dog"));
@@ -444,7 +510,8 @@ public class PathTest {
 	@Test
 	public void appendSubModel() {
 		Path<?,?,?> path1 = Path.make("cat.dog");
-		Path<Model> path2 = path1.append(SubModel.make(Model.class, "title"));
+		Path<Object,Model,Model> path2 = 
+			path1.append(SubModel.make(Model.class, "title"));
 		assertTrue(path2.size() == 3);
 		assertTrue(path2.getImmediate().equals("cat"));
 		assertTrue(path2.advance().getImmediate().equals("dog"));

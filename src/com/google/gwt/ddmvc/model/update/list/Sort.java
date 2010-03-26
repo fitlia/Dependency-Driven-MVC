@@ -36,7 +36,7 @@ public class Sort extends ModelUpdate {
 	 * Sort the list by the object's .compateTo(...) method.
 	 * @param target
 	 */
-	public Sort(Path<?> target) {
+	public Sort(Path<?,?,?> target) {
 		super(target);
 	}
 	

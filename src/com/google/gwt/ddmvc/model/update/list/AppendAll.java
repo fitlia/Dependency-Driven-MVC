@@ -47,7 +47,7 @@ public class AppendAll extends ModelUpdate {
 	 * @param target
 	 * @param collection - the collection of objects to append
 	 */
-	public AppendAll(Path<?> target, 
+	public AppendAll(Path<?,?,?> target, 
 			Collection<? extends Object> collection) {
 		
 		super(target);
@@ -76,7 +76,7 @@ public class AppendAll extends ModelUpdate {
 	 * @param useLinkedList - true if you want to use linked-list, if new list
 	 * 						creation is necessary
 	 */
-	public AppendAll(Path<?> target, Collection<? extends Object> collection, 
+	public AppendAll(Path<?,?,?> target, Collection<? extends Object> collection, 
 			boolean useLinkedList) {
 		super(target);
 		this.collection = collection;

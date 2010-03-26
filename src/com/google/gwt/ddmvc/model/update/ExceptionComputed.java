@@ -10,7 +10,7 @@ public class ExceptionComputed extends ModelUpdate {
 
 	private Exception exception;
 	
-	public ExceptionComputed(Path<?> target, Exception exception) {
+	public ExceptionComputed(Path<?,?,?> target, Exception exception) {
 		super(target);
 		this.exception = exception;
 		this.isComplete = true;

@@ -27,7 +27,7 @@ public class ModelModelTest {
 
 	private class FakeObserver implements Observer { 
 		public int change = 0;
-		public Path<?> getPath() { return null; }
+		public Path<?,?,?> getPath() { return null; }
 		public void modelChanged(Collection<ModelUpdate> updates) {
 			change++;
 		}
@@ -76,10 +76,10 @@ public class ModelModelTest {
 	
 	@Test
 	public void setModel() {
-		ModelModel<ValueModel<String>> myModel = 
-			ModelModel.make(ValueModel.make("meow"));
+		ModelModel<ValueModel> myModel = 
+			ModelModel.make(new ValueModel("meow"));
 		DDMVC.setModel("cat", myModel);
-		DDMVC.setModel("cat", ValueModel.make("purr"));
+		DDMVC.setModel("cat", new ValueModel("purr"));
 		assertTrue(DDMVC.getModel("cat").getClass().equals(ModelModel.class));
 		assertTrue(DDMVC.getValue("cat").equals("purr"));
 	}
@@ -89,15 +89,15 @@ public class ModelModelTest {
 		ModelModel<Model> myModel = 
 			ModelModel.make(new Model("meow"));
 		DDMVC.setModel("cat", myModel);
-		DDMVC.setModel("cat", ValueModel.make("purr"));
+		DDMVC.setModel("cat", new ValueModel("purr"));
 		assertTrue(DDMVC.getModel("cat").getClass().equals(ModelModel.class));
 		assertTrue(DDMVC.getValue("cat").equals("purr"));
 	}
 	
 	@Test
 	public void setModelWrongType() {
-		ModelModel<ValueModel<String>> myModel = 
-			ModelModel.make(ValueModel.make("meow"));
+		ModelModel<ValueModel> myModel = 
+			ModelModel.make(new ValueModel("meow"));
 		DDMVC.setModel("cat", myModel);
 		try {
 			DDMVC.setModel("cat", new Model());
@@ -107,14 +107,14 @@ public class ModelModelTest {
 	
 	@Test
 	public void setValueModel() {
-		ModelModel<ValueModel<String>> myModel = 
-			ModelModel.make(ValueModel.make("meow"));
+		ModelModel<ValueModel> myModel = 
+			ModelModel.make(new ValueModel("meow"));
 		DDMVC.setValue("cat", "purr");
 		DDMVC.setModel("cat.tabby", myModel);	
 		DDMVC.setValue("cat.tabby", "hiss");
 		assertTrue(DDMVC.getValue("cat.tabby").equals("hiss"));
 		assertTrue(myModel.getModel().getValue().equals("hiss"));
-		ValueModel<String> tabby = myModel.getModel();
+		ValueModel tabby = myModel.getModel();
 		tabby.setValue("pow");
 		assertTrue(DDMVC.getValue("cat.tabby").equals("pow"));
 		assertTrue(myModel.getModel().getValue().equals("pow"));

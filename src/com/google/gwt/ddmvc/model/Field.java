@@ -44,6 +44,7 @@ public abstract class Field<ValueType, ModelType extends Model, ReferenceType> {
 	 */
 	public Field(Class<ValueType> valueType, Class<ModelType> modelType, 
 			Class<ReferenceType> referenceType, FieldType fieldType, String key) {
+		Path.validateKey(key);
 		
 		if(valueType.isInterface()
 				|| modelType.isInterface()

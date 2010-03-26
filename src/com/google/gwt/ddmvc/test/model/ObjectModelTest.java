@@ -43,8 +43,6 @@ public class ObjectModelTest {
 	}
 
 	@Test
-	public void basicModelFeatures() {
-		PersonModel pm = new PersonModel();
-	}
+	public void basicModelFeatures() {	}
 	
 }

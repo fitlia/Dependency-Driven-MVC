@@ -135,7 +135,7 @@ public class Path<ValueType, ModelType extends Model, ReferenceType> {
 		
 		if(pathString.length() == 0)
 			pathString = fieldPathString;
-		else
+		else if(fieldPathString.length() > 0)
 			pathString +=  "." + fieldPathString;
 		
 		return (new Path<VT,MT,VT>((Class<VT>) valueType, (Class<MT>) modelType,
@@ -191,7 +191,7 @@ public class Path<ValueType, ModelType extends Model, ReferenceType> {
 		
 		if(pathString.length() == 0)
 			pathString = fieldPathString;
-		else
+		else if(fieldPathString.length() > 0)
 			pathString +=  "." + fieldPathString;
 		
 		return (new Path<VT,MT,MT>((Class<VT>) valueType, (Class<MT>) modelType,
@@ -242,7 +242,7 @@ public class Path<ValueType, ModelType extends Model, ReferenceType> {
 	public static void validateSpecialEnd(String pathString, char special) {
 		if(pathString.substring(0, pathString.length() - 1).indexOf(special) >= 0)
 			throw new InvalidPathException("Path string cannot contain '" +
-					special + "' anywhere by the final character");
+					special + "' anywhere but the final character");
 		
 		if(pathString.endsWith("" + special) && pathString.length() > 1 && 
 				!pathString.endsWith("." + special))

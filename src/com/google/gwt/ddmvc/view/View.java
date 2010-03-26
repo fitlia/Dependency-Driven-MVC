@@ -75,11 +75,11 @@ public abstract class View extends EventSource implements Observer {
 	 * a field observer.
 	 * @param modelKey the key of the observer to observe
 	 */
-	protected void observe(Path<?> path) {
+	protected void observe(Path<?,?,?> path) {
 		DDMVC.getDataRoot().addObserver(this, path);
 	}
 	
-	public Path<?> getPath() {
+	public Path<?,?,?> getPath() {
 		return null;
 	}
 	
@@ -119,7 +119,7 @@ public abstract class View extends EventSource implements Observer {
 	 * @param path - the path to observe
 	 * @param cls - the update class to subscribe to.
 	 */
-	protected void subscribeToModelUpdate(Path<?> path, 
+	protected void subscribeToModelUpdate(Path<?,?,?> path, 
 			Class<? extends ModelUpdate> cls) {
 		
 		subscriptions.put(path.toString(), cls.getName());

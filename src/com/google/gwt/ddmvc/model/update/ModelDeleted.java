@@ -20,7 +20,7 @@ public class ModelDeleted extends ModelUpdate {
 	/**
 	 * @param target
 	 */
-	public ModelDeleted(Path<?> target) {
+	public ModelDeleted(Path<?,?,?> target) {
 		super(target);
 		this.isComplete = true;
 	}

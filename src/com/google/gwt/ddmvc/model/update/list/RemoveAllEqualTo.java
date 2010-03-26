@@ -29,7 +29,7 @@ public class RemoveAllEqualTo extends RemoveAllThatMatch {
 	 * @param target
 	 * @param data - the object to compare the other objects to
 	 */
-	public RemoveAllEqualTo(Path<?> target, Object data) {		
+	public RemoveAllEqualTo(Path<?,?,?> target, Object data) {		
 		super(target, new EqualsFilter(data));
 	}
 	

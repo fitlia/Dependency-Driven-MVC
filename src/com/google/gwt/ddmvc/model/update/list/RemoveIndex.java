@@ -36,7 +36,7 @@ public class RemoveIndex extends ModelUpdate {
 	 * @param target
 	 * @param index - the index to remove
 	 */
-	public RemoveIndex(Path<?> target, int index) {
+	public RemoveIndex(Path<?,?,?> target, int index) {
 		super(target);
 		this.index = index;
 	}

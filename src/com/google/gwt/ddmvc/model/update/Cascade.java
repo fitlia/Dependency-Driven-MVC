@@ -22,7 +22,7 @@ public class Cascade extends ModelUpdate {
 	/**
 	 * @param target
 	 */
-	public Cascade(Path<?> target) {
+	public Cascade(Path<?,?,?> target) {
 		super(target);
 		this.isComplete = true;
 	}

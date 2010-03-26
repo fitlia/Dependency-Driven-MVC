@@ -124,7 +124,7 @@ public class ModelModel<ModelType extends Model> extends Model {
 	}
 	
 	@Override
-	protected void handleUpdateSafe(ModelUpdate update, Path<?> relative) {
+	protected void handleUpdateSafe(ModelUpdate update, Path<?,?,?> relative) {
 		if(relative.getImmediate() == null)
 			applyUpdate(update);
 		else if(relative.getImmediate().equals("$"))
