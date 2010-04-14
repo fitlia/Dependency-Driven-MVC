@@ -10,9 +10,9 @@ import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.event.Observer;
 import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.ModelModel;
-import com.google.gwt.ddmvc.model.Path;
 import com.google.gwt.ddmvc.model.ValueModel;
 import com.google.gwt.ddmvc.model.Model.UpdateLevel;
+import com.google.gwt.ddmvc.model.path.Path;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
@@ -80,7 +80,7 @@ public class ModelModelTest {
 			ModelModel.make(new ValueModel("meow"));
 		DDMVC.setModel("cat", myModel);
 		DDMVC.setModel("cat", new ValueModel("purr"));
-		assertTrue(DDMVC.getModel("cat").getClass().equals(ModelModel.class));
+		assertTrue(DDMVC.getModel("cat").getClass().equals(ValueModel.class));
 		assertTrue(DDMVC.getValue("cat").equals("purr"));
 	}
 	
@@ -90,7 +90,7 @@ public class ModelModelTest {
 			ModelModel.make(new Model("meow"));
 		DDMVC.setModel("cat", myModel);
 		DDMVC.setModel("cat", new ValueModel("purr"));
-		assertTrue(DDMVC.getModel("cat").getClass().equals(ModelModel.class));
+		assertTrue(DDMVC.getModel("cat").getClass().equals(ValueModel.class));
 		assertTrue(DDMVC.getValue("cat").equals("purr"));
 	}
 	
@@ -139,7 +139,7 @@ public class ModelModelTest {
 		ModelModel<Model> myModel = ModelModel.make(new Model("meow"));
 		DDMVC.setValue("cat", "purr");
 		DDMVC.setModel("cat.tabby", myModel);
-		assertTrue(DDMVC.getModel("cat.tabby").getClass().equals(ModelModel.class));
+		assertTrue(DDMVC.getModel("cat.tabby").getClass().equals(Model.class));
 	}
 	
 	@Test

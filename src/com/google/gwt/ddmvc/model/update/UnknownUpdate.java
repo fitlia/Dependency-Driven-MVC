@@ -1,6 +1,6 @@
 package com.google.gwt.ddmvc.model.update;
 
-import com.google.gwt.ddmvc.model.Path;
+import com.google.gwt.ddmvc.model.path.Path;
 
 /**
  * Update sent as a notification when the type of update 

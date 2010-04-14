@@ -1,6 +1,6 @@
 package com.google.gwt.ddmvc.model.exception;
 
-import com.google.gwt.ddmvc.model.Path;
+import com.google.gwt.ddmvc.model.path.Path;
 
 /**
  * Thrown when an attempt is made to access a model which does not exist.

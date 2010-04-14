@@ -1,6 +1,6 @@
 package com.google.gwt.ddmvc.model.update.list;
 
-import com.google.gwt.ddmvc.model.Path;
+import com.google.gwt.ddmvc.model.path.Path;
 
 /**
  * Update to remove all elements from a list that are equal to the provided

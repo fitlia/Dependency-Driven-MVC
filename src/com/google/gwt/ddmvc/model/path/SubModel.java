@@ -1,4 +1,8 @@
-package com.google.gwt.ddmvc.model;
+package com.google.gwt.ddmvc.model.path;
+
+import com.google.gwt.ddmvc.Utility;
+import com.google.gwt.ddmvc.model.Model;
+import com.google.gwt.ddmvc.model.ModelModel;
 
 /**
  * A SubModel is a Field that stores some type of Model (by means of a 
@@ -43,8 +47,11 @@ public class SubModel<ModelType extends Model>
 
 	@Override
 	public boolean isValidModel(Model model) {
-		//TODO - hmmm?
-		return false;
+		if(!Utility.aExtendsB(model.getClass(), ModelModel.class))
+			return false;
+		
+		ModelModel<?> mm = (ModelModel<?>) model;
+		return Utility.aExtendsB(mm.getModelClass(), getModelType());
 	}
 	
 }

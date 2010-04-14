@@ -1,6 +1,6 @@
 package com.google.gwt.ddmvc.model.update.list;
 
-import com.google.gwt.ddmvc.model.Path;
+import com.google.gwt.ddmvc.model.path.Path;
 
 /**
  * Update to filter out all elements from a list not matching a certain filter

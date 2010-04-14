@@ -2,6 +2,7 @@ package com.google.gwt.ddmvc.model;
 
 import com.google.gwt.ddmvc.Utility;
 import com.google.gwt.ddmvc.model.exception.InvalidPathException;
+import com.google.gwt.ddmvc.model.path.Path;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**

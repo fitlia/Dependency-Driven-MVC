@@ -3,6 +3,9 @@ package com.google.gwt.ddmvc.model;
 import java.util.HashMap;
 import java.util.Map;
 import com.google.gwt.ddmvc.model.exception.InvalidPathException;
+import com.google.gwt.ddmvc.model.path.Field;
+import com.google.gwt.ddmvc.model.path.Property;
+import com.google.gwt.ddmvc.model.path.SubModel;
 
 /**
  * An ObjectModel attempts to emulate a native Java object in a manner
@@ -12,6 +15,9 @@ import com.google.gwt.ddmvc.model.exception.InvalidPathException;
  * The Object model has a number of static factory methods for convenience for
  * creating Properties and SubModels.  They should be utilized when defining
  * fields for an Object Model.
+ * 
+ * Attempts to set the model for a given field (from setChild) in an ObjectModel
+ * will defer the decision to the Field's isValidModel method.
  * 
  * @author Kevin Dolan
  */

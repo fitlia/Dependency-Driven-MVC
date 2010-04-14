@@ -14,10 +14,10 @@ import com.google.gwt.ddmvc.controller.Controller;
 import com.google.gwt.ddmvc.controller.ServerRequest;
 import com.google.gwt.ddmvc.event.AppEvent;
 import com.google.gwt.ddmvc.event.Observer;
-import com.google.gwt.ddmvc.model.Field;
 import com.google.gwt.ddmvc.model.Model;
-import com.google.gwt.ddmvc.model.Path;
 import com.google.gwt.ddmvc.model.Model.UpdateLevel;
+import com.google.gwt.ddmvc.model.path.Field;
+import com.google.gwt.ddmvc.model.path.Path;
 import com.google.gwt.ddmvc.model.update.Cascade;
 import com.google.gwt.ddmvc.model.update.ExceptionComputed;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
@@ -25,7 +25,21 @@ import com.google.gwt.ddmvc.model.update.ModelUpdate;
 /**
  * The DDMVC object is the top-level object for managing the data and run-loop 
  * execution. 
+ * 
  * It is a static singleton.
+ * 
+ * DDMVC maintains the set of observational dependencies.
+ * 
+ * There are three modes of observing a model, referential observers, value
+ * observers, and field observers.  Referential observers are only notified
+ * when this model is replaced by another model.  Value observes are notified
+ * if the value data changes, and are also notified when referential observers
+ * are notified.  Field observers respond to changes in any data in the
+ * subtree of this model, and also when referential and value observers would
+ * be notified.
+ * 
+ * This is hierarchical as follows:
+ * Referential Observers <- Value Observers <- Field Observers
  * 
  * @author Kevin Dolan
  */

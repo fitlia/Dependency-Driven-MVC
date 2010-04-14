@@ -1,6 +1,6 @@
 package com.google.gwt.ddmvc.model.update;
 
-import com.google.gwt.ddmvc.model.Path;
+import com.google.gwt.ddmvc.model.path.Path;
 
 /**
  * ModelUpdate to cascade when an exception is encountered by a Computed Model.

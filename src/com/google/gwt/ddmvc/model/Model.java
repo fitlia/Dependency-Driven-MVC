@@ -7,6 +7,8 @@ import com.google.gwt.ddmvc.Utility;
 import com.google.gwt.ddmvc.event.Observer;
 import com.google.gwt.ddmvc.model.exception.InvalidPathException;
 import com.google.gwt.ddmvc.model.exception.ModelDoesNotExistException;
+import com.google.gwt.ddmvc.model.path.Field;
+import com.google.gwt.ddmvc.model.path.Path;
 import com.google.gwt.ddmvc.model.update.ModelDeleted;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.model.update.SetModel;
@@ -14,6 +16,7 @@ import com.google.gwt.ddmvc.model.update.SetValue;
 import com.google.gwt.ddmvc.model.update.UnknownUpdate;
 
 /**
+ * 
  * Model objects represent model data and dependencies.
  * 
  * There are three modes of observing a model, referential observers, value
@@ -31,8 +34,8 @@ import com.google.gwt.ddmvc.model.update.UnknownUpdate;
  * to the root model.  Path syntax is as follows:
  * 
  * fieldKey1.fieldKey2 to reference a model by field keys
- * fieldKey1.fieldKey2.$ to represent the value held by the rightmost field key
- * fieldKey1.fieldKey2.* to reference the subtree of fieldKey2, used only
+ * fieldKey1.fieldKey2$ to represent the value held by the rightmost field key
+ * fieldKey1.fieldKey2* to reference the subtree of fieldKey2, used mostly
  * for observation.
  * 
  * Models do not maintain their sets of observers; these are held in DDMVC.
@@ -893,16 +896,21 @@ public class Model {
 		}
 		
 		if(returnModel) {
+			Type thisModel = (Type) getThisModel();
 			if(!Utility.aExtendsB(getClass(), path.getReferenceType()))
-					throw new ClassCastException(getPath().append(path) + 
-							" cannot be cast to " + path.getReferenceType());
-			return (Type) this;
+					throw new ClassCastException(getPath().append(path) + " (" +
+							getClass() + ")" + " cannot be cast to " + 
+							path.getReferenceType());
+			return thisModel;
 		}
 		
 		if(path.getImmediate().equals("$")) {
+			if(myValue() == null)
+				return null;
 			if(!Utility.aExtendsB(myValue().getClass(), path.getReferenceType()))
-				throw new ClassCastException(getPath().append(path) 
-						+ " cannot be cast to " + path.getReferenceType());
+				throw new ClassCastException(getPath().append(path)  + " (" +
+						getClass() + ")" + " cannot be cast to " +
+						path.getReferenceType());
 			return (Type) getValue(observer);
 		}
 		
@@ -911,6 +919,14 @@ public class Model {
 			throw new ModelDoesNotExistException(getPath().append(key));
 		
 		return getChild(key).get(path.advance(), observer);
+	}
+	
+	/**
+	 * Get a reference to this model, useful for proxy models to override
+	 * @return a reference to this model
+	 */
+	protected Model getThisModel() {
+		return this;
 	}
 	
 	//

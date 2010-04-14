@@ -10,12 +10,13 @@ import org.junit.Test;
 import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.event.Observer;
 import com.google.gwt.ddmvc.model.Model;
-import com.google.gwt.ddmvc.model.Path;
-import com.google.gwt.ddmvc.model.Property;
-import com.google.gwt.ddmvc.model.SubModel;
+import com.google.gwt.ddmvc.model.ValueModel;
 import com.google.gwt.ddmvc.model.Model.UpdateLevel;
 import com.google.gwt.ddmvc.model.exception.InvalidPathException;
 import com.google.gwt.ddmvc.model.exception.ModelDoesNotExistException;
+import com.google.gwt.ddmvc.model.path.Path;
+import com.google.gwt.ddmvc.model.path.Property;
+import com.google.gwt.ddmvc.model.path.SubModel;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.model.update.list.Append;
 
@@ -114,7 +115,33 @@ public class ModelTest {
 	
 	@Test
 	public void pathIsTypeValid() {
-		//TODO - test the shit out of this
+		DDMVC.setValue("pa.pb", "cat");
+		
+		Path<?,?,?> path = Path.make("pa.pb");
+		assertTrue(DDMVC.pathIsTypeValid(path));
+		
+		path = Path.make(String.class,Model.class,Model.class,"pa.pb");
+		assertTrue(DDMVC.pathIsTypeValid(path));
+		
+		path = Path.make(Integer.class,Model.class,Model.class,"pa.pb");
+		assertFalse(DDMVC.pathIsTypeValid(path));
+		
+		path = Path.make(String.class,ValueModel.class,ValueModel.class,"pa.pb");
+		assertFalse(DDMVC.pathIsTypeValid(path));
+		
+		path = Path.make(String.class,Model.class,String.class,"pa.pb.$");
+		assertTrue(DDMVC.pathIsTypeValid(path));
+		
+		path = Path.make(Object.class,Model.class,Object.class,"pa.pb.$");
+		assertTrue(DDMVC.pathIsTypeValid(path));
+		
+		DDMVC.setModel("nah.nah", new ValueModel("taco"));
+		
+		path = Path.make(String.class,ValueModel.class,ValueModel.class,"nah.nah");
+		assertTrue(DDMVC.pathIsTypeValid(path));
+		
+		path = Path.make(String.class,Model.class,Model.class,"nah.nah");
+		assertTrue(DDMVC.pathIsTypeValid(path));
 	}
 	
 	@Test
@@ -294,6 +321,25 @@ public class ModelTest {
 		assertTrue(cat.getValueObservers().contains(obs));
 	}
 	
+	@Test
+	public void getValueByField() {
+		String s = DDMVC.getValue("person", Property.make(String.class, "french"));
+		assertTrue(s.equals("bonjour"));
+		
+		s = (String) DDMVC.getValue("person", 
+				SubModel.make(Model.class, "english"));
+		assertTrue(s.equals("hello"));
+		
+		s = (String) DDMVC.getValue("person", 
+				SubModel.make(ValueModel.class, "english"));
+		assertTrue(s.equals("hello"));
+		
+		try {
+			DDMVC.getValue("person", Property.make(Integer.class, "french"));
+			fail();
+		} catch(ClassCastException e) {}
+	}
+	
 	//
 	// Model Accessors
 	//
@@ -327,6 +373,22 @@ public class ModelTest {
 		
 		Model cat = DDMVC.getModel("cat");
 		assertTrue(cat.getReferentialObservers().contains(obs));
+	}
+	
+	@Test
+	public void getModelByField() {
+		Model m = DDMVC.getModel("person", SubModel.make(Model.class, "english"));
+		assertTrue(m.getValue().equals("hello"));
+
+		try {
+			DDMVC.getModel("person", Property.make(String.class, "french"));
+			fail();
+		} catch(ClassCastException e) {}
+		
+		try {
+			DDMVC.getModel("person", SubModel.make(ValueModel.class, "english"));
+			fail();
+		} catch(ClassCastException e) {}
 	}
 	
 	//

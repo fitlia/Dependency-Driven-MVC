@@ -1,8 +1,8 @@
 package com.google.gwt.ddmvc.event;
 
 import java.util.Collection;
-import com.google.gwt.ddmvc.model.Path;
 import com.google.gwt.ddmvc.model.Model.UpdateLevel;
+import com.google.gwt.ddmvc.model.path.Path;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**

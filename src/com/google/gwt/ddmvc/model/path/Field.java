@@ -1,4 +1,10 @@
-package com.google.gwt.ddmvc.model;
+package com.google.gwt.ddmvc.model.path;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import com.google.gwt.ddmvc.model.Model;
 
 
 /**
@@ -12,16 +18,17 @@ package com.google.gwt.ddmvc.model;
  * @param <ReferenceType> the type actually referred to be this field (should be
  * 				one of the above)
  */
-public abstract class Field<ValueType, ModelType extends Model, ReferenceType> {
-
+public abstract class Field<ValueType, ModelType extends Model, ReferenceType> 
+		extends Path<ValueType, ModelType, ReferenceType> {
+	
 	/**
-	 * The referential depth of this field, determines what to be appended for
-	 * the path.  
+	 * The referential depth of this path's most terminal field, determines what 
+	 * to be appended for the pathString.
 	 * 	MODEL -> nothing appended
-	 *	VALUE -> .$ appended
-	 *	FIELD -> .* appended
+	 *	VALUE -> $ appended
+	 *	FIELD -> * appended
 	 */
-	public enum FieldType {
+	public enum ReferenceDepth {
 		MODEL,
 		VALUE,
 		FIELD
@@ -31,7 +38,7 @@ public abstract class Field<ValueType, ModelType extends Model, ReferenceType> {
 	protected Class<ValueType> valueType;
 	protected Class<ModelType> modelType;
 	protected Class<ReferenceType> referenceType;
-	protected FieldType fieldType;
+	private ReferenceDepth referenceDepth;
 	
 	/**
 	 * Instantiate a new Field
@@ -42,8 +49,11 @@ public abstract class Field<ValueType, ModelType extends Model, ReferenceType> {
 	 * @param fieldType - the type of field this field is
 	 * @param key - they key to assign to the model
 	 */
-	public Field(Class<ValueType> valueType, Class<ModelType> modelType, 
-			Class<ReferenceType> referenceType, FieldType fieldType, String key) {
+	protected Field(Class<ValueType> valueType, Class<ModelType> modelType, 
+			Class<ReferenceType> referenceType, ReferenceDepth referenceDepth, 
+			String key) {
+		super(valueType, modelType, referenceType, (List<Field<?,?,?>>) null);
+		
 		Path.validateKey(key);
 		
 		if(valueType.isInterface()
@@ -57,7 +67,7 @@ public abstract class Field<ValueType, ModelType extends Model, ReferenceType> {
 					" ValueType or ModelType.");
 		
 		this.key = key;
-		this.fieldType = fieldType;
+		this.referenceDepth = referenceDepth;
 		this.valueType = valueType;
 		this.modelType = modelType;
 		this.referenceType = referenceType;

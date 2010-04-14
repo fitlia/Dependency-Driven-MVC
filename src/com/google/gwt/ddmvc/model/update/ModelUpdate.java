@@ -1,7 +1,7 @@
 package com.google.gwt.ddmvc.model.update;
 
 import com.google.gwt.ddmvc.model.Model;
-import com.google.gwt.ddmvc.model.Path;
+import com.google.gwt.ddmvc.model.path.Path;
 
 /**
  * The ModelUpdate class represents an individual update to some model. 

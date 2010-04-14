@@ -2,7 +2,7 @@ package com.google.gwt.ddmvc.model.update.list;
 
 import java.util.List;
 
-import com.google.gwt.ddmvc.model.Path;
+import com.google.gwt.ddmvc.model.path.Path;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**

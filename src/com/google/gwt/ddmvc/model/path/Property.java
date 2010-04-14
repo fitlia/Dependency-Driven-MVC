@@ -1,6 +1,8 @@
-package com.google.gwt.ddmvc.model;
+package com.google.gwt.ddmvc.model.path;
 
 import com.google.gwt.ddmvc.Utility;
+import com.google.gwt.ddmvc.model.Model;
+import com.google.gwt.ddmvc.model.ValueModel;
 
 
 /**

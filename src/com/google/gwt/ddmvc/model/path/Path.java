@@ -1,8 +1,10 @@
-package com.google.gwt.ddmvc.model;
+package com.google.gwt.ddmvc.model.path;
 
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+
+import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.exception.InvalidPathException;
 
 /**
@@ -12,117 +14,162 @@ import com.google.gwt.ddmvc.model.exception.InvalidPathException;
  * 
  * This expected return type may not actually reflect the type referred to by
  * a path.  The parameterization of a Path merely provides a means of adding
- * some compile-time type-casting convenience for programmers.  Use of these
- * features is entirely optional, but recommended.
+ * some compile-time type-casting convenience for programmers and run-time
+ * checking for earlier error detection.  Use of these features is entirely 
+ * optional, but recommended.
  * 
  * In general, if a value at a given path does not match the expected type,
  * a run-time InvalidPathException should be thrown to indicate the mistake.
+ * 
+ * Paths implement CharSequence.  This allows for convenient method signatures, 
+ * which allow auto-casting from Strings (or other char sequences).
+ * 
+ * PathStrings have the following formatting syntax:
+ * Keys are alphanumeric, case-sensitive, underscore-allowed values without
+ * spaces.  Most valid java variable names are valid keys.
+ * Fields are keys optionally followed by a modifier ('*' or '$').  Fields 
+ * without a modifier refer directly to the model and for observation, indicate 
+ * Referential Observers.  Fields modified by '*' also refer to a model, but for
+ * observation refer to Field Observers.  Fields modified by '$' refer to the
+ * value held by the particular model and for observation, indicate Value
+ * Observers.
+ * Fields can be separated by either a '.' or a '<'.  The '.' represents a 
+ * similar relationship to the '.' in Java.  The '<' represents the inverse 
+ * relationship, (ie. from). For example, "dog.collie" is the same as 
+ * "collie<dog".
+ * The '.' relationship is evaluated before the '<' relationship.
+ * Only one field in a path can have a modifier, and that must be the terminal
+ * fields.
+ * Spaces can exist in the PathString, but are ignored when they are compiled to
+ * paths.
+ * 
+ * Examples of equivalent valid paths are shown below:
+ * "square$ < rhombus < quadrilateral"
+ * "square$ < quadrilateral.rhombus"
+ * "rhombus.square$<quadrilateral"
+ * 
+ * In general, for method signatures that allow multiple Paths or Strings, the
+ * comma separating arguments should represent a '<' relationship.
+ * 
+ * Path has no public constructors, and new Paths can only be created using
+ * the static factory methods.
  * 
  * @author Kevin Dolan
  * 
  * @param <ValueType> the expected type of value at this path
  * @param <ModelType> the expected type of model at this path
  * @param <ReferenceType> the expected type actually referred to at this path 
- * 				(should be one of the above)
  */
-public class Path<ValueType, ModelType extends Model, ReferenceType> {
+public class Path<ValueType, ModelType extends Model, ReferenceType> 
+		implements CharSequence {
 	
-	private List<String> path;
-	private boolean isTerminal;
-	private boolean isValuePath;
-	private boolean isFieldPath;
-	private Class<ValueType> valueType;
-	private Class<ModelType> modelType;
-	private Class<ReferenceType> referenceType;
+	private List<Field<?,?,?>> path;
+	private String stringRepresentation;
+	private int current;
 	
 	//
 	// Factory methods
 	//
 	
 	/**
-	 * Create a standard-parameterized path from a pathString
-	 * @param pathString - the pathString to parse
+	 * Create a standard-parameterized path from any number of paths,
+	 * separated by the '<' relationship.
+	 * @param paths - the paths to use (pathStrings will be parsed)
 	 * @return the newly created path
 	 */
-	public static Path<Object,Model,Object> make(String pathString) {
+	public static Path<Object,Model,Object> make(CharSequence... paths) {
+		
+		//TODO - implement me
 		return new Path<Object,Model,Object>(Object.class, Model.class, 
-				Object.class, pathString);
+				null, pathString);
 	}
 	
 	/**
-	 * Create a path from a Field
+	 * Create a custom-parameterized path from any number of paths,
+	 * separated by the '<' relationship.
+	 * Can throw an InvalidPathException if the path is not consistent with
+	 * the provided parameterization.
+	 * @param <VT> the valueType, packed into the provided class
+	 * @param <MT> the modelType, packed into the provided class
+	 * @param <RT> the referenceType, packed into the provided class
+	 * @param valueType - the value type to use
+	 * @param modelType - the model type to use
+	 * @param referenceType - the reference type to use
+	 * @param paths - the paths to use (pathStrings will be parsed)
+	 * @return the newly created path
+	 */
+	public static <VT,MT extends Model, RT> Path<VT,MT,RT> 
+			make(Class<VT> valueType, Class<MT> modelType, Class<RT> referenceType,
+			CharSequence... paths) {
+		
+		//TODO - implement me
+		return new Path<VT,MT,RT>(valueType, modelType, referenceType, pathString);
+	}
+	
+	/**
+	 * Create a parameterized path from a parameterized path, and any number of 
+	 * other paths, separated by the '<' relationship.
 	 * @param <VT> the valueType, packed into the field
 	 * @param <MT> the modelType, packed into the field
 	 * @param <RT> the referenceType, packed into the field
-	 * @param field - the field to access
+	 * @param path - the most terminal path to access
+	 * @param paths - the rest of the paths to use (pathStrings will be parsed)
 	 * @return the newly created path
 	 */
 	public static <VT,MT extends Model,RT> Path<VT,MT,RT> 
-			make(Field<VT,MT,RT> field) {
+			make(Path<VT,MT,RT> path, CharSequence... paths) {
 		
+		//TODO - implement me
 		String pathString = field.getPathString();
 		return new Path<VT,MT,RT>(field.getValueType(), field.getModelType(),
 				field.getReferenceType(), pathString);
 	}
-	
+
 	/**
-	 * Create a path from a pathString followed by a Field
-	 * @param <VT> the valueType, packed into the field
-	 * @param <MT> the modelType, packed into the field
-	 * @param <RT> the referenceType, packed into the field
-	 * @param pathString - the pathString to locate the field
-	 * @param field - the field to access
+	 * Create a standard-parameterized Value path from any number of paths,
+	 * separated by the '<' relationship.
+	 * If the most terminal path refers to a model, $ will be appended
+	 * @param paths - the paths to use (pathStrings will be parsed)
 	 * @return the newly created path
 	 */
-	public static <VT,MT extends Model,RT> Path<VT,MT,RT> 
-			make(String pathString, Field<VT,MT,RT> field) {
-		
-		if(pathString.length() == 0)
-			pathString = field.getPathString();
-		else
-			pathString +=  "." + field.getPathString();
-		
-		return new Path<VT,MT,RT>(field.getValueType(), field.getModelType(),
-				field.getReferenceType(), pathString);
-	}
-	
-	/**
-	 * Create a standard-parameterized Value path from a pathString
-	 * If the path refers to a model, $ will be appended
-	 * @param pathString - the pathString to parse
-	 * @return the newly created path
-	 */
-	public static Path<Object,Model,Object> makeValue(String pathString) {
+	public static Path<Object,Model,Object> makeValue(CharSequence... paths) {
+		//TODO - implement me
 		return makeValue(pathString,null);
 	}
 	
 	/**
-	 * Create a Value path from a Field
-	 * If the field refers to a model, $ will be appended
-	 * @param <VT> the valueType, packed into the field
-	 * @param <MT> the modelType, packed into the field
-	 * @param field - the field to access
+	 * Create a custom-parameterized value path from any number of paths,
+	 * separated by the '<' relationship.
+	 * @param <VT> the valueType, packed into the provided class
+	 * @param <MT> the modelType, packed into the provided class
+	 * @param valueType - the value type to use
+	 * @param modelType - the model type to use
+	 * @param paths - the paths to use (pathStrings will be parsed)
 	 * @return the newly created path
 	 */
 	public static <VT,MT extends Model> Path<VT,MT,VT> 
-			makeValue(Field<VT,MT,?> field) {
+			makeValue(Class<VT> valueType, Class<MT> modelType, 
+			CharSequence... pathString) {
 		
-		return makeValue("",field);
+		//TODO - implement me
+		return (Path.make(valueType, modelType, null, pathString))
+			.toValuePath();
 	}
 	
 	/**
-	 * Create a Value path from a pathString followed by a Field
-	 * If the field refers to a model, $ will be appended
+	 * Create a Value path from a parameterized path, and any number of 
+	 * other paths, separated by the '<' relationship.
+	 * If the most terminal path refers to a model, $ will be appended
 	 * @param <VT> the valueType, packed into the field
 	 * @param <MT> the modelType, packed into the field
-	 * @param pathString - the pathString to locate the field
-	 * @param field - the field to access
+	 * @param path - the most terminal path to access
+	 * @param paths - the rest of the paths to use (pathStrings will be parsed)
 	 * @return the newly created path
 	 */
-	@SuppressWarnings("unchecked")
 	public static <VT,MT extends Model> Path<VT,MT,VT> 
-			makeValue(String pathString, Field<VT,MT,?> field) {
+			makeValue(Path<VT,MT,?> path, CharSequence... paths) {
 		
+		//TODO - implement me
 		String fieldPathString = "";
 		Class<?> valueType = Object.class;
 		Class<?> modelType = Model.class;
@@ -139,46 +186,56 @@ public class Path<ValueType, ModelType extends Model, ReferenceType> {
 			pathString +=  "." + fieldPathString;
 		
 		return (new Path<VT,MT,VT>((Class<VT>) valueType, (Class<MT>) modelType,
-				(Class<VT>) valueType, pathString)).toValuePath();
+				null, pathString)).toValuePath();
 	}
 	
 	/**
-	 * Create a standard-parameterized Model path from a pathString
-	 * If the paths refers to a value, the $ will be dropped
-	 * @param pathString - the pathString to parse
+	 * Create a standard-parameterized Model path from any number of paths,
+	 * separated by the '<' relationship.
+	 * If the most terminal path refers to a value, the $ will be dropped.
+	 * @param paths - the paths to use (pathStrings will be parsed)
 	 * @return the newly created path
 	 */
-	public static Path<Object,Model,Model> makeModel(String pathString) {
+	public static Path<Object,Model,Model> makeModel(CharSequence... paths) {
+		//TODO - implement me
 		return makeModel(pathString,null);
 	}
 	
 	/**
-	 * Create a Model path from a Field
-	 * If the field refers to a value, the $ will be dropped
-	 * @param <VT> the valueType, packed into the field
-	 * @param <MT> the modelType, packed into the field
-	 * @param field - the field to access
+	 * Create a custom-parameterized model path from any number of paths,
+	 * separated by the '<' relationship.
+	 * If the most terminal path refers to a value, the $ will be dropped.
+	 * @param <VT> the valueType, packed into the provided class
+	 * @param <MT> the modelType, packed into the provided class
+	 * @param valueType - the value type to use
+	 * @param modelType - the model type to use
+	 * @param paths - the paths to use (pathStrings will be parsed)
 	 * @return the newly created path
 	 */
 	public static <VT,MT extends Model> Path<VT,MT,MT> 
-			makeModel(Field<VT,MT,?> field) {
+			makeModel(Class<VT> valueType, Class<MT> modelType, 
+			CharSequence... paths) {
 		
-		return makeModel("",field);
+		//TODO - implement me
+		return (Path.make(valueType, modelType, null, pathString))
+			.toModelPath();
 	}
 	
 	/**
-	 * Create a Model path from a pathString followed by a Field
-	 * If the field refers to a value, the $ will be dropped
+	 * Create a Model path from a a parameterized path, and any number of 
+	 * other paths, separated by the '<' relationship.
+	 * If the most terminal path refers to a value, the $ will be dropped.
 	 * @param <VT> the valueType, packed into the field
 	 * @param <MT> the modelType, packed into the field
-	 * @param pathString - the pathString to locate the field
-	 * @param field - the field to access
+	 * @param path - the most terminal path to access
+	 * @param paths - the rest of the paths to use (pathStrings will be parsed)
 	 * @return the newly created path
 	 */
 	@SuppressWarnings("unchecked")
 	public static <VT,MT extends Model> Path<VT,MT,MT> 
-			makeModel(String pathString, Field<VT,MT,?> field) {
+			makeModel(Path<VT,MT,?> path, CharSequence... paths) {
 		
+		//TODO - implement Me
 		String fieldPathString = "";
 		Class<?> valueType = Object.class;
 		Class<?> modelType = Model.class;
@@ -195,7 +252,7 @@ public class Path<ValueType, ModelType extends Model, ReferenceType> {
 			pathString +=  "." + fieldPathString;
 		
 		return (new Path<VT,MT,MT>((Class<VT>) valueType, (Class<MT>) modelType,
-				(Class<MT>) modelType, pathString)).toModelPath();
+				null, pathString)).toModelPath();
 	}
 	
 	//
@@ -285,9 +342,10 @@ public class Path<ValueType, ModelType extends Model, ReferenceType> {
 	 * 				(should be one of the above)
 	 * @param pathString - the path string to parse
 	 */
-	private Path(Class<ValueType> valueType, Class<ModelType> modelType, 
+	protected Path(Class<ValueType> valueType, Class<ModelType> modelType, 
 			Class<ReferenceType> referenceType, String pathString) {
 		
+		//TODO - parse to list of fields
 		List<String> path;
 		if(pathString.length() > 0) {	
 			validatePathString(pathString);
@@ -301,46 +359,17 @@ public class Path<ValueType, ModelType extends Model, ReferenceType> {
 		else {
 			path = Collections.emptyList();
 		}
-		init(valueType, modelType, referenceType, path);
+		
+		this.path = path;
 	}
 	
 	/**
 	 * Instantiate a new path directly from a list, bypassing parse checks
-	 * @param valueType - the expected type of value at this path
-	 * @param modelType - the expected type of model at this path
-	 * @param referenceType - the expected type actually referred to by this path
-	 * 				(should be one of the above)
-	 * @param path - the list of fields
+	 * @param path - the list of fields, may be null
 	 */
-	private Path(Class<ValueType> valueType, Class<ModelType> modelType, 
-			Class<ReferenceType> referenceType, List<String> path) {
-		init(valueType, modelType, referenceType, path);
-	}
-	
-	private void init(Class<ValueType> valueType, Class<ModelType> modelType, 
-			Class<ReferenceType> referenceType, List<String> path) {
-		
-		if(valueType.isInterface()
-				|| modelType.isInterface()
-				|| referenceType.isInterface())
-			throw new IllegalArgumentException("Types cannot be an interface.");
-		
-		if(!referenceType.equals(valueType)
-				&& !referenceType.equals(modelType))
-			throw new IllegalArgumentException("ReferenceType must be either" +
-					" ValueType or ModelType.");
-		
-		this.valueType = valueType;
-		this.modelType = modelType;
-		this.referenceType = referenceType;
-		
+	protected Path(List<Field<?,?,?>> path, int current) {
+		this.current = current;
 		this.path = path;
-		if(path.size() > 0) {
-			String right = rightMost();
-			isValuePath = right.equals("$");
-			isFieldPath = right.equals("*");
-			isTerminal = isValuePath || isFieldPath;
-		}
 	}
 	
 	//
@@ -358,70 +387,63 @@ public class Path<ValueType, ModelType extends Model, ReferenceType> {
 	 * Get the immediate, leftmost path field from the path
 	 * @return the immediate field
 	 */
-	public String getImmediate() {
-		if(path.size() == 0)
+	public Field<?,?,?> getImmediate() {
+		if(path.size() <= current)
 			return null;
-		return path.get(0);
-	}
-	
-	/**
-	 * @return the leftmost field of this path, null if this is an empty path
-	 */
-	public String leftMost() {
-		if(path.size() == 0)
-			return null;
-		return path.get(0);
+		return path.get(current);
 	}
 	
 	/**
 	 * @return the rightmost field of this path, null if this is an empty path
 	 */
-	public String rightMost() {
-		if(path.size() == 0)
+	@SuppressWarnings("unchecked")
+	public Field<ValueType, ModelType, ReferenceType> getTerminal() {
+		if(path.size() <= current)
 			return null;
-		return path.get(path.size() - 1);
+		return (Field<ValueType, ModelType, ReferenceType>) 
+				path.get(path.size() - 1);
 	}
 	
 	/**
 	 * @return whether or not this path is terminated (ends in $ or *)
 	 */
 	public boolean isTerminal() {
-		return isTerminal;
+		return getTerminal().isTerminal();
 	}
 
 	/**
 	 * @return whether or not this path is terminated by a $
 	 */
 	public boolean isValuePath() {
-		return isValuePath;
+		return getTerminal().isValuePath();
 	}
 	
 	/**
 	 * @return whether or not this path is terminated by a *
 	 */
 	public boolean isFieldPath() {
-		return isFieldPath;
+		return getTerminal().isFieldPath();
 	}
 	
 	/**
 	 * @return the expected type of value at this path
 	 */
 	public Class<ValueType> getValueType() {
-		return valueType;
+		return getTerminal().getValueType();
 	}
 
 	/**
 	 * @return the expected type of model at this path
 	 */
 	public Class<ModelType> getModelType() {
-		return modelType;
+		return getTerminal().getModelType();
 	}
 
 	/**
 	 * @return the expected type actually referred to at this path
 	 */
 	public Class<ReferenceType> getReferenceType() {
-		return referenceType;
+		return getTerminal().getReferenceType();
 	}
 	
 	@Override
@@ -430,9 +452,11 @@ public class Path<ValueType, ModelType extends Model, ReferenceType> {
 			return "ROOT_PATH";
 		
 		StringBuilder sb = new StringBuilder();
-		for(String field : path)
+		for(int i = current; i < path.size(); i++) {
+			Field<?,?,?> field = path.get(i);
 			sb.append(field + ".");
-		if(path.size() > 0)
+		}
+		if(path.size() > current)
 			sb.replace(sb.length() - 1, sb.length(), "");
 		return sb.toString();
 	}
@@ -445,12 +469,11 @@ public class Path<ValueType, ModelType extends Model, ReferenceType> {
 	 * Get a new path that represents this path, advanced right by one
 	 * @return the new path, advanced by one
 	 */
-	public Path<ValueType, ModelType, ReferenceType> advance() {
+	public Path<ValueType, ModelType, ReferenceType> advance() {		
 		if(path.size() == 0)
 			return null;
-		return new Path<ValueType, ModelType, ReferenceType>(
-			getValueType(), getModelType(), getReferenceType(), 
-			path.subList(1, path.size()));
+		
+		return new Path<ValueType, ModelType, ReferenceType>(path, current + 1);
 	}
 	
 	/**
@@ -463,19 +486,6 @@ public class Path<ValueType, ModelType extends Model, ReferenceType> {
 	}
 	
 	/**
-	 * Get a new path that represents this path, with the field appended
-	 * @param <VT> the valueType, packed into the field
-	 * @param <MT> the modelType, packed into the field
-	 * @param <RT> the referenceType, packed into the field
-	 * @param field - the field to append
-	 * @return the new path
-	 */
-	public <VT,MT extends Model,RT> Path<VT,MT,RT> append(Field<VT,MT,RT> field) {
-		
-		return append(make(field));
-	}
-	
-	/**
 	 * Get a new path that represents this path, with the other path appended
 	 * @param <VT> the valueType, packed into the other
 	 * @param <MT> the modelType, packed into the other
@@ -484,7 +494,7 @@ public class Path<ValueType, ModelType extends Model, ReferenceType> {
 	 * @return the new path
 	 */
 	public <VT,MT extends Model,RT> Path<VT,MT,RT> append(Path<VT,MT,RT> other) {
-		if(isTerminal)
+		if(isTerminal())
 			throw new InvalidPathException("It is illegal to append a field to " +
 					"a terminated path.");
 		
@@ -493,23 +503,6 @@ public class Path<ValueType, ModelType extends Model, ReferenceType> {
 		newPathList.addAll(other.path);
 		return new Path<VT,MT,RT>(other.getValueType(), other.getModelType(),
 				other.getReferenceType(), newPathList);
-	}
-	
-	/**
-	 * Get a new path that represents this path, with $ appended.
-	 * If this is a terminal path, an exception will be thrown.
-	 * @return the new path
-	 */
-	public Path<ValueType, ModelType, ValueType> appendValueField() {
-		if(isTerminal)
-			throw new InvalidPathException("It is illegal to append a field to " +
-					"a terminated path.");
-		
-		List<String> newPathList = new LinkedList<String>();
-		newPathList.addAll(path);
-		newPathList.add("$");
-		return new Path<ValueType, ModelType, ValueType>
-			(getValueType(), getModelType(), getValueType(), newPathList);
 	}
 	
 	/**
@@ -632,7 +625,7 @@ public class Path<ValueType, ModelType extends Model, ReferenceType> {
 		while(a.size() > other.size())
 			a = a.advance();
 		
-		while(a.getImmediate() != null) {
+		while((a != null | other != null) && a.getImmediate() != null) {
 			if(!a.getImmediate().equals(other.getImmediate()))
 				return false;
 			
@@ -659,5 +652,24 @@ public class Path<ValueType, ModelType extends Model, ReferenceType> {
 	 */
 	public boolean equals(String other) {
 		return toString().equals(other);
+	}
+	
+	//
+	// CharSequence methods
+	//
+	
+	@Override
+	public char charAt(int index) {
+		return stringRepresentation.charAt(index);
+	}
+
+	@Override
+	public int length() {
+		return stringRepresentation.length();
+	}
+
+	@Override
+	public CharSequence subSequence(int start, int end) {
+		return stringRepresentation.subSequence(start, end);
 	}
 }
