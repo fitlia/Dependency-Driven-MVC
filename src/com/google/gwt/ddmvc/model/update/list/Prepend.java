@@ -2,7 +2,7 @@ package com.google.gwt.ddmvc.model.update.list;
 
 import java.util.List;
 
-import com.google.gwt.ddmvc.model.path.Path;
+import com.google.gwt.ddmvc.model.path.DefaultPath;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
@@ -46,7 +46,7 @@ public class Prepend extends ModelUpdate {
 	 * @param target
 	 * @param data - the item to be prepended to the list
 	 */
-	public Prepend(Path<?,?,?> target, Object data) {	
+	public Prepend(DefaultPath<?,?,?> target, Object data) {	
 		super(target);
 		this.data = data;
 		useLinkedList = false;
@@ -59,7 +59,7 @@ public class Prepend extends ModelUpdate {
 	 * @param useLinkedList - true if you want to use linked-list, if new list
 	 * 				creation is necessary
 	 */
-	protected Prepend(Path<?,?,?> target, Object data, boolean useLinkedList) {
+	protected Prepend(DefaultPath<?,?,?> target, Object data, boolean useLinkedList) {
 		super(target);
 		this.data = data;
 		this.useLinkedList = useLinkedList;

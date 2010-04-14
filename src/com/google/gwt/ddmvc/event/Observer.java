@@ -2,7 +2,7 @@ package com.google.gwt.ddmvc.event;
 
 import java.util.Collection;
 import com.google.gwt.ddmvc.model.Model.UpdateLevel;
-import com.google.gwt.ddmvc.model.path.Path;
+import com.google.gwt.ddmvc.model.path.DefaultPath;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
@@ -26,7 +26,7 @@ public interface Observer {
 	/**
 	 * @return the path associated with this observer
 	 */
-	public Path<?,?,?> getPath();
+	public DefaultPath<?,?,?> getPath();
 
 	/**
 	 * @return true if this model, or any of its child models has any type of

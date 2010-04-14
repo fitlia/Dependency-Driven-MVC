@@ -2,7 +2,7 @@ package com.google.gwt.ddmvc.model.update.list;
 
 import java.util.List;
 
-import com.google.gwt.ddmvc.model.path.Path;
+import com.google.gwt.ddmvc.model.path.DefaultPath;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
@@ -40,7 +40,7 @@ public class RemoveAllThatMatch extends ModelUpdate {
 	 * @param target
 	 * @param filter - the filter that will determine which elements are removed
 	 */
-	public RemoveAllThatMatch(Path<?,?,?> target, ListFilter filter) {
+	public RemoveAllThatMatch(DefaultPath<?,?,?> target, ListFilter filter) {
 		super(target);
 		removeMatches = true;
 		this.filter = filter;

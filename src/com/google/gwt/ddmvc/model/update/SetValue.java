@@ -1,6 +1,6 @@
 package com.google.gwt.ddmvc.model.update;
 
-import com.google.gwt.ddmvc.model.path.Path;
+import com.google.gwt.ddmvc.model.path.DefaultPath;
 
 /**
  * Update to initialize or reset a model's associated value 
@@ -28,7 +28,7 @@ public class SetValue extends ModelUpdate {
 	 * @param target
 	 * @param data
 	 */
-	public SetValue(Path<?,?,?> target, Object data) {
+	public SetValue(DefaultPath<?,?,?> target, Object data) {
 		super(target);
 		this.data = data;
 	}

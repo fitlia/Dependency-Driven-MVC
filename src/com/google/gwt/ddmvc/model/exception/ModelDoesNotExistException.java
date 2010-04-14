@@ -1,6 +1,6 @@
 package com.google.gwt.ddmvc.model.exception;
 
-import com.google.gwt.ddmvc.model.path.Path;
+import com.google.gwt.ddmvc.model.path.DefaultPath;
 
 /**
  * Thrown when an attempt is made to access a model which does not exist.
@@ -10,14 +10,14 @@ public class ModelDoesNotExistException extends RuntimeException {
 
 	private static final long serialVersionUID = 6676614531981476205L;
 
-	private Path<?,?,?> path;
+	private DefaultPath<?,?,?> path;
 	
-	public ModelDoesNotExistException(Path<?,?,?> path) {
+	public ModelDoesNotExistException(DefaultPath<?,?,?> path) {
 		super("The model path " + path + " does not exist.");
 		this.path = path;
 	}
 	
-	public Path<?,?,?> getPath() {
+	public DefaultPath<?,?,?> getPath() {
 		return path;
 	}
 	

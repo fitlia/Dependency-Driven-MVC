@@ -1,15 +1,11 @@
 package com.google.gwt.ddmvc.model.path;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import com.google.gwt.ddmvc.Utility;
 import com.google.gwt.ddmvc.model.Model;
-
+import com.google.gwt.ddmvc.model.exception.InvalidPathException;
 
 /**
- * Field is used by ObjectModel to define certain fields which enforce a level
- * of type-safety on models.
+ * Fields store information about a single unit of a path.
  * 
  * @author Kevin Dolan
  * 
@@ -18,20 +14,80 @@ import com.google.gwt.ddmvc.model.Model;
  * @param <ReferenceType> the type actually referred to be this field (should be
  * 				one of the above)
  */
-public abstract class Field<ValueType, ModelType extends Model, ReferenceType> 
+public class Field<ValueType, ModelType extends Model, ReferenceType> 
 		extends Path<ValueType, ModelType, ReferenceType> {
 	
+	//
+	// Static factory methods for convenience
+	//
+	
 	/**
-	 * The referential depth of this path's most terminal field, determines what 
-	 * to be appended for the pathString.
-	 * 	MODEL -> nothing appended
-	 *	VALUE -> $ appended
-	 *	FIELD -> * appended
+	 * Create a new standard-parameterized model field
+	 * @param key - the key to use
+	 * @return the field
 	 */
-	public enum ReferenceDepth {
-		MODEL,
-		VALUE,
-		FIELD
+	public static Field<Object, Model, Model> modelField(String key) {
+		return new Field<Object, Model, Model>(Object.class, Model.class, 
+				Model.class, key, ReferenceDepth.MODEL);
+	}
+	
+	/**
+	 * Create a new custom-parameterized model field
+	 * @param key - the key to use
+	 * @param modelType - the expected model class
+	 * @return the field
+	 */
+	public static <MT extends Model> Field<Object, MT, MT> 
+			modelField(Class<MT> modelType, String key) {
+		
+		return new Field<Object, MT, MT>(Object.class, modelType, 
+				modelType, key, ReferenceDepth.MODEL);
+	}
+	
+	/**
+	 * Create a new standard-parameterized field field
+	 * @param key - the key to use
+	 * @return the field
+	 */
+	public static Field<Object, Model, Model> fieldField(String key) {
+		return new Field<Object, Model, Model>(Object.class, Model.class, 
+				Model.class, key, ReferenceDepth.FIELD);
+	}
+	
+	/**
+	 * Create a new custom-parameterized field field
+	 * @param key - the key to use
+	 * @param modelType - the expected model class
+	 * @return the field
+	 */
+	public static <MT extends Model> Field<Object, MT, MT> 
+			fieldField(Class<MT> modelType, String key) {
+		
+		return new Field<Object, MT, MT>(Object.class, modelType, 
+				modelType, key, ReferenceDepth.FIELD);
+	}
+	
+	/**
+	 * Create a new standard-parameterized value field
+	 * @param key - the key to use
+	 * @return the field
+	 */
+	public static Field<Object, Model, Object> valueField(String key) {
+		return new Field<Object, Model, Object>(Object.class, Model.class, 
+				Object.class, key, ReferenceDepth.VALUE);
+	}
+	
+	/**
+	 * Create a new custom-parameterized value field
+	 * @param valueType - the expected value class
+	 * @param key - the key to use
+	 * @return the field
+	 */
+	public static <VT> Field<VT, Model, VT> valueField(Class<VT> valueType, 
+			String key) {
+		
+		return new Field<VT, Model, VT>(valueType, Model.class, 
+				valueType, key, ReferenceDepth.VALUE);
 	}
 	
 	protected String key;
@@ -41,95 +97,78 @@ public abstract class Field<ValueType, ModelType extends Model, ReferenceType>
 	private ReferenceDepth referenceDepth;
 	
 	/**
-	 * Instantiate a new Field
-	 * @param valueType - the type of value held by this field
-	 * @param modelType - the type of model used by this field
-	 * @param referenceType - the type actually referred to be this field (should be
-	 * 				one of the above)
-	 * @param fieldType - the type of field this field is
-	 * @param key - they key to assign to the model
+	 * Create a new field with all the parameters specified,
+	 * may throw InvalidPathException if something doesn't add up
+	 * @param valueType - the expected value class
+	 * @param modelType - the expected model class
+	 * @param referenceType - the expected reference class
+	 * @param key - the key of the field
+	 * @param referenceDepth - the depth of the field's reference
 	 */
-	protected Field(Class<ValueType> valueType, Class<ModelType> modelType, 
-			Class<ReferenceType> referenceType, ReferenceDepth referenceDepth, 
-			String key) {
-		super(valueType, modelType, referenceType, (List<Field<?,?,?>>) null);
-		
-		Path.validateKey(key);
-		
-		if(valueType.isInterface()
-				|| modelType.isInterface()
-				|| referenceType.isInterface())
-			throw new IllegalArgumentException("Types cannot be an interface.");
-		
-		if(!referenceType.equals(valueType)
-				&& !referenceType.equals(modelType))
-			throw new IllegalArgumentException("ReferenceType must be either" +
-					" ValueType or ModelType.");
+	public Field(Class<ValueType> valueType, Class<ModelType> modelType, 
+			Class<ReferenceType> referenceType, String key, 
+			ReferenceDepth referenceDepth) {
 		
 		this.key = key;
-		this.referenceDepth = referenceDepth;
 		this.valueType = valueType;
 		this.modelType = modelType;
 		this.referenceType = referenceType;
-	}
-	
-
-	/**
-	 * @return the key of this model
-	 */
-	public String getKey() {
-		return key;
-	}
-	
-	/**
-	 * @return the type of value held by this field
-	 */
-	public Class<ValueType> getValueType() {
-		return valueType;
-	}
-
-	/**
-	 * @return the type of model used by this field
-	 */
-	public Class<ModelType> getModelType() {
-		return modelType;
-	}
-
-	/**
-	 * @return the type actually referred to be this field
-	 */
-	public Class<ReferenceType> getReferenceType() {
-		return referenceType;
-	}
-
-	/**
-	 * @return the field type of this field
-	 */
-	public FieldType getFieldType() {
-		return fieldType;
-	}
-	
-	/**
-	 * @return the pathString to append for this field
-	 */
-	public String getPathString() {
-		if(fieldType == FieldType.MODEL)
-			return key;
+		this.referenceDepth = referenceDepth;
 		
-		if(fieldType == FieldType.VALUE)
-			return key + ".$";
+		Path.validateKey(key);
 		
-		//if(fieldType == FieldType.FIELD)
-		return key + ".*";
+		if(referenceDepth == ReferenceDepth.VALUE) {
+			if(valueType != referenceType)
+				throw new InvalidPathException("Value Fields must refer to ValueType.");
+		}
+		else {
+			if(!Utility.aExtendsB(modelType, referenceType))
+				throw new InvalidPathException("Model Fields must refer to a " +
+						"valid type.");
+		}
+	}
+
+	@Override
+	public ReferenceDepth getReferenceDepth() {
+		return referenceDepth;
 	}
 	
-	/**
-	 * @return the model that is used to represent this Field
-	 */
-	public abstract Model getModel();
+	@Override
+	protected Field<?,?,?> getFieldByIndexSafe(int index) {
+		return this;
+	}
+
+	@Override
+	public int size() {
+		return 1;
+	}
+
+	@Override
+	public Path<ValueType, ModelType, ModelType> toFieldPath() {
+		// TODO WRITE THIS
+		return null;
+	}
+
+	@Override
+	public Path<ValueType, ModelType, ModelType> toModelPath() {
+		// TODO WRITE THIS
+		return null;
+	}
+
+	@Override
+	public Path<ValueType, ModelType, ValueType> toValuePath() {
+		// TODO WRITE THIS
+		return null;
+	}
 	
-	/**
-	 * @return true if the model is an acceptable model for this field
-	 */
-	public abstract boolean isValidModel(Model model);
+	@Override
+	public String toString() {
+		String s = key;
+		if(referenceDepth == ReferenceDepth.VALUE)
+			s += "$";
+		else if(referenceDepth == ReferenceDepth.FIELD)
+			s += "*";
+		return s;
+	}
+	
 }

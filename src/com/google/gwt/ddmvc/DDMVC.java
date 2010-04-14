@@ -17,7 +17,7 @@ import com.google.gwt.ddmvc.event.Observer;
 import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.Model.UpdateLevel;
 import com.google.gwt.ddmvc.model.path.Field;
-import com.google.gwt.ddmvc.model.path.Path;
+import com.google.gwt.ddmvc.model.path.DefaultPath;
 import com.google.gwt.ddmvc.model.update.Cascade;
 import com.google.gwt.ddmvc.model.update.ExceptionComputed;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
@@ -107,7 +107,7 @@ public class DDMVC {
 	 * @return true if the path has any observers
 	 */
 	public static boolean hasObservers(String pathString) {
-		return hasObservers(Path.make(pathString));
+		return hasObservers(DefaultPath.make(pathString));
 	}
 	
 	/**
@@ -119,7 +119,7 @@ public class DDMVC {
 	 * @return true if the path has any observers
 	 */
 	public static boolean hasObservers(String pathString, Field<?,?,?> field) {
-		return hasObservers(Path.make(pathString, field));
+		return hasObservers(DefaultPath.make(pathString, field));
 	}
 	
 	/**
@@ -129,7 +129,7 @@ public class DDMVC {
 	 * @param path - the path to check for observers
 	 * @return true if the path has any observers
 	 */
-	public static boolean hasObservers(Path<?,?,?> path) {
+	public static boolean hasObservers(DefaultPath<?,?,?> path) {
 		path = path.ignoreTerminal();
 		
 		if(!observerRoot.hasPath(path))
@@ -183,9 +183,9 @@ public class DDMVC {
 	 * @return the sets of observers, packed in an array
 	 */
 	@SuppressWarnings("unchecked")
-	private static Set<Observer>[] getAllObservers(Path path, boolean create) {
+	private static Set<Observer>[] getAllObservers(DefaultPath path, boolean create) {
 		Model observerModel;
-		Path modelPath = path.ignoreTerminal();
+		DefaultPath modelPath = path.ignoreTerminal();
 		if(observerRoot.hasPath(modelPath))
 			observerModel = observerRoot.getModel(modelPath);
 		else if(create) {
@@ -214,7 +214,7 @@ public class DDMVC {
 	 * 				does not exist.
 	 * @return the sets of observers
 	 */
-	private static Set<Observer> getObserversSafe(Path<?,?,?> path, boolean create) {
+	private static Set<Observer> getObserversSafe(DefaultPath<?,?,?> path, boolean create) {
 		Set<Observer>[] observers = getAllObservers(path, create);
 		if(observers == null)
 			return null;
@@ -237,7 +237,7 @@ public class DDMVC {
 	 * @return the sets of observers, unmodifiable
 	 */
 	public static Set<Observer> getObservers(String pathString) {
-		return getObservers(Path.make(pathString));
+		return getObservers(DefaultPath.make(pathString));
 	}
 	
 	/**
@@ -251,7 +251,7 @@ public class DDMVC {
 	 * @return the sets of observers, unmodifiable
 	 */
 	public static Set<Observer> getObservers(String pathString, Field<?,?,?> field) {
-		return getObservers(Path.make(pathString, field));
+		return getObservers(DefaultPath.make(pathString, field));
 	}
 	
 	/**
@@ -263,7 +263,7 @@ public class DDMVC {
 	 * @param path - the path to access
 	 * @return the sets of observers, unmodifiable
 	 */
-	public static Set<Observer> getObservers(Path<?,?,?> path) {
+	public static Set<Observer> getObservers(DefaultPath<?,?,?> path) {
 		Set<Observer> observers = getObserversSafe(path, false);
 		if(observers == null)
 			return Collections.emptySet();
@@ -277,7 +277,7 @@ public class DDMVC {
 	 * @return the sets of observers, unmodifiable
 	 */
 	public static Set<Observer> getAllObservers(String pathString) {
-		return getAllObservers(Path.make(pathString));
+		return getAllObservers(DefaultPath.make(pathString));
 	}
 	
 	/**
@@ -290,7 +290,7 @@ public class DDMVC {
 	public static Set<Observer> getAllObservers(String pathString,
 			Field<?,?,?> field) {
 		
-		return getAllObservers(Path.make(pathString, field));
+		return getAllObservers(DefaultPath.make(pathString, field));
 	}
 	
 	/**
@@ -299,7 +299,7 @@ public class DDMVC {
 	 * @param path - the path to access
 	 * @return the sets of observers, unmodifiable
 	 */
-	public static Set<Observer> getAllObservers(Path<?,?,?> path) {
+	public static Set<Observer> getAllObservers(DefaultPath<?,?,?> path) {
 		Set<Observer>[] observers = getAllObservers(path, false);
 		if(observers == null)
 			return Collections.emptySet();
@@ -321,7 +321,7 @@ public class DDMVC {
 	public static Set<Observer> getAllAffected(String pathString, 
 			UpdateLevel level) {
 		
-		return getAllAffected(Path.make(pathString), level);
+		return getAllAffected(DefaultPath.make(pathString), level);
 	}
 	
 	/**
@@ -334,7 +334,7 @@ public class DDMVC {
 	public static Set<Observer> getAllAffected(String pathString, 
 			Field<?,?,?> field, UpdateLevel level) {
 		
-		return getAllAffected(Path.make(pathString, field), level);
+		return getAllAffected(DefaultPath.make(pathString, field), level);
 	}
 	
 	/**
@@ -344,7 +344,7 @@ public class DDMVC {
 	 * @param level - the level of update which would occur
 	 * @return the set of all observers who would be affected
 	 */
-	public static Set<Observer> getAllAffected(Path<?,?,?> path, UpdateLevel level) {
+	public static Set<Observer> getAllAffected(DefaultPath<?,?,?> path, UpdateLevel level) {
 		path = path.ignoreTerminal();
 		
 		if(!observerRoot.hasPath(path)) {
@@ -393,7 +393,7 @@ public class DDMVC {
 	 * observer it is according to the right-most path field)
 	 */
 	public static void addObserver(Observer observer, String pathString) {
-		addObserver(observer, Path.make(pathString));
+		addObserver(observer, DefaultPath.make(pathString));
 	}
 	
 	/**
@@ -407,7 +407,7 @@ public class DDMVC {
 	public static void addObserver(Observer observer, String pathString, 
 			Field<?,?,?> field) {
 		
-		addObserver(observer, Path.make(pathString, field));
+		addObserver(observer, DefaultPath.make(pathString, field));
 	}
 	
 	/**
@@ -417,7 +417,7 @@ public class DDMVC {
 	 * @param path - the path to add the observer to (defines what type of 
 	 * observer it is according to the right-most path field)
 	 */
-	public static void addObserver(Observer observer, Path<?,?,?> path) {
+	public static void addObserver(Observer observer, DefaultPath<?,?,?> path) {
 		Set<Observer> observers = getObserversSafe(path, true);
 		observers.add(observer);
 	}
@@ -434,7 +434,7 @@ public class DDMVC {
 	 * of observer it is according to the right-most path field)
 	 */
 	public static void removeObserver(Observer observer, String pathString) {			
-		removeObserver(observer, Path.make(pathString));
+		removeObserver(observer, DefaultPath.make(pathString));
 	}
 	
 	/**
@@ -448,7 +448,7 @@ public class DDMVC {
 	public static void removeObserver(Observer observer, String pathString, 
 			Field<?,?,?> field) {			
 		
-		removeObserver(observer, Path.make(pathString, field));
+		removeObserver(observer, DefaultPath.make(pathString, field));
 	}
 	
 	/**
@@ -458,7 +458,7 @@ public class DDMVC {
 	 * @param path - the path to add the observer to (defines what type of 
 	 * observer it is according to the right-most path field)
 	 */
-	public static void removeObserver(Observer observer, Path<?,?,?> path) {			
+	public static void removeObserver(Observer observer, DefaultPath<?,?,?> path) {			
 		Set<Observer> observers = getObserversSafe(path, false);
 		if(observers != null)	{
 			observers.remove(observer);
@@ -489,7 +489,7 @@ public class DDMVC {
 	//
 	
 	//
-	// Path Methods
+	// DefaultPath Methods
 	//
 	
 	/**
@@ -498,7 +498,7 @@ public class DDMVC {
 	 * @return true if there exists the path
 	 */
 	public static boolean hasPath(String pathString) {
-		return hasPath(Path.make(pathString));
+		return hasPath(DefaultPath.make(pathString));
 	}
 
 	/**
@@ -510,7 +510,7 @@ public class DDMVC {
 	 * @return true if there exists the path
 	 */
 	public static boolean hasPath(String pathString, Field<?,?,?> field) {
-		return hasPath(Path.make(pathString, field));
+		return hasPath(DefaultPath.make(pathString, field));
 	}
 	
 	/**
@@ -520,7 +520,7 @@ public class DDMVC {
 	 * @param path - the path to check, relative to this model
 	 * @return true if there exists the path
 	 */
-	public static boolean hasPath(Path<?,?,?> path) {
+	public static boolean hasPath(DefaultPath<?,?,?> path) {
 		return dataRoot.hasPath(path);
 	}
 	
@@ -534,7 +534,7 @@ public class DDMVC {
 	 * @return true if the type of the model/value referred to by the path 
 	 */
 	public static boolean pathIsTypeValid(String pathString, Field<?,?,?> field) {
-		return pathIsTypeValid(Path.make(pathString, field));
+		return pathIsTypeValid(DefaultPath.make(pathString, field));
 	}
 	
 	/**
@@ -546,7 +546,7 @@ public class DDMVC {
 	 * @param path - the path to check, relative to this model
 	 * @return true if the type of the model/value referred to by the path 
 	 */
-	public static boolean pathIsTypeValid(Path<?,?,?> path) {
+	public static boolean pathIsTypeValid(DefaultPath<?,?,?> path) {
 		return dataRoot.pathIsTypeValid(path);
 	}
 	
@@ -560,7 +560,7 @@ public class DDMVC {
 	 * @return the value at the path
 	 */
 	public static Object getValue(String pathString) {
-		return getValue(Path.make(pathString), null);
+		return getValue(DefaultPath.make(pathString), null);
 	}
 	
 	/**
@@ -571,7 +571,7 @@ public class DDMVC {
 	 * @return the value at the path
 	 */
 	public static <Type> Type getValue(String pathString, Field<Type,?,?> field) {
-		return getValue(Path.make(pathString, field), null);
+		return getValue(DefaultPath.make(pathString, field), null);
 	}
 	
 	/**
@@ -581,7 +581,7 @@ public class DDMVC {
 	 * @return the value at the path
 	 */
 	public static Object getValue(String pathString, Observer observer) {
-		return getValue(Path.make(pathString), observer);
+		return getValue(DefaultPath.make(pathString), observer);
 	}	
 	
 	/**
@@ -595,7 +595,7 @@ public class DDMVC {
 	public static <Type> Type getValue(String pathString, Field<Type,?,?> field,
 			Observer observer) {
 		
-		return getValue(Path.make(pathString, field), observer);
+		return getValue(DefaultPath.make(pathString, field), observer);
 	}
 	
 	/**
@@ -604,7 +604,7 @@ public class DDMVC {
 	 * @param path - the path to the data model to access
 	 * @return the value at the path
 	 */
-	public static <Type> Type getValue(Path<Type,?,?> path) {
+	public static <Type> Type getValue(DefaultPath<Type,?,?> path) {
 		return getValue(path, null);
 	}
 	
@@ -615,7 +615,7 @@ public class DDMVC {
 	 * @param observer - the observer to add
 	 * @return the value at the path
 	 */
-	public static <Type> Type getValue(Path<Type,?,?> path, Observer observer) {
+	public static <Type> Type getValue(DefaultPath<Type,?,?> path, Observer observer) {
 		return dataRoot.getValue(path, observer);
 	}
 
@@ -629,7 +629,7 @@ public class DDMVC {
 	 * @return the Model at the path
 	 */
 	public static Model getModel(String pathString) {
-		return getModel(Path.make(pathString), null);
+		return getModel(DefaultPath.make(pathString), null);
 	}
 	
 	/**
@@ -642,7 +642,7 @@ public class DDMVC {
 	public static <ModelType extends Model> ModelType
 			getModel(String pathString, Field<?,ModelType,?> field) {
 		
-		return getModel(Path.make(pathString, field), null);
+		return getModel(DefaultPath.make(pathString, field), null);
 	}
 	
 	/**
@@ -652,7 +652,7 @@ public class DDMVC {
 	 * @return the Model at the path
 	 */
 	public static Model getModel(String pathString, Observer observer) {
-		return getModel(Path.make(pathString), observer);
+		return getModel(DefaultPath.make(pathString), observer);
 	}
 	
 	/**
@@ -667,7 +667,7 @@ public class DDMVC {
 			getModel(String pathString, Field<?,ModelType,?> field, 
 			Observer observer) {
 		
-		return getModel(Path.make(pathString, field), observer);
+		return getModel(DefaultPath.make(pathString, field), observer);
 	}
 	
 	/**
@@ -676,7 +676,7 @@ public class DDMVC {
 	 * @return the Model at the path
 	 */
 	public static <ModelType extends Model> ModelType
-			getModel(Path<?, ModelType, ?> path) {
+			getModel(DefaultPath<?, ModelType, ?> path) {
 		
 		return getModel(path, null);
 	}
@@ -689,7 +689,7 @@ public class DDMVC {
 	 * @return the Model at the path
 	 */
 	public static <ModelType extends Model> ModelType
-			getModel(Path<?, ModelType, ?> path, Observer observer) {
+			getModel(DefaultPath<?, ModelType, ?> path, Observer observer) {
 		
 		return dataRoot.getModel(path, observer);
 	}
@@ -704,7 +704,7 @@ public class DDMVC {
 	 * @return the value at the path
 	 */
 	public static Object get(String pathString) {
-		return get(Path.make(pathString), null);
+		return get(DefaultPath.make(pathString), null);
 	}
 	
 	/**
@@ -715,7 +715,7 @@ public class DDMVC {
 	 * @return the value at the path
 	 */
 	public static <Type> Type get(String pathString, Field<?,?,Type> field) {
-		return get(Path.make(pathString, field), null);
+		return get(DefaultPath.make(pathString, field), null);
 	}
 	
 	/**
@@ -725,7 +725,7 @@ public class DDMVC {
 	 * @return the value at the path
 	 */
 	public static Object get(String pathString, Observer observer) {
-		return get(Path.make(pathString), observer);
+		return get(DefaultPath.make(pathString), observer);
 	}
 	
 	/**
@@ -739,7 +739,7 @@ public class DDMVC {
 	public static <Type> Type get(String pathString, Field<?,?,Type> field, 
 			Observer observer) {
 		
-		return get(Path.make(pathString, field), observer);
+		return get(DefaultPath.make(pathString, field), observer);
 	}
 	
 	
@@ -749,7 +749,7 @@ public class DDMVC {
 	 * @param path - the path to the data model to access
 	 * @return the value at the path
 	 */
-	public static <Type> Type get(Path<?,?,Type> path) {
+	public static <Type> Type get(DefaultPath<?,?,Type> path) {
 		return get(path, null);
 	}
 	
@@ -760,7 +760,7 @@ public class DDMVC {
 	 * @param observer - the observer to add
 	 * @return the value at the path
 	 */
-	public static <Type> Type get(Path<?,?,Type> path, Observer observer) {
+	public static <Type> Type get(DefaultPath<?,?,Type> path, Observer observer) {
 		return dataRoot.get(path, observer);
 	}
 	
@@ -780,7 +780,7 @@ public class DDMVC {
 	 * @param value - the value to set
 	 */
 	public static void setValue(String pathString, Object value) {
-		setValue(Path.make(pathString), value);
+		setValue(DefaultPath.make(pathString), value);
 	}
 	
 	/**
@@ -793,7 +793,7 @@ public class DDMVC {
 	public static <ValueType> void  
 			setValue(String pathString, Field<ValueType,?,?> field, ValueType value) {
 		
-		setValue(Path.make(pathString, field), value);
+		setValue(DefaultPath.make(pathString, field), value);
 	}
 	
 	/**
@@ -803,7 +803,7 @@ public class DDMVC {
 	 * @param value - the value to set
 	 */
 	public static <ValueType> void 
-			setValue(Path<ValueType,?,?> path, ValueType value) {
+			setValue(DefaultPath<ValueType,?,?> path, ValueType value) {
 		
 		dataRoot.setValue(path, value);
 	}
@@ -818,7 +818,7 @@ public class DDMVC {
 	 * @param model - the model to set
 	 */
 	public static void setModel(String pathString, Model model) {
-		setModel(Path.make(pathString), model);
+		setModel(DefaultPath.make(pathString), model);
 	}
 
 	/**
@@ -830,7 +830,7 @@ public class DDMVC {
 	public static <ModelType extends Model> void 
 			setModel(String pathString, Field<?,ModelType,?> field, ModelType model) {
 		
-		setModel(Path.make(pathString, field), model);
+		setModel(DefaultPath.make(pathString, field), model);
 	}
 	
 	/**
@@ -840,7 +840,7 @@ public class DDMVC {
 	 * @param model - the model to set
 	 */
 	public static <ModelType extends Model> void 
-			setModel(Path<?,ModelType,?> path, ModelType model) {
+			setModel(DefaultPath<?,ModelType,?> path, ModelType model) {
 		
 		dataRoot.setModel(path, model);
 	}
@@ -854,7 +854,7 @@ public class DDMVC {
 	 * @param pathString - the path to delete
 	 */
 	public static void deleteModel(String pathString) {
-		deleteModel(Path.make(pathString));
+		deleteModel(DefaultPath.make(pathString));
 	}
 	
 	/**
@@ -862,14 +862,14 @@ public class DDMVC {
 	 * @param pathString - the path to delete
 	 */
 	public static void deleteModel(String pathString, Field<?,?,?> field) {
-		deleteModel(Path.make(pathString, field));
+		deleteModel(DefaultPath.make(pathString, field));
 	}
 	
 	/**
 	 * Delete the model at a given path
 	 * @param path - the path to delete
 	 */
-	public static void deleteModel(Path<?,?,?> path) {
+	public static void deleteModel(DefaultPath<?,?,?> path) {
 		dataRoot.deleteModel(path);
 	}
 	
@@ -882,7 +882,7 @@ public class DDMVC {
 	 * @param pathString - the path to the model
 	 */
 	public static void update(String pathString) {
-		update(Path.make(pathString));
+		update(DefaultPath.make(pathString));
 	}
 	
 	/**
@@ -891,14 +891,14 @@ public class DDMVC {
 	 * @param field - the field past the path to access
 	 */
 	public static void update(String pathString, Field<?,?,?> field) {
-		update(Path.make(pathString, field));
+		update(DefaultPath.make(pathString, field));
 	}
 	
 	/**
 	 * Send an UnkownUpdate notification to the observers of a model
 	 * @param path - the path to the model
 	 */
-	public static void update(Path<?,?,?> path) {
+	public static void update(DefaultPath<?,?,?> path) {
 		dataRoot.update(path);
 	}
 	

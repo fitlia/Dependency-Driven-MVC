@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.google.gwt.ddmvc.model.path.Path;
+import com.google.gwt.ddmvc.model.path.DefaultPath;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
@@ -46,7 +46,7 @@ public class Append extends ModelUpdate {
 	 * @param target
 	 * @param data - the item to be appended to the list
 	 */
-	public Append(Path<?,?,?> target, Object data) {
+	public Append(DefaultPath<?,?,?> target, Object data) {
 		super(target);
 		this.data = data;
 		useLinkedList = false;
@@ -72,7 +72,7 @@ public class Append extends ModelUpdate {
 	 * @param useLinkedList - true if you want to use linked list, if new list
 	 * 				creation is necessary
 	 */
-	public Append(Path<?,?,?> target, Object data, boolean useLinkedList) {
+	public Append(DefaultPath<?,?,?> target, Object data, boolean useLinkedList) {
 		super(target);
 		this.data = data;
 		this.useLinkedList = useLinkedList;

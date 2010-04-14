@@ -1,6 +1,6 @@
 package com.google.gwt.ddmvc.model.update;
 
-import com.google.gwt.ddmvc.model.path.Path;
+import com.google.gwt.ddmvc.model.path.DefaultPath;
 
 /**
  * Update sent as a notification when a data change is cascaded
@@ -22,7 +22,7 @@ public class Cascade extends ModelUpdate {
 	/**
 	 * @param target
 	 */
-	public Cascade(Path<?,?,?> target) {
+	public Cascade(DefaultPath<?,?,?> target) {
 		super(target);
 		this.isComplete = true;
 	}

@@ -2,7 +2,7 @@ package com.google.gwt.ddmvc.model;
 
 import com.google.gwt.ddmvc.Utility;
 import com.google.gwt.ddmvc.model.exception.InvalidPathException;
-import com.google.gwt.ddmvc.model.path.Path;
+import com.google.gwt.ddmvc.model.path.DefaultPath;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
@@ -130,7 +130,7 @@ public class ModelModel<ModelType extends Model> extends Model {
 	}
 	
 	@Override
-	protected void handleUpdateSafe(ModelUpdate update, Path<?,?,?> relative) {
+	protected void handleUpdateSafe(ModelUpdate update, DefaultPath<?,?,?> relative) {
 		if(relative.getImmediate() == null)
 			applyUpdate(update);
 		else if(relative.getImmediate().equals("$"))

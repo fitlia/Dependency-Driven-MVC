@@ -12,7 +12,7 @@ import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.ModelModel;
 import com.google.gwt.ddmvc.model.ValueModel;
 import com.google.gwt.ddmvc.model.Model.UpdateLevel;
-import com.google.gwt.ddmvc.model.path.Path;
+import com.google.gwt.ddmvc.model.path.DefaultPath;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
@@ -27,7 +27,7 @@ public class ModelModelTest {
 
 	private class FakeObserver implements Observer { 
 		public int change = 0;
-		public Path<?,?,?> getPath() { return null; }
+		public DefaultPath<?,?,?> getPath() { return null; }
 		public void modelChanged(Collection<ModelUpdate> updates) {
 			change++;
 		}

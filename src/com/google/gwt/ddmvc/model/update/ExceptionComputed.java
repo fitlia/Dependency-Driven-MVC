@@ -1,6 +1,6 @@
 package com.google.gwt.ddmvc.model.update;
 
-import com.google.gwt.ddmvc.model.path.Path;
+import com.google.gwt.ddmvc.model.path.DefaultPath;
 
 /**
  * ModelUpdate to cascade when an exception is encountered by a Computed Model.
@@ -10,7 +10,7 @@ public class ExceptionComputed extends ModelUpdate {
 
 	private Exception exception;
 	
-	public ExceptionComputed(Path<?,?,?> target, Exception exception) {
+	public ExceptionComputed(DefaultPath<?,?,?> target, Exception exception) {
 		super(target);
 		this.exception = exception;
 		this.isComplete = true;

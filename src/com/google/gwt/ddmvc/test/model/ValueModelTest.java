@@ -13,7 +13,7 @@ import com.google.gwt.ddmvc.model.Model;
 import com.google.gwt.ddmvc.model.ValueModel;
 import com.google.gwt.ddmvc.model.Model.UpdateLevel;
 import com.google.gwt.ddmvc.model.exception.InvalidPathException;
-import com.google.gwt.ddmvc.model.path.Path;
+import com.google.gwt.ddmvc.model.path.DefaultPath;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 import com.google.gwt.ddmvc.model.update.list.Append;
 
@@ -24,7 +24,7 @@ public class ValueModelTest {
 
 	private class FakeObserver implements Observer {
 		public int change = 0;
-		public Path<?,?,?> getPath() { return null; }
+		public DefaultPath<?,?,?> getPath() { return null; }
 		public void modelChanged(Collection<ModelUpdate> updates) {
 			change++;
 		}

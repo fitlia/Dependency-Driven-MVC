@@ -3,7 +3,7 @@ package com.google.gwt.ddmvc.model.update.list;
 import java.util.Collection;
 import java.util.List;
 
-import com.google.gwt.ddmvc.model.path.Path;
+import com.google.gwt.ddmvc.model.path.DefaultPath;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
@@ -47,7 +47,7 @@ public class AppendAll extends ModelUpdate {
 	 * @param target
 	 * @param collection - the collection of objects to append
 	 */
-	public AppendAll(Path<?,?,?> target, 
+	public AppendAll(DefaultPath<?,?,?> target, 
 			Collection<? extends Object> collection) {
 		
 		super(target);
@@ -76,7 +76,7 @@ public class AppendAll extends ModelUpdate {
 	 * @param useLinkedList - true if you want to use linked-list, if new list
 	 * 						creation is necessary
 	 */
-	public AppendAll(Path<?,?,?> target, Collection<? extends Object> collection, 
+	public AppendAll(DefaultPath<?,?,?> target, Collection<? extends Object> collection, 
 			boolean useLinkedList) {
 		super(target);
 		this.collection = collection;

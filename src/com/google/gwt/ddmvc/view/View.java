@@ -6,7 +6,7 @@ import com.google.gwt.ddmvc.DDMVC;
 import com.google.gwt.ddmvc.event.EventSource;
 import com.google.gwt.ddmvc.event.Observer;
 import com.google.gwt.ddmvc.model.Model.UpdateLevel;
-import com.google.gwt.ddmvc.model.path.Path;
+import com.google.gwt.ddmvc.model.path.DefaultPath;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
@@ -17,7 +17,7 @@ import com.google.gwt.ddmvc.model.update.ModelUpdate;
  */
 public abstract class View extends EventSource implements Observer {
 	
-	//Maps Path.toString() -> ModelUpdate.getClass().getName()
+	//Maps DefaultPath.toString() -> ModelUpdate.getClass().getName()
 	private MultiHashMap<String, String> subscriptions;
 	
 	/**
@@ -64,7 +64,7 @@ public abstract class View extends EventSource implements Observer {
 	 * @param pathString
 	 */
 	protected void observe(String pathString) {
-		observe(Path.make(pathString));
+		observe(DefaultPath.make(pathString));
 	}
 	
 	/**
@@ -75,11 +75,11 @@ public abstract class View extends EventSource implements Observer {
 	 * a field observer.
 	 * @param modelKey the key of the observer to observe
 	 */
-	protected void observe(Path<?,?,?> path) {
+	protected void observe(DefaultPath<?,?,?> path) {
 		DDMVC.getDataRoot().addObserver(this, path);
 	}
 	
-	public Path<?,?,?> getPath() {
+	public DefaultPath<?,?,?> getPath() {
 		return null;
 	}
 	
@@ -105,7 +105,7 @@ public abstract class View extends EventSource implements Observer {
 	protected void subscribeToModelUpdate(String pathString, 
 			Class<? extends ModelUpdate> cls) {
 		
-		subscribeToModelUpdate(Path.make(pathString), cls);
+		subscribeToModelUpdate(DefaultPath.make(pathString), cls);
 	}
 	
 	/**
@@ -119,7 +119,7 @@ public abstract class View extends EventSource implements Observer {
 	 * @param path - the path to observe
 	 * @param cls - the update class to subscribe to.
 	 */
-	protected void subscribeToModelUpdate(Path<?,?,?> path, 
+	protected void subscribeToModelUpdate(DefaultPath<?,?,?> path, 
 			Class<? extends ModelUpdate> cls) {
 		
 		subscriptions.put(path.toString(), cls.getName());

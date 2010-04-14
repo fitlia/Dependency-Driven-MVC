@@ -1,7 +1,7 @@
 package com.google.gwt.ddmvc.model.update;
 
 import com.google.gwt.ddmvc.model.Model;
-import com.google.gwt.ddmvc.model.path.Path;
+import com.google.gwt.ddmvc.model.path.DefaultPath;
 
 /**
  * Update to initialize or reset a model's reference
@@ -29,7 +29,7 @@ public class SetModel extends ModelUpdate {
 	 * @param target
 	 * @param model
 	 */
-	public SetModel(Path<?,?,?> target, Model model) {
+	public SetModel(DefaultPath<?,?,?> target, Model model) {
 		super(target);
 		this.model = model;
 	}

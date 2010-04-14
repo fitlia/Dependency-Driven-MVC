@@ -1,6 +1,6 @@
 package com.google.gwt.ddmvc.model.update;
 
-import com.google.gwt.ddmvc.model.path.Path;
+import com.google.gwt.ddmvc.model.path.DefaultPath;
 
 /**
  * Update sent as a notification when a model is deleted.
@@ -20,7 +20,7 @@ public class ModelDeleted extends ModelUpdate {
 	/**
 	 * @param target
 	 */
-	public ModelDeleted(Path<?,?,?> target) {
+	public ModelDeleted(DefaultPath<?,?,?> target) {
 		super(target);
 		this.isComplete = true;
 	}

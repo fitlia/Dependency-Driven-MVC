@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import com.google.gwt.ddmvc.model.path.Path;
+import com.google.gwt.ddmvc.model.path.DefaultPath;
 import com.google.gwt.ddmvc.model.update.ModelUpdate;
 
 /**
@@ -36,7 +36,7 @@ public class Sort extends ModelUpdate {
 	 * Sort the list by the object's .compateTo(...) method.
 	 * @param target
 	 */
-	public Sort(Path<?,?,?> target) {
+	public Sort(DefaultPath<?,?,?> target) {
 		super(target);
 	}
 	
@@ -57,7 +57,7 @@ public class Sort extends ModelUpdate {
 	 * @param comparator - the comparator object to use to sort the list
 	 */
 	@SuppressWarnings("unchecked")
-	public Sort(Path target, Comparator<?> comparator) {
+	public Sort(DefaultPath target, Comparator<?> comparator) {
 		super(target);
 		this.comparator = (Comparator<Object>) comparator;
 	}
